@@ -1,2 +1,2 @@
-# Fabulous Project (AMOS SS 20xx)
-Something something something
+# A simply fabulous 3d-viewer (AMOS SS 2021)
+more to come
