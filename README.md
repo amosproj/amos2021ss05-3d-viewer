@@ -1,7 +1,7 @@
 # A simply fabulous pano-based 3D-Viewer (AMOS SS 2021)
 
 <p align="center">
-    <img src="Deliverables/2021-04-20-Final-Logo.png" alt="Logo" width="412" height="139">
+    <img src="Deliverables/2021-04-20-Final-Logo.png" alt="Logo" width="600" height="230">
   </a>
 </p>
 
