@@ -1,10 +1,18 @@
 # A simply fabulous pano-based 3D-Viewer (AMOS SS 2021)
+
+<p align="center">
+    <img src="Deliverables/2021-04-20-Final-Logo.png" alt="Logo" width="600" height="230">
+  </a>
+</p>
+
 This project is for our industry partnet Büren & Partner
 
 The software to be developed shall be able to:
 
  &nbsp; ● View arbitrary rooms based on a 3D model\
  &nbsp; ● Allow users to walk through these rooms
+
+## Properties
 
 Functional properties of the software shall be:
 
