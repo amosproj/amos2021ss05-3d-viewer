@@ -10,11 +10,14 @@ let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
 
 const DEFAULT_FOV = 90, MAX_FOV = 120, MIN_FOV = 5;
 
+// initialize ViewerViewState
+let viewerviewstate = new ViewerViewState(90, latitude, longitude)
+
 init();
 animate();
 
 function init() {
-
+    
     const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
 
@@ -47,7 +50,7 @@ function init() {
     document.addEventListener('wheel', onDocumentMouseWheel);
 
     document.addEventListener('resize', onWindowResize);
-    
+
 }
 
 function animate() {
@@ -59,8 +62,8 @@ function animate() {
 
 function update() {
 
-    phi = THREE.MathUtils.degToRad(90 - latitude);
-    theta = THREE.MathUtils.degToRad(longitude);
+    phi = THREE.MathUtils.degToRad(90 - viewerviewstate.latov);
+    theta = THREE.MathUtils.degToRad(viewerviewstate.lonov);
 
     const x = 500 * Math.sin(phi) * Math.cos(theta);
     const y = 500 * Math.cos(phi);
@@ -78,8 +81,8 @@ function onPointerDown(event) {
     onPointerDownMouseX = event.clientX;
     onPointerDownMouseY = event.clientY;
 
-    onPointerDownLon = longitude;
-    onPointerDownLat = latitude;
+    onPointerDownLon = viewerviewstate.lonov;
+    onPointerDownLat = viewerviewstate.latov;
 
     // Two new event listeneres are called to handle *how far* the user drags
     document.addEventListener('pointermove', onPointerMove);
@@ -90,11 +93,11 @@ function onPointerDown(event) {
 // handles continues update of the distance mouse moved
 function onPointerMove(event) {
 
-    longitude = (onPointerDownMouseX - event.clientX) * 0.2 + onPointerDownLon;
-    latitude = (event.clientY - onPointerDownMouseY) * 0.2 + onPointerDownLat;
+    viewerviewstate.lonov = (onPointerDownMouseX - event.clientX) * 0.2 + onPointerDownLon;
+    viewerviewstate.latov = (event.clientY - onPointerDownMouseY) * 0.2 + onPointerDownLat;
 
-    // keep latitude within bounds because it loops back around at top and bottom
-    latitude = Math.max( -85, Math.min(85, latitude));
+    // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
+    viewerviewstate.latov = Math.max( -85, Math.min(85, viewerviewstate.latov));
 
 }
 
@@ -109,9 +112,9 @@ function onPointerUp() {
 function onDocumentMouseWheel(event) {
 
     // the 0.05 constant determines how quick scrolling in and out feels for the user
-    const fov = camera.fov + event.deltaY * 0.05;
+    viewerviewstate.fov = camera.fov + event.deltaY * 0.05;
 
-    camera.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
+    camera.fov = THREE.MathUtils.clamp(viewerviewstate.fov, MIN_FOV, MAX_FOV);
 
     camera.updateProjectionMatrix();
 
