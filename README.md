@@ -12,6 +12,8 @@ The software to be developed shall be able to:
  &nbsp; ● View arbitrary rooms based on a 3D model\
  &nbsp; ● Allow users to walk through these rooms
 
+## Properties
+
 Functional properties of the software shall be:
 
 &nbsp; &nbsp; ● The panorama shall be scalable (within a window)\
