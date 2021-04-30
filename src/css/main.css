@@ -21,3 +21,12 @@ body {
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
 }
+
+#map {
+    width: 32em;
+    height: 18em;
+    background-color: chartreuse;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}

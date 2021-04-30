@@ -1,4 +1,5 @@
 "use strict";
+import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 
 let camera, scene, renderer;
@@ -27,7 +28,7 @@ function init() {
     sphere.scale( -1, 1, 1);
 
     // load the 360-panorama image data (one specific hardcoded for now)
-    const texture = new THREE.TextureLoader().load( '../assets/0r3.jpg' );
+    const texture = new THREE.TextureLoader().load( '../assets/0/0r3.jpg' );
     texture.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
     
     // put the texture on the spehere and add it to the scene
@@ -48,6 +49,7 @@ function init() {
 
     document.addEventListener('resize', onWindowResize);
     
+    const viewerImageAPI = new ViewerImageAPI();
 }
 
 function animate() {
