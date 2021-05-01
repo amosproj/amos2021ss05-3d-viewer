@@ -1,5 +1,12 @@
 "use strict";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
+import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
+
+let testview = new ViewerPanoAPI; 
+console.log(testview);
+//let testcamera = testhh.camera();
+//console.log(testcamera);
+
 
 let camera, scene, renderer;
 
@@ -21,8 +28,9 @@ function init() {
     const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
 
-    camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
-    scene = new THREE.Scene();
+    camera = testview.camera();
+    //console.log(camera);
+    scene = testview.scene;
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
@@ -62,15 +70,15 @@ function animate() {
 
 function update() {
 
-    phi = THREE.MathUtils.degToRad(90 - viewerviewstate.latov);
-    theta = THREE.MathUtils.degToRad(viewerviewstate.lonov);
+    // phi = THREE.MathUtils.degToRad(90 - viewerviewstate.latov);
+    // theta = THREE.MathUtils.degToRad(viewerviewstate.lonov);
 
-    const x = 500 * Math.sin(phi) * Math.cos(theta);
-    const y = 500 * Math.cos(phi);
-    const z = 500 * Math.sin(phi) * Math.sin(theta);
+    // const x = 500 * Math.sin(phi) * Math.cos(theta);
+    // const y = 500 * Math.cos(phi);
+    // const z = 500 * Math.sin(phi) * Math.sin(theta);
 
-    camera.lookAt(x, y, z);
-
+    // camera.lookAt(x, y, z);
+    scene, camera = testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
     renderer.render(scene, camera);
 
 }
@@ -114,9 +122,10 @@ function onDocumentMouseWheel(event) {
     // the 0.05 constant determines how quick scrolling in and out feels for the user
     viewerviewstate.fov = camera.fov + event.deltaY * 0.05;
 
-    camera.fov = THREE.MathUtils.clamp(viewerviewstate.fov, MIN_FOV, MAX_FOV);
+    // camera.fov = THREE.MathUtils.clamp(viewerviewstate.fov, MIN_FOV, MAX_FOV);
 
-    camera.updateProjectionMatrix();
+    // camera.updateProjectionMatrix();
+    testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
 
 }
 
