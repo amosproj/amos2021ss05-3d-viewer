@@ -56,11 +56,17 @@ function init() {
     document.addEventListener('wheel', onDocumentMouseWheel);
     document.addEventListener('resize', onWindowResize);
     
-
-
     
-    const viewerImageAPI = new ViewerImageAPI();
+    let viewerImageAPI;
     // initGui();
+    
+    // hardcoded to work with assets/ for now
+    const jsonImageDataFilepath = "../assets/data.json";
+
+    $.getJSON(jsonImageDataFilepath, function(data) {
+        viewerImageAPI = new ViewerImageAPI(data);
+    });
+
 }
 
 function animate() {

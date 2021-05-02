@@ -1,27 +1,25 @@
 "use strict";
-//import { ViewerImage } from "ViewerImage.js";
+import { ViewerImage } from "./ViewerImage.js";
 
 // Specific API for Panorama Image(s)
 export class ViewerImageAPI {
 
-    constructor() {
-        // hardcoded to work with assets/ for now
-        const jsonImageDataFilepath = "../assets/data.json";
-        this.viewer_image; //= new ViewerImage()
-        this.metadata; 
+    constructor(data) {
         // The file «data.json» contains the metadata defining the panorama image locations.
             //"images" Array Images Array
             //"lon0" Number Reference longitude of model (WGS 84)
             //"lat0" Number Reference latitude of model (WGS 84)
             //"floors" Object Floors Object
+    
+        this.origin = [data.lon0, data.lat0];
+        this.floors = data.floors;
+        this.viewerImages = [];
 
-            
-        $.getJSON(jsonImageDataFilepath, function(data) {
-           this.metadata = data;
-           console.log(data); 
-
+        data.images.forEach( (element, index) => {
+            this.viewerImages.push(new ViewerImage(element, index));
         });
 
+        console.log(this);
     }
     
     all ( callback ) {
@@ -33,9 +31,9 @@ export class ViewerImageAPI {
         //  Signal changed image data (e.g. hidden flag) to the viewer.
     }
 
-    get get() {
-        //      Get the currently displayed panorama image.
+    get images() {
+        // Get the currently managed panorama images.
 
-        return this.viewer_image;
+        return this.viewerImages;
     }
 }
