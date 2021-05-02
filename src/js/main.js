@@ -24,8 +24,8 @@ init();
 animate();
 
 function init() {
-    
-    const container = document.getElementById('pano-viewer');
+    const container = testview.container;
+    //const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
 
     camera = testview.camera();
@@ -47,10 +47,12 @@ function init() {
     scene.add(mesh);
 
     // create the renderer, and embed the attributed dom element in the html page
-    renderer = new THREE.WebGLRenderer();
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    container.appendChild(renderer.domElement);
+    // renderer = new THREE.WebGLRenderer();
+    // renderer.setPixelRatio(window.devicePixelRatio);
+    // renderer.setSize(window.innerWidth, window.innerHeight);
+    // container.appendChild(renderer.domElement);
+
+
 
     // link event listeners to the corresponding functions
     container.addEventListener('pointerdown', onPointerDown);
@@ -78,8 +80,8 @@ function update() {
     // const z = 500 * Math.sin(phi) * Math.sin(theta);
 
     // camera.lookAt(x, y, z);
-    scene, camera = testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
-    renderer.render(scene, camera);
+    //scene, camera = testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
+    testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
 
 }
 

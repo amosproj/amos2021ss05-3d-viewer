@@ -12,6 +12,8 @@ export class ViewerPanoAPI{
 
     constructor(){
         this.scene = new THREE.Scene(); // three.js scene used by the panorama (3D) viewer
+        this.renderer = new THREE.WebGLRenderer();
+        this.container = document.getElementById('pano-viewer');
     }
 
     camera(){
@@ -24,7 +26,16 @@ export class ViewerPanoAPI{
         //lonov // Number // Longitude of view (in rad) // 0 looks east // (PI / 2) looks north
         //latov // Number // Latitude of view (in rad) // 0 is horizontal // positive values look up // negative values look down
         //fov // Number // Field of view (in degrees)
-        let cameratest = this.camera();
+        let renderer = this.renderer;
+        let container = this.container;
+        let scene = this.scene;
+        let camera = this.camera();
+
+
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
         phi = THREE.MathUtils.degToRad(90 - latov);
         theta = THREE.MathUtils.degToRad(lonov);
     
@@ -32,14 +43,16 @@ export class ViewerPanoAPI{
         const y = 500 * Math.cos(phi);
         const z = 500 * Math.sin(phi) * Math.sin(theta);
     
-        cameratest.lookAt(x, y, z);
-        //renderer.render(scene, cameratest);
+        camera.lookAt(x, y, z);
+        //renderer.render(scene, camera);
 
-        cameratest.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
+        camera.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
 
-        cameratest.updateProjectionMatrix();
+        camera.updateProjectionMatrix();
 
-        return this.scene, cameratest;
+        renderer.render(scene, camera);
+
+        //return this.scene, camera;
 
     }
 
