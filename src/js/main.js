@@ -1,8 +1,12 @@
 "use strict";
 import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
+// import { GUI } from './jsm/libs/dat.gui.module.js';
 
 let camera, scene, renderer;
+var cameraOrtho, sceneOrtho, map_renderer;
+var geometry, material, mesh;
+
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
     longitude = 0, onPointerDownLon = 0,
@@ -18,9 +22,11 @@ function init() {
 
     const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
-
+   
+    // Create the Thee.js scene
     camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
     scene = new THREE.Scene();
+
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
@@ -36,20 +42,25 @@ function init() {
     const mesh = new THREE.Mesh(sphere, material);
     scene.add(mesh);
 
+
     // create the renderer, and embed the attributed dom element in the html page
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
+
+
     // link event listeners to the corresponding functions
     container.addEventListener('pointerdown', onPointerDown);
-
     document.addEventListener('wheel', onDocumentMouseWheel);
-
     document.addEventListener('resize', onWindowResize);
     
+
+
+    
     const viewerImageAPI = new ViewerImageAPI();
+    // initGui();
 }
 
 function animate() {
