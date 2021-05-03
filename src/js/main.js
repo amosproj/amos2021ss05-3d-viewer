@@ -4,18 +4,12 @@ import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 
 let testview = new ViewerPanoAPI; 
 console.log(testview);
-//let testcamera = testhh.camera();
-//console.log(testcamera);
-
 
 let camera, scene, renderer;
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
     longitude = 0, onPointerDownLon = 0,
-    latitude = 0, onPointerDownLat = 0,
-    phi = 0, theta = 0;
-
-const DEFAULT_FOV = 90, MAX_FOV = 120, MIN_FOV = 5;
+    latitude = 0, onPointerDownLat = 0;
 
 // initialize ViewerViewState
 let viewerviewstate = new ViewerViewState(90, latitude, longitude)
@@ -24,8 +18,7 @@ init();
 animate();
 
 function init() {
-    const container = testview.container;
-    //const container = document.getElementById('pano-viewer');
+    const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
 
     camera = testview.camera();
@@ -47,10 +40,10 @@ function init() {
     scene.add(mesh);
 
     // create the renderer, and embed the attributed dom element in the html page
-    // renderer = new THREE.WebGLRenderer();
-    // renderer.setPixelRatio(window.devicePixelRatio);
-    // renderer.setSize(window.innerWidth, window.innerHeight);
-    // container.appendChild(renderer.domElement);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
 
 
 
@@ -72,16 +65,9 @@ function animate() {
 
 function update() {
 
-    // phi = THREE.MathUtils.degToRad(90 - viewerviewstate.latov);
-    // theta = THREE.MathUtils.degToRad(viewerviewstate.lonov);
-
-    // const x = 500 * Math.sin(phi) * Math.cos(theta);
-    // const y = 500 * Math.cos(phi);
-    // const z = 500 * Math.sin(phi) * Math.sin(theta);
-
-    // camera.lookAt(x, y, z);
-    //scene, camera = testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
     testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
+
+    renderer.render(scene, camera);
 
 }
 
@@ -124,9 +110,6 @@ function onDocumentMouseWheel(event) {
     // the 0.05 constant determines how quick scrolling in and out feels for the user
     viewerviewstate.fov = camera.fov + event.deltaY * 0.05;
 
-    // camera.fov = THREE.MathUtils.clamp(viewerviewstate.fov, MIN_FOV, MAX_FOV);
-
-    // camera.updateProjectionMatrix();
     testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
 
 }
