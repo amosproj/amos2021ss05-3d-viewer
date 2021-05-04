@@ -176,17 +176,15 @@ function createHUDSprites( texture ) {
 
 function updateHUDSprites() {
 
-    const width = window.innerWidth / 2;
-    const height = window.innerHeight / 2;
-    spriteMap.position.set(width, -height, 1 );// bottom right
+    spriteMap.position.set(window.innerWidth / 2, -window.innerHeight / 2, 1 ); // bottom right
 
 }
 
 function render() {
     
     renderer.clear();
-	renderer.render( scenePano, cameraPano );
-	renderer.clearDepth();
+    renderer.render( scenePano, cameraPano );
+    renderer.clearDepth();
     renderer.render( sceneMap, cameraMap );
 
 }
