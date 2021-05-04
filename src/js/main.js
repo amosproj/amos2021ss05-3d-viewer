@@ -3,27 +3,16 @@ import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 
-let testview = new ViewerPanoAPI; 
-console.log(testview);
 
-let cameraPano, scenePano, cameraMap, sceneMap, renderer;
+let viewerPanoAPI, viewerViewState, cameraMap, sceneMap, renderer;
 let spriteMap; // for createHUDSprites and updateHUDSprites
 
-let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
-    longitude = 0, onPointerDownLon = 0,
-    latitude = 0, onPointerDownLat = 0;
-
-// initialize ViewerViewState
-let viewerviewstate = new ViewerViewState(90, latitude, longitude)
+let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
 init();
 animate();
 
 function init() {
-    cameraPano = testview.camera();
-    //console.log(camera);
-    scenePano = testview.scene;
-
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -31,8 +20,8 @@ function init() {
     // the only html element we work with (the pano-viewer div)
 
     // ----- init Panorama scene -----
-    //cameraPano = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
-    //scenePano = new THREE.Scene();
+    viewerPanoAPI = new ViewerPanoAPI();
+    viewerViewState = new ViewerViewState(90, 0, 0)
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
@@ -46,7 +35,7 @@ function init() {
     // put the texture on the spehere and add it to the scene
     const material = new THREE.MeshBasicMaterial({ map: texturePano });
     const mesh = new THREE.Mesh(sphere, material);
-    scenePano.add(mesh);
+    viewerPanoAPI.scene.add(mesh);
     // ----- -----
 
     // ----- init Map scene -----
@@ -67,12 +56,11 @@ function init() {
     
     container.appendChild(renderer.domElement);
 
-
-
     // link event listeners to the corresponding functions
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('wheel', onDocumentMouseWheel);
     //document.addEventListener('resize', onWindowResize);
+
 
     let viewerImageAPI;
     
@@ -88,15 +76,7 @@ function init() {
 function animate() {
 
     requestAnimationFrame(animate);
-    update();
     render();
-
-}
-function update() {
-
-    testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
-
-    //renderer.render(scene, camera);
 
 }
 
@@ -106,8 +86,8 @@ function onPointerDown(event) {
     onPointerDownMouseX = event.clientX;
     onPointerDownMouseY = event.clientY;
 
-    onPointerDownLon = viewerviewstate.lonov;
-    onPointerDownLat = viewerviewstate.latov;
+    onPointerDownLon = viewerViewState.lonov;
+    onPointerDownLat = viewerViewState.latov;
 
     // Two new event listeneres are called to handle *how far* the user drags
     document.addEventListener('pointermove', onPointerMove);
@@ -118,11 +98,11 @@ function onPointerDown(event) {
 // handles continues update of the distance mouse moved
 function onPointerMove(event) {
 
-    viewerviewstate.lonov = (onPointerDownMouseX - event.clientX) * 0.2 + onPointerDownLon;
-    viewerviewstate.latov = (event.clientY - onPointerDownMouseY) * 0.2 + onPointerDownLat;
+    viewerViewState.lonov = (onPointerDownMouseX - event.clientX) * 0.2 + onPointerDownLon;
+    viewerViewState.latov = (event.clientY - onPointerDownMouseY) * 0.2 + onPointerDownLat;
 
     // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
-    viewerviewstate.latov = Math.max( -85, Math.min(85, viewerviewstate.latov));
+    viewerViewState.latov = Math.max( -85, Math.min(85, viewerViewState.latov));
 
 }
 
@@ -135,13 +115,12 @@ function onPointerUp() {
 }
 
 function onDocumentMouseWheel(event) {
-
     // the 0.05 constant determines how quick scrolling in and out feels for the user
-    viewerviewstate.fov = camera.fov + event.deltaY * 0.05;
+    viewerViewState.fov = viewerPanoAPI.camera().fov + event.deltaY * 0.05;
 
-    testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
+    viewerPanoAPI.view(viewerViewState.lonov, viewerViewState.latov, viewerViewState.fov);
 
-    cameraPano.updateProjectionMatrix();
+    viewerPanoAPI.camera().updateProjectionMatrix();
 
 }
 
@@ -151,8 +130,8 @@ function onWindowResize() {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    cameraPano.aspect = width / height;
-    cameraPano.updateProjectionMatrix();
+    viewerPanoAPI.camera().aspect = width / height;
+    viewerPanoAPI.camera().updateProjectionMatrix();
     
     cameraMap.left = - width / 2;
     cameraMap.right = width / 2;
@@ -187,8 +166,10 @@ function updateHUDSprites() {
 
 function render() {
     
+    viewerPanoAPI.view(viewerViewState.lonov, viewerViewState.latov, viewerViewState.fov);
+
     renderer.clear();
-    renderer.render( scenePano, cameraPano );
+    renderer.render( viewerPanoAPI.scene, viewerPanoAPI.camera() );
     renderer.clearDepth();
     renderer.render( sceneMap, cameraMap );
 
