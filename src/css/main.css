@@ -10,7 +10,6 @@ body {
 #map {
     width: 32em;
     height: 18em;
-    background-color: rgb(255, 255, 255);
     position: absolute;
     bottom: 0;
     right: 0;

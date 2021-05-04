@@ -99,8 +99,7 @@ function update() {
     const z = 500 * Math.sin(phi) * Math.sin(theta);
 
     camera.lookAt(x, y, z);
-    spriteMap.position.set(x, y, 1 );
-    //cameraOrtho.lookAt(x, y, z);
+    
 }
 
 // this event listener is called when the user *begins* moving the picture
