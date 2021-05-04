@@ -1,11 +1,13 @@
 "use strict";
+import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 
 let testview = new ViewerPanoAPI; 
 console.log(testview);
 
-let camera, scene, renderer;
+let cameraPano, scenePano, cameraMap, sceneMap, renderer;
+let spriteMap; // for createHUDSprites and updateHUDSprites
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
     longitude = 0, onPointerDownLon = 0,
@@ -18,12 +20,19 @@ init();
 animate();
 
 function init() {
+    cameraPano = testview.camera();
+    //console.log(camera);
+    scenePano = testview.scene;
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
     const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
 
-    camera = testview.camera();
-    //console.log(camera);
-    scene = testview.scene;
+    // ----- init Panorama scene -----
+    //cameraPano = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
+    //scenePano = new THREE.Scene();
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
@@ -31,28 +40,48 @@ function init() {
     sphere.scale( -1, 1, 1);
 
     // load the 360-panorama image data (one specific hardcoded for now)
-    const texture = new THREE.TextureLoader().load( '../assets/0r3.jpg' );
-    texture.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+    const texturePano = new THREE.TextureLoader().load( '../assets/0/0r3.jpg' );
+    texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
     
     // put the texture on the spehere and add it to the scene
-    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const material = new THREE.MeshBasicMaterial({ map: texturePano });
     const mesh = new THREE.Mesh(sphere, material);
-    scene.add(mesh);
+    scenePano.add(mesh);
+    // ----- -----
+
+    // ----- init Map scene -----
+    cameraMap = new THREE.OrthographicCamera( -width / 2, width / 2, height / 2, -height / 2, 1, 10 );
+    cameraMap.position.z = 10;
+    sceneMap = new THREE.Scene();
+
+    //Create new camera for 2D display
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load( "../assets/map-small.jpg", createHUDSprites );
+    // ----- -----
 
     // create the renderer, and embed the attributed dom element in the html page
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.autoClear = false; // To allow render overlay on top of panorama scene
+    
     container.appendChild(renderer.domElement);
 
 
 
     // link event listeners to the corresponding functions
-    container.addEventListener('pointerdown', onPointerDown);
-
+    document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('wheel', onDocumentMouseWheel);
+    //document.addEventListener('resize', onWindowResize);
 
-    document.addEventListener('resize', onWindowResize);
+    let viewerImageAPI;
+    
+    // hardcoded to work with assets/ for now
+    const jsonImageDataFilepath = "../assets/data.json";
+
+    $.getJSON(jsonImageDataFilepath, function(data) {
+        viewerImageAPI = new ViewerImageAPI(data);
+    });
 
 }
 
@@ -60,14 +89,14 @@ function animate() {
 
     requestAnimationFrame(animate);
     update();
+    render();
 
 }
-
 function update() {
 
     testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
 
-    renderer.render(scene, camera);
+    //renderer.render(scene, camera);
 
 }
 
@@ -112,13 +141,56 @@ function onDocumentMouseWheel(event) {
 
     testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
 
+    cameraPano.updateProjectionMatrix();
+
 }
 
+// currently not supported
 function onWindowResize() {
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    cameraPano.aspect = width / height;
+    cameraPano.updateProjectionMatrix();
+    
+    cameraMap.left = - width / 2;
+    cameraMap.right = width / 2;
+    cameraMap.top = height / 2;
+    cameraMap.bottom = - height / 2;
+    cameraMap.updateProjectionMatrix();
+    updateHUDSprites();
+    
+    renderer.setSize(width, height);
 
 }
+
+
+function createHUDSprites( texture ) {
+    //Texture is Map
+    const material = new THREE.SpriteMaterial( { map: texture } );
+    const width = material.map.image.width;
+    const height = material.map.image.height;
+    spriteMap = new THREE.Sprite( material );
+    spriteMap.center.set( 1.0, 0.0 ); // bottom right
+    spriteMap.scale.set( width, height, 1 );
+    sceneMap.add( spriteMap );
+    updateHUDSprites();
+
+}
+
+function updateHUDSprites() {
+
+    spriteMap.position.set(window.innerWidth / 2, -window.innerHeight / 2, 1 ); // bottom right
+
+}
+
+function render() {
+    
+    renderer.clear();
+    renderer.render( scenePano, cameraPano );
+    renderer.clearDepth();
+    renderer.render( sceneMap, cameraMap );
+
+}
+
