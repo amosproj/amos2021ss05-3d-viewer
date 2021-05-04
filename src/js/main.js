@@ -1,21 +1,29 @@
 "use strict";
 import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
+import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
+
+let testview = new ViewerPanoAPI; 
+console.log(testview);
 
 let cameraPano, scenePano, cameraMap, sceneMap, renderer;
 let spriteMap; // for createHUDSprites and updateHUDSprites
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
     longitude = 0, onPointerDownLon = 0,
-    latitude = 0, onPointerDownLat = 0,
-    phi = 0, theta = 0;
+    latitude = 0, onPointerDownLat = 0;
 
-const DEFAULT_FOV = 90, MAX_FOV = 120, MIN_FOV = 5;
+// initialize ViewerViewState
+let viewerviewstate = new ViewerViewState(90, latitude, longitude)
 
 init();
 animate();
 
 function init() {
+    cameraPano = testview.camera();
+    //console.log(camera);
+    scenePano = testview.scene;
+
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -23,8 +31,8 @@ function init() {
     // the only html element we work with (the pano-viewer div)
 
     // ----- init Panorama scene -----
-    cameraPano = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
-    scenePano = new THREE.Scene();
+    //cameraPano = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
+    //scenePano = new THREE.Scene();
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
@@ -59,6 +67,8 @@ function init() {
     
     container.appendChild(renderer.domElement);
 
+
+
     // link event listeners to the corresponding functions
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('wheel', onDocumentMouseWheel);
@@ -84,14 +94,9 @@ function animate() {
 }
 function update() {
 
-    phi = THREE.MathUtils.degToRad(90 - latitude);
-    theta = THREE.MathUtils.degToRad(longitude);
+    testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
 
-    const x = 500 * Math.sin(phi) * Math.cos(theta);
-    const y = 500 * Math.cos(phi);
-    const z = 500 * Math.sin(phi) * Math.sin(theta);
-
-    cameraPano.lookAt(x, y, z);
+    //renderer.render(scene, camera);
 
 }
 
@@ -101,8 +106,8 @@ function onPointerDown(event) {
     onPointerDownMouseX = event.clientX;
     onPointerDownMouseY = event.clientY;
 
-    onPointerDownLon = longitude;
-    onPointerDownLat = latitude;
+    onPointerDownLon = viewerviewstate.lonov;
+    onPointerDownLat = viewerviewstate.latov;
 
     // Two new event listeneres are called to handle *how far* the user drags
     document.addEventListener('pointermove', onPointerMove);
@@ -113,11 +118,11 @@ function onPointerDown(event) {
 // handles continues update of the distance mouse moved
 function onPointerMove(event) {
 
-    longitude = (onPointerDownMouseX - event.clientX) * 0.2 + onPointerDownLon;
-    latitude = (event.clientY - onPointerDownMouseY) * 0.2 + onPointerDownLat;
+    viewerviewstate.lonov = (onPointerDownMouseX - event.clientX) * 0.2 + onPointerDownLon;
+    viewerviewstate.latov = (event.clientY - onPointerDownMouseY) * 0.2 + onPointerDownLat;
 
-    // keep latitude within bounds because it loops back around at top and bottom
-    latitude = Math.max( -85, Math.min(85, latitude));
+    // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
+    viewerviewstate.latov = Math.max( -85, Math.min(85, viewerviewstate.latov));
 
 }
 
@@ -132,9 +137,9 @@ function onPointerUp() {
 function onDocumentMouseWheel(event) {
 
     // the 0.05 constant determines how quick scrolling in and out feels for the user
-    const fov = cameraPano.fov + event.deltaY * 0.05;
+    viewerviewstate.fov = camera.fov + event.deltaY * 0.05;
 
-    cameraPano.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
+    testview.view(viewerviewstate.lonov, viewerviewstate.latov, viewerviewstate.fov);
 
     cameraPano.updateProjectionMatrix();
 
