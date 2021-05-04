@@ -1,7 +1,7 @@
 "use strict";
 import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
-import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
+import { ViewerPanoAPI, MAX_FOV } from "./viewer/ViewerPanoAPI.js";
 
 
 let viewerPanoAPI, viewerViewState, cameraMap, sceneMap, renderer;
@@ -98,8 +98,10 @@ function onPointerDown(event) {
 // handles continues update of the distance mouse moved
 function onPointerMove(event) {
 
-    viewerViewState.lonov = (onPointerDownMouseX - event.clientX) * 0.2 + onPointerDownLon;
-    viewerViewState.latov = (event.clientY - onPointerDownMouseY) * 0.2 + onPointerDownLat;
+    let scalingFactor = viewerPanoAPI.camera().fov / MAX_FOV;
+
+    viewerViewState.lonov = (onPointerDownMouseX - event.clientX) * 0.2 * scalingFactor + onPointerDownLon;
+    viewerViewState.latov = (event.clientY - onPointerDownMouseY) * 0.2 * scalingFactor + onPointerDownLat;
 
     // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
     viewerViewState.latov = Math.max( -85, Math.min(85, viewerViewState.latov));

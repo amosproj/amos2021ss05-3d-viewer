@@ -1,6 +1,6 @@
 let phi = 0, theta = 0;
 
-const DEFAULT_FOV = 90, MAX_FOV = 120, MIN_FOV = 5;
+export const DEFAULT_FOV = 90, MAX_FOV = 120, MIN_FOV = 5;
 
 export class ViewerPanoAPI{
 
