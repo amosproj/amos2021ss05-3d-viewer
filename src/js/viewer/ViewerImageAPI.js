@@ -21,8 +21,6 @@ export class ViewerImageAPI {
 
         this.currentFloorId = 0;
         this.currentImageId = 0;
-
-        console.log(this);
     }
     
     get currentFloor() {

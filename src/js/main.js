@@ -5,10 +5,8 @@ import { ViewerViewState } from "./viewer/ViewerViewState.js";
 
 // import { GUI } from './jsm/libs/dat.gui.module.js';
 
-let camera, scene, renderer;
-let  cameraOrtho, sceneOrtho;
-var geometry, material, mesh;
-let spriteMap, width, height; 
+let cameraPano, scenePano, cameraOrtho, sceneOrtho, renderer;
+let spriteMap; // for createHUDSprites and updateHUDSprites
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
     longitude = 0, onPointerDownLon = 0,
@@ -26,9 +24,9 @@ function init() {
     // the only html element we work with (the pano-viewer div)
    
     // Create the Thee.js scene
-    camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
+    cameraPano = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
 	//camera.position.z = 500;
-    scene = new THREE.Scene();
+    scenePano = new THREE.Scene();
 
      // Create the Overlay scene
      
@@ -45,13 +43,13 @@ function init() {
     sphere.scale( -1, 1, 1);
 
     // load the 360-panorama image data (one specific hardcoded for now)
-    const texture = new THREE.TextureLoader().load( '../assets/0/0r3.jpg' );
-    texture.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+    const texturePano = new THREE.TextureLoader().load( '../assets/0/0r3.jpg' );
+    texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
     
     // put the texture on the spehere and add it to the scene
-    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const material = new THREE.MeshBasicMaterial({ map: texturePano });
     const mesh = new THREE.Mesh(sphere, material);
-    scene.add(mesh);
+    scenePano.add(mesh);
 
 
     //Create new camera for 2D display
@@ -61,7 +59,7 @@ function init() {
     // create the renderer, and embed the attributed dom element in the html page
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(width, height);
     renderer.autoClear = false; // To allow render overlay on top of panorama scene
     
     container.appendChild(renderer.domElement);
@@ -69,8 +67,8 @@ function init() {
     // link event listeners to the corresponding functions
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('wheel', onDocumentMouseWheel);
-    document.addEventListener('resize', onWindowResize);
- 
+    //document.addEventListener('resize', onWindowResize);
+
     let viewerImageAPI;
     
     // hardcoded to work with assets/ for now
@@ -98,8 +96,8 @@ function update() {
     const y = 500 * Math.cos(phi);
     const z = 500 * Math.sin(phi) * Math.sin(theta);
 
-    camera.lookAt(x, y, z);
-    
+    cameraPano.lookAt(x, y, z);
+
 }
 
 // this event listener is called when the user *begins* moving the picture
@@ -139,19 +137,22 @@ function onPointerUp() {
 function onDocumentMouseWheel(event) {
 
     // the 0.05 constant determines how quick scrolling in and out feels for the user
-    const fov = camera.fov + event.deltaY * 0.05;
+    const fov = cameraPano.fov + event.deltaY * 0.05;
 
-    camera.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
+    cameraPano.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
 
-    camera.updateProjectionMatrix();
+    cameraPano.updateProjectionMatrix();
 
 }
 
-
+// currently not supported
 function onWindowResize() {
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    cameraPano.aspect = width / height;
+    cameraPano.updateProjectionMatrix();
     
     cameraOrtho.left = - width / 2;
     cameraOrtho.right = width / 2;
@@ -160,7 +161,7 @@ function onWindowResize() {
     cameraOrtho.updateProjectionMatrix();
     updateHUDSprites();
     
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(width, height);
 
 }
 
@@ -189,7 +190,7 @@ function updateHUDSprites() {
 function render() {
     
     renderer.clear();
-	renderer.render( scene, camera );
+	renderer.render( scenePano, cameraPano );
 	renderer.clearDepth();
     renderer.render( sceneOrtho, cameraOrtho );
 
