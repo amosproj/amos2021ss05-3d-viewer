@@ -172,8 +172,8 @@ function createHUDSprites( texture ) {
     const width = material.map.image.width;
     const height = material.map.image.height;
     spriteMap = new THREE.Sprite( material );
-    spriteMap.center.set( 0.0, 1.0 );
-    spriteMap.scale.set( width,  height, 1 ); // bottom right
+    spriteMap.center.set( 1.0, 0.0 ); // bottom right
+    spriteMap.scale.set( width, height, 1 );
     sceneOrtho.add( spriteMap );
     updateHUDSprites();
 
@@ -183,7 +183,7 @@ function updateHUDSprites() {
 
     const width = window.innerWidth / 2;
     const height = window.innerHeight / 2;
-    spriteMap.position.set(width, height, 1 );// bottom right
+    spriteMap.position.set(width, -height, 1 );// bottom right
 
 }
 
