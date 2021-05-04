@@ -7,14 +7,6 @@ body {
     overflow-y: hidden;
 }
 
-#map {
-    width: 32em;
-    height: 18em;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-}
-
 #pano-viewer {
     position: relative;
     overflow: hidden;
