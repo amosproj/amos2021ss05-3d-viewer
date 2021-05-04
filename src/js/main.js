@@ -8,7 +8,7 @@ import { ViewerViewState } from "./viewer/ViewerViewState.js";
 let camera, scene, renderer;
 let  cameraOrtho, sceneOrtho;
 var geometry, material, mesh;
-let spriteMap;
+let spriteMap, width, height; 
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
     longitude = 0, onPointerDownLon = 0,
@@ -27,6 +27,7 @@ function init() {
    
     // Create the Thee.js scene
     camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
+	//camera.position.z = 500;
     scene = new THREE.Scene();
 
      // Create the Overlay scene
@@ -54,27 +55,23 @@ function init() {
 
 
     //Create new camera for 2D display
-
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load( "../assets/map-small.jpg", createHUDSprites );
-
 
     // create the renderer, and embed the attributed dom element in the html page
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-	//renderer.autoClear = false; // To allow render overlay on top of panorama scene
-	
-    document.body.appendChild( renderer.domElement );
+    renderer.autoClear = false; // To allow render overlay on top of panorama scene
+    
+    container.appendChild(renderer.domElement);
 
     // link event listeners to the corresponding functions
-    container.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('wheel', onDocumentMouseWheel);
     document.addEventListener('resize', onWindowResize);
-    
-    
+ 
     let viewerImageAPI;
-    // initGui();
     
     // hardcoded to work with assets/ for now
     const jsonImageDataFilepath = "../assets/data.json";
@@ -89,10 +86,9 @@ function animate() {
 
     requestAnimationFrame(animate);
     update();
-    //render(); 
+    render();
 
 }
-
 function update() {
 
     phi = THREE.MathUtils.degToRad(90 - latitude);
@@ -101,9 +97,10 @@ function update() {
     const x = 500 * Math.sin(phi) * Math.cos(theta);
     const y = 500 * Math.cos(phi);
     const z = 500 * Math.sin(phi) * Math.sin(theta);
+
     camera.lookAt(x, y, z);
-    //renderer.clear();
-    renderer.render( scene, camera );
+    spriteMap.position.set(x, y, 1 );
+    //cameraOrtho.lookAt(x, y, z);
 }
 
 // this event listener is called when the user *begins* moving the picture
@@ -156,7 +153,6 @@ function onWindowResize() {
 
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-
     
     cameraOrtho.left = - width / 2;
     cameraOrtho.right = width / 2;
@@ -164,8 +160,8 @@ function onWindowResize() {
     cameraOrtho.bottom = - height / 2;
     cameraOrtho.updateProjectionMatrix();
     updateHUDSprites();
-
-   // renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
 }
 
@@ -177,7 +173,7 @@ function createHUDSprites( texture ) {
     const height = material.map.image.height;
     spriteMap = new THREE.Sprite( material );
     spriteMap.center.set( 0.0, 1.0 );
-    spriteMap.scale.set(  width, - height, 1 ); // bottom right
+    spriteMap.scale.set( width,  height, 1 ); // bottom right
     sceneOrtho.add( spriteMap );
     updateHUDSprites();
 
@@ -187,15 +183,14 @@ function updateHUDSprites() {
 
     const width = window.innerWidth / 2;
     const height = window.innerHeight / 2;
-    spriteMap.position.set(- width,- height, 1 );// bottom right
+    spriteMap.position.set(width, height, 1 );// bottom right
 
 }
 
 function render() {
-
-    const time = Date.now() / 1000;
-    //renderer.clear();
-	//renderer.render( scene, camera );
+    
+    renderer.clear();
+	renderer.render( scene, camera );
 	renderer.clearDepth();
     renderer.render( sceneOrtho, cameraOrtho );
 
