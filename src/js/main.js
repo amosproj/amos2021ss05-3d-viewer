@@ -1,11 +1,8 @@
 "use strict";
-//import * as THREE from './libs/three.module.js'
 import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 
-// import { GUI } from './jsm/libs/dat.gui.module.js';
-
-let cameraPano, scenePano, cameraOrtho, sceneOrtho, renderer;
+let cameraPano, scenePano, cameraMap, sceneMap, renderer;
 let spriteMap; // for createHUDSprites and updateHUDSprites
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
@@ -19,23 +16,15 @@ init();
 animate();
 
 function init() {
-
-    const container = document.getElementById('pano-viewer');
-    // the only html element we work with (the pano-viewer div)
-   
-    // Create the Thee.js scene
-    cameraPano = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
-	//camera.position.z = 500;
-    scenePano = new THREE.Scene();
-
-     // Create the Overlay scene
-     
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    cameraOrtho = new THREE.OrthographicCamera( - width / 2, width / 2, height / 2, - height / 2, 1, 10 );
-    cameraOrtho.position.z = 10;
-    sceneOrtho = new THREE.Scene();
+    const container = document.getElementById('pano-viewer');
+    // the only html element we work with (the pano-viewer div)
+
+    // ----- init Panorama scene -----
+    cameraPano = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
+    scenePano = new THREE.Scene();
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
@@ -50,16 +39,22 @@ function init() {
     const material = new THREE.MeshBasicMaterial({ map: texturePano });
     const mesh = new THREE.Mesh(sphere, material);
     scenePano.add(mesh);
+    // ----- -----
 
+    // ----- init Map scene -----
+    cameraMap = new THREE.OrthographicCamera( -width / 2, width / 2, height / 2, -height / 2, 1, 10 );
+    cameraMap.position.z = 10;
+    sceneMap = new THREE.Scene();
 
     //Create new camera for 2D display
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load( "../assets/map-small.jpg", createHUDSprites );
+    // ----- -----
 
     // create the renderer, and embed the attributed dom element in the html page
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(width, height);
+    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.autoClear = false; // To allow render overlay on top of panorama scene
     
     container.appendChild(renderer.domElement);
@@ -154,11 +149,11 @@ function onWindowResize() {
     cameraPano.aspect = width / height;
     cameraPano.updateProjectionMatrix();
     
-    cameraOrtho.left = - width / 2;
-    cameraOrtho.right = width / 2;
-    cameraOrtho.top = height / 2;
-    cameraOrtho.bottom = - height / 2;
-    cameraOrtho.updateProjectionMatrix();
+    cameraMap.left = - width / 2;
+    cameraMap.right = width / 2;
+    cameraMap.top = height / 2;
+    cameraMap.bottom = - height / 2;
+    cameraMap.updateProjectionMatrix();
     updateHUDSprites();
     
     renderer.setSize(width, height);
@@ -174,7 +169,7 @@ function createHUDSprites( texture ) {
     spriteMap = new THREE.Sprite( material );
     spriteMap.center.set( 1.0, 0.0 ); // bottom right
     spriteMap.scale.set( width, height, 1 );
-    sceneOrtho.add( spriteMap );
+    sceneMap.add( spriteMap );
     updateHUDSprites();
 
 }
@@ -192,7 +187,7 @@ function render() {
     renderer.clear();
 	renderer.render( scenePano, cameraPano );
 	renderer.clearDepth();
-    renderer.render( sceneOrtho, cameraOrtho );
+    renderer.render( sceneMap, cameraMap );
 
 }
 
