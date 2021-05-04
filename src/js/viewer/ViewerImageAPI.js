@@ -4,7 +4,7 @@ import { ViewerImage } from "./ViewerImage.js";
 // Specific API for Panorama Image(s)
 export class ViewerImageAPI {
 
-    constructor(data) {
+    constructor( data ) {
         // The file «data.json» contains the metadata defining the panorama image locations.
             //"images" Array Images Array
             //"lon0" Number Reference longitude of model (WGS 84)
@@ -19,21 +19,33 @@ export class ViewerImageAPI {
             this.viewerImages.push(new ViewerImage(element, index));
         });
 
+        this.currentFloorId = 0;
+        this.currentImageId = 0;
+
         console.log(this);
     }
     
+    get currentFloor() {
+        return this.floors[Object.keys(this.floors)[this.currentImageId]];
+    }
+
+    get currentImage() {
+        return this.viewerImages[this.currentFloorId];
+    }
+
     all ( callback ) {
      //    Get all panorama images.
     // Parameters:  Function called with all images ([ViewerImage]): Array of panorama images
+        callback(this.viewerImages);
     }
 
     changed (  ) {
         //  Signal changed image data (e.g. hidden flag) to the viewer.
     }
 
-    get images() {
-        // Get the currently managed panorama images.
+    get get() {
+        // Get the currently displayed panorama image.
 
-        return this.viewerImages;
+        return this.currentImage;
     }
 }

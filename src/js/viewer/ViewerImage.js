@@ -15,6 +15,7 @@ export class ViewerImage {
     
         this.pos = [panoLon, panoLat, panoZ]; // : [Number] // WGS 84 coordinates [longitude, latitude, z] of this image
 
+        this.orientation = new THREE.Quaternion(x, y, z, w);
     }
 
 }
