@@ -31,6 +31,33 @@ function init() {
     cameraOrtho = new THREE.OrthographicCamera( - width / 2, width / 2, height / 2, - height / 2, 1, 10 );
     sceneOrtho = new THREE.Scene();
 
+
+    cameraOrtho = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
+    sceneOrtho = new THREE.Scene();
+
+    // Create a Sphere for the image texture to be displayed on
+    const sphere = new THREE.SphereGeometry(500, 60, 40);
+    // invert the geometry on the x-axis so that we look out from the middle of the sphere
+    sphere.scale( -1, 1, 1);
+
+
+    // load the 360-panorama image data (one specific hardcoded for now)
+    const texture = new THREE.TextureLoader().load( '../assets/metal.jpg' );
+    texture.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+    
+    // put the texture on the spehere and add it to the scene
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const mesh = new THREE.Mesh(sphere, material);
+    sceneOrtho.add(mesh);
+
+    const material = new THREE.SpriteMaterial( { map: mapTexture } );
+    spriteBR = new THREE.Sprite( material );
+    spriteBR.center.set( 1.0, 0.0 );
+    spriteBR.scale.set( width, height, 1 );
+    sceneOrtho.add( spriteBR );
+    spriteBR.position.set( -width, - height, 1 );
+
+    /*
     // Load the map textures
     const mapTexture = new THREE.TextureLoader().load( '../assets/metal.jpg' ); 
     //var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff } );
@@ -38,8 +65,9 @@ function init() {
     const material = new THREE.SpriteMaterial( { map: mapTexture } );
     spriteBR = new THREE.Sprite( material );
     spriteBR.center.set( 1.0, 0.0 );
-    spriteBR.scale.set( width/10, height/10, 1 );
+    spriteBR.scale.set( width, height, 1 );
     sceneOrtho.add( spriteBR );
+    spriteBR.position.set( -width, - height, 1 );
 
     //sprite.scale.set(width,height,1);
     //sceneOrtho.add( sprite );
@@ -47,64 +75,32 @@ function init() {
     // create sprites
     //const mapTexture = new THREE.TextureLoader().load( "../assets/map0.png", createHUDSprites );
     //const materialMap = new THREE.SpriteMaterial( { map: mapTexture, color: 0xffffff, fog: true } );
+    */
+
+
 
     // create the renderer, and embed the attributed dom element in the html page
     rendererOrtho = new THREE.WebGLRenderer();
+    rendererOrtho.clearDepth();
     rendererOrtho.setPixelRatio(window.devicePixelRatio);
     rendererOrtho.setSize(window.innerWidth, window.innerHeight);
-
+    
     //Render 2D Map
-    rendererOrtho.clearDepth();
     rendererOrtho.render( sceneOrtho, cameraOrtho );
     container.appendChild(rendererOrtho.domElement);
 
     // link event listeners to the corresponding functions
-    container.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('resize', onWindowResize);
 }
 
 function animate() {
     requestAnimationFrame(animate);
     update();
-
 }
 
 function update() {
-    updateHUDSprites()
+    //updateHUDSprites()
     rendererOrtho.render(sceneOrtho, cameraOrtho);
-}
-
-
-// this event listener is called when the user *begins* moving the picture
-function onPointerDown(event) {
-
-    onPointerDownMouseX = event.clientX;
-    onPointerDownMouseY = event.clientY;
-
-    onPointerDownLon = longitude;
-    onPointerDownLat = latitude;
-
-    // Two new event listeneres are called to handle *how far* the user drags
-    document.addEventListener('pointermove', onPointerMove);
-    document.addEventListener('pointerup', onPointerUp);
-
-}
-
-// handles continues update of the distance mouse moved
-function onPointerMove(event) {
-
-    longitude = (onPointerDownMouseX - event.clientX) * 0.2 + onPointerDownLon;
-    latitude = (event.clientY - onPointerDownMouseY) * 0.2 + onPointerDownLat;
-    // keep latitude within bounds because it loops back around at top and bottom
-    latitude = Math.max( -85, Math.min(85, latitude));
-
-}
-
-// this event listener is called when the user *ends* moving the picture
-function onPointerUp() {
-    document.removeEventListener('pointermove', onPointerMove);
-    document.removeEventListener('pointerup', onPointerUp);
-
 }
 
 
@@ -114,7 +110,6 @@ function onWindowResize() {
     rendererOrtho.setSize(window.innerWidth, window.innerHeight);
 
 }
-
 
 function createHUDSprites( texture ) {
 
