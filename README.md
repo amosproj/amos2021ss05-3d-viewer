@@ -5,7 +5,7 @@
   </a>
 </p>
 
-This project is for our industry partnet Büren & Partner
+This project is designed to enable the computer science department of the Friedrich-Alexander University Erlangen-Nuremberg to display its 50 years computer science department exhibition online.
 
 The software to be developed shall be able to:
 
