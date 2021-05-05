@@ -1,0 +1,1 @@
+export const DEFAULT_FOV = 80, MAX_FOV = 100, MIN_FOV = 10;

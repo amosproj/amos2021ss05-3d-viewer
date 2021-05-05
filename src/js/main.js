@@ -1,25 +1,28 @@
 "use strict";
+import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
+import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
+import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
 
-let camera, scene, renderer;
 
-let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
-    longitude = 0, onPointerDownLon = 0,
-    latitude = 0, onPointerDownLat = 0,
-    phi = 0, theta = 0;
+let viewerPanoAPI, viewerViewState, cameraMap, sceneMap, renderer;
+let spriteMap; // for createHUDSprites and updateHUDSprites
 
-const DEFAULT_FOV = 90, MAX_FOV = 120, MIN_FOV = 5;
+let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
 init();
 animate();
 
 function init() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
 
-    camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
-    scene = new THREE.Scene();
+    // ----- init Panorama scene -----
+    viewerPanoAPI = new ViewerPanoAPI();
+    viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0)
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
@@ -27,48 +30,54 @@ function init() {
     sphere.scale( -1, 1, 1);
 
     // load the 360-panorama image data (one specific hardcoded for now)
-    const texture = new THREE.TextureLoader().load( '../assets/0r3.jpg' );
-    texture.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+    const texturePano = new THREE.TextureLoader().load( '../assets/0/0r3.jpg' );
+    texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
     
     // put the texture on the spehere and add it to the scene
-    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const material = new THREE.MeshBasicMaterial({ map: texturePano });
     const mesh = new THREE.Mesh(sphere, material);
-    scene.add(mesh);
+    viewerPanoAPI.scene.add(mesh);
+    // ----- -----
+
+    // ----- init Map scene -----
+    cameraMap = new THREE.OrthographicCamera( -width / 2, width / 2, height / 2, -height / 2, 1, 10 );
+    cameraMap.position.z = 10;
+    sceneMap = new THREE.Scene();
+
+    //Create new camera for 2D display
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load( "../assets/map-small.jpg", createHUDSprites );
+    // ----- -----
 
     // create the renderer, and embed the attributed dom element in the html page
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.autoClear = false; // To allow render overlay on top of panorama scene
+    
     container.appendChild(renderer.domElement);
 
     // link event listeners to the corresponding functions
-    container.addEventListener('pointerdown', onPointerDown);
-
+    document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('wheel', onDocumentMouseWheel);
+    //document.addEventListener('resize', onWindowResize);
 
-    document.addEventListener('resize', onWindowResize);
+
+    let viewerImageAPI;
     
+    // hardcoded to work with assets/ for now
+    const jsonImageDataFilepath = "../assets/data.json";
+
+    $.getJSON(jsonImageDataFilepath, function(data) {
+        viewerImageAPI = new ViewerImageAPI(data);
+    });
+
 }
 
 function animate() {
 
     requestAnimationFrame(animate);
-    update();
-
-}
-
-function update() {
-
-    phi = THREE.MathUtils.degToRad(90 - latitude);
-    theta = THREE.MathUtils.degToRad(longitude);
-
-    const x = 500 * Math.sin(phi) * Math.cos(theta);
-    const y = 500 * Math.cos(phi);
-    const z = 500 * Math.sin(phi) * Math.sin(theta);
-
-    camera.lookAt(x, y, z);
-
-    renderer.render(scene, camera);
+    render();
 
 }
 
@@ -78,8 +87,8 @@ function onPointerDown(event) {
     onPointerDownMouseX = event.clientX;
     onPointerDownMouseY = event.clientY;
 
-    onPointerDownLon = longitude;
-    onPointerDownLat = latitude;
+    onPointerDownLon = viewerViewState.lonov;
+    onPointerDownLat = viewerViewState.latov;
 
     // Two new event listeneres are called to handle *how far* the user drags
     document.addEventListener('pointermove', onPointerMove);
@@ -90,11 +99,13 @@ function onPointerDown(event) {
 // handles continues update of the distance mouse moved
 function onPointerMove(event) {
 
-    longitude = (onPointerDownMouseX - event.clientX) * 0.2 + onPointerDownLon;
-    latitude = (event.clientY - onPointerDownMouseY) * 0.2 + onPointerDownLat;
+    let scalingFactor = viewerPanoAPI.camera().fov / MAX_FOV;
 
-    // keep latitude within bounds because it loops back around at top and bottom
-    latitude = Math.max( -85, Math.min(85, latitude));
+    viewerViewState.lonov = (onPointerDownMouseX - event.clientX) * 0.1 * scalingFactor + onPointerDownLon;
+    viewerViewState.latov = (event.clientY - onPointerDownMouseY) * 0.1 * scalingFactor + onPointerDownLat;
+
+    // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
+    viewerViewState.latov = Math.max( -85, Math.min(85, viewerViewState.latov));
 
 }
 
@@ -107,21 +118,63 @@ function onPointerUp() {
 }
 
 function onDocumentMouseWheel(event) {
-
     // the 0.05 constant determines how quick scrolling in and out feels for the user
-    const fov = camera.fov + event.deltaY * 0.05;
+    viewerViewState.fov = viewerPanoAPI.camera().fov + event.deltaY * 0.05;
 
-    camera.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
+    viewerPanoAPI.view(viewerViewState.lonov, viewerViewState.latov, viewerViewState.fov);
 
-    camera.updateProjectionMatrix();
+    viewerPanoAPI.camera().updateProjectionMatrix();
 
 }
 
+// currently not supported
 function onWindowResize() {
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    viewerPanoAPI.camera().aspect = width / height;
+    viewerPanoAPI.camera().updateProjectionMatrix();
+    
+    cameraMap.left = - width / 2;
+    cameraMap.right = width / 2;
+    cameraMap.top = height / 2;
+    cameraMap.bottom = - height / 2;
+    cameraMap.updateProjectionMatrix();
+    updateHUDSprites();
+    
+    renderer.setSize(width, height);
 
 }
+
+
+function createHUDSprites( texture ) {
+    //Texture is Map
+    const material = new THREE.SpriteMaterial( { map: texture } );
+    const width = material.map.image.width;
+    const height = material.map.image.height;
+    spriteMap = new THREE.Sprite( material );
+    spriteMap.center.set( 1.0, 0.0 ); // bottom right
+    spriteMap.scale.set( width, height, 1 );
+    sceneMap.add( spriteMap );
+    updateHUDSprites();
+
+}
+
+function updateHUDSprites() {
+
+    spriteMap.position.set(window.innerWidth / 2, -window.innerHeight / 2, 1 ); // bottom right
+
+}
+
+function render() {
+    
+    viewerPanoAPI.view(viewerViewState.lonov, viewerViewState.latov, viewerViewState.fov);
+
+    renderer.clear();
+    renderer.render( viewerPanoAPI.scene, viewerPanoAPI.camera() );
+    renderer.clearDepth();
+    renderer.render( sceneMap, cameraMap );
+
+}
+
