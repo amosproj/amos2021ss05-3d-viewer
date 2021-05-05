@@ -1,7 +1,8 @@
 "use strict";
 import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
-import { ViewerPanoAPI, MAX_FOV } from "./viewer/ViewerPanoAPI.js";
+import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
+import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
 
 
 let viewerPanoAPI, viewerViewState, cameraMap, sceneMap, renderer;
@@ -21,7 +22,7 @@ function init() {
 
     // ----- init Panorama scene -----
     viewerPanoAPI = new ViewerPanoAPI();
-    viewerViewState = new ViewerViewState(90, 0, 0)
+    viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0)
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
@@ -100,8 +101,8 @@ function onPointerMove(event) {
 
     let scalingFactor = viewerPanoAPI.camera().fov / MAX_FOV;
 
-    viewerViewState.lonov = (onPointerDownMouseX - event.clientX) * 0.2 * scalingFactor + onPointerDownLon;
-    viewerViewState.latov = (event.clientY - onPointerDownMouseY) * 0.2 * scalingFactor + onPointerDownLat;
+    viewerViewState.lonov = (onPointerDownMouseX - event.clientX) * 0.1 * scalingFactor + onPointerDownLon;
+    viewerViewState.latov = (event.clientY - onPointerDownMouseY) * 0.1 * scalingFactor + onPointerDownLat;
 
     // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
     viewerViewState.latov = Math.max( -85, Math.min(85, viewerViewState.latov));

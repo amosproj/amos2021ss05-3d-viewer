@@ -1,4 +1,4 @@
-export const DEFAULT_FOV = 90, MAX_FOV = 120, MIN_FOV = 5;
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV } from "./Globals.js";
 
 export class ViewerPanoAPI{
 
