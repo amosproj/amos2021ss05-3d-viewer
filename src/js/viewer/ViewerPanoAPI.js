@@ -1,5 +1,3 @@
-let phi = 0, theta = 0;
-
 export const DEFAULT_FOV = 90, MAX_FOV = 120, MIN_FOV = 5;
 
 export class ViewerPanoAPI{
@@ -16,8 +14,8 @@ export class ViewerPanoAPI{
     // Set the panorama view characteristics.
     view (lonov, latov, fov){
 
-        phi = THREE.MathUtils.degToRad(90 - latov);
-        theta = THREE.MathUtils.degToRad(lonov);
+        let phi = THREE.MathUtils.degToRad(90 - latov);
+        let theta = THREE.MathUtils.degToRad(lonov);
     
         const x = 500 * Math.sin(phi) * Math.cos(theta);
         const y = 500 * Math.cos(phi);
