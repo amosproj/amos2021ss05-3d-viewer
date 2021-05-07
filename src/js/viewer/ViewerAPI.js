@@ -5,16 +5,23 @@ export class ViewerAPI {
     constructor() {
         //list of all images
         this.images = [];
+        let temp = new Array();
         
         // access JSON file
         const jsonImageDataFilepath = "../assets/data.json";
 
         // save only index 0 to 2 of each images as THREE.Vector3
         $.getJSON(jsonImageDataFilepath, function(data) {
-            $.each( data, function( key, val ) {
-                this.images.push( new THREE.Vector3( , , ) );
+            $.each( data.images, function( key, val ) {
+                //console.log(key+":"+val);
+                temp.push(val);
             });
         });
+        //alert(JSON.stringify(temp));
+        console.log(temp);
+        // $.each(temp,function(key,val){
+        //     console.log(key+":"+val);
+        // });
 
     }
 

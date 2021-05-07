@@ -3,9 +3,10 @@ import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
+import { ViewerAPI } from "./viewer/ViewerAPI.js";
 
 
-let viewerPanoAPI, viewerViewState, cameraMap, sceneMap, renderer;
+let viewerPanoAPI, viewerViewState, cameraMap, sceneMap, renderer,viewerAPI;
 let spriteMap; // for createHUDSprites and updateHUDSprites
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
@@ -23,6 +24,7 @@ function init() {
     // ----- init Panorama scene -----
     viewerPanoAPI = new ViewerPanoAPI();
     viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0)
+    viewerAPI = new ViewerAPI();
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
