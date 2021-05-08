@@ -74,6 +74,8 @@ function init() {
         viewerImageAPI = new ViewerImageAPI(data);
     });
 
+    viewerAPI.move(15,15,1);
+
 }
 
 function animate() {
