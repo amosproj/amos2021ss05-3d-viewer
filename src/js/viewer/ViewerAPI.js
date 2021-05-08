@@ -1,47 +1,40 @@
 "use strict";
+import { ViewerImageAPI } from "./ViewerImageAPI.js";
 
 // API provided by the viewer
 export class ViewerAPI {
     constructor() {
         //list of all images
         this.images = [];
-        let temp = new Array();
-        
-        // access JSON file
-        const jsonImageDataFilepath = "../assets/data.json";
-
-        // save only index 0 to 2 of each images as THREE.Vector3
-        $.getJSON(jsonImageDataFilepath, function(data) {
-            $.each( data.images, function( key, val ) {
-                //console.log(key+":"+val);
-                temp.push(val);
-            });
-        });
-        //alert(JSON.stringify(temp));
-        console.log(temp);
-        // $.each(temp,function(key,val){
-        //     console.log(key+":"+val);
-        // });
-
     }
+
 
     //Move the view to the given position.
     move ( lon,  lat,  z ){
+        const jsonImageDataFilepath = "../assets/data.json";
+        let viewerImageAPI;
+        let temp = [lon,lat,z];
+        let resultset = [];
+        //console.log(temp[0]);
 
-        // current lon, lat, z
-        const vec1 = new THREE.Vector3( lon, lat, z );
+        $.getJSON(jsonImageDataFilepath, function(data) {
 
-        // compare between vectors
-        const distance = [];
 
-        for (i = 0; i < this.images.length; i++){
-            distance.push = vec1.distanceTo(this.images[i]);
-        }
-        
-        // get the index of the image which has the shotest distance
-        const index = distance.indexOf(Math.min.apply(Math, distance));
+            viewerImageAPI = new ViewerImageAPI(data);
+            //console.log(viewerImageAPI.viewerImages);
+            for (let i in viewerImageAPI.viewerImages){
+                //console.log(viewerImageAPI.viewerImages[i].pos);
+                //console.log(viewerImageAPI.viewerImages[i].pos[0]);
+                //console.log(temp[0]);
+                let result = Math.sqrt(Math.pow(viewerImageAPI.viewerImages[i].pos[0]-temp[0],2)+Math.pow(viewerImageAPI.viewerImages[i].pos[1]-temp[1],2)+Math.pow(viewerImageAPI.viewerImages[i].pos[2]-temp[2],2));
+                //console.log(result);
+                resultset.push(result);  
+            }
+            console.log(resultset);
+        });
+    
 
-        // move to the index of this image //TODO
+
 
     }
 
