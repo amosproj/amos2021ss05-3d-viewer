@@ -1,11 +1,12 @@
 "use strict";
 import { ViewerImageAPI } from "./ViewerImageAPI.js";
+import { ViewerPanoAPI } from "./ViewerPanoAPI.js";
 
 // API provided by the viewer
 export class ViewerAPI {
     constructor() {
         //list of all images
-        this.images = [];
+        //this.images = [];
     }
 
 
@@ -15,6 +16,9 @@ export class ViewerAPI {
         let viewerImageAPI;
         let temp = [lon,lat,z];
         let resultset = [];
+        let minval;
+        let minkey;
+        let viewerPanoAPI = new ViewerPanoAPI();
         //console.log(temp[0]);
 
         $.getJSON(jsonImageDataFilepath, function(data) {
@@ -31,6 +35,49 @@ export class ViewerAPI {
                 resultset.push(result);  
             }
             console.log(resultset);
+            minkey = 0;
+            minval = resultset[0];
+            for (let i in resultset){
+                if (resultset[i]<minval){
+                    minval = resultset[i];
+                    minkey = i;
+                }
+            }
+            console.log(minkey);
+            console.log(minval);
+
+
+
+
+            // Create a Sphere for the image texture to be displayed on
+            const sphere = new THREE.SphereGeometry(500, 60, 40);
+            // invert the geometry on the x-axis so that we look out from the middle of the sphere
+            sphere.scale( -1, 1, 1);
+
+            // load the 360-panorama image data (one specific hardcoded for now)
+            const texturePano = new THREE.TextureLoader().load( '../assets/0/1r3.jpg' );
+            texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+    
+            // put the texture on the spehere and add it to the scene
+            const material = new THREE.MeshBasicMaterial({ map: texturePano });
+            const mesh = new THREE.Mesh(sphere, material);
+            viewerPanoAPI.scene.add(mesh);
+
+            let renderer = new THREE.WebGLRenderer();
+            const container = document.getElementById('pano-viewer');
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.autoClear = false; // To allow render overlay on top of panorama scene
+            
+            container.appendChild(renderer.domElement);
+
+            viewerPanoAPI.view(viewerImageAPI.viewerImages[minkey].pos[0], viewerImageAPI.viewerImages[minkey].pos[1], viewerImageAPI.viewerImages[minkey].pos[2]);
+
+            renderer.clear();
+            renderer.render( viewerPanoAPI.scene, viewerPanoAPI.camera() );
+            renderer.clearDepth();
+
+
         });
     
 
