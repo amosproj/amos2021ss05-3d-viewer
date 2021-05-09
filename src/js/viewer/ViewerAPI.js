@@ -1,12 +1,16 @@
 "use strict";
 
+import { ViewerImage } from "./ViewerImage";
+
 // API provided by the viewer
 export class ViewerAPI {
-    constructor() {
+    constructor(data) {
         //list of all images
         this.images = [];
         $.jsonImageDataFilepath,
-            function(distance) {
+            function(data, val) {
+                let data = ViewerImage
+
 
                 let temp = new Array();
 
