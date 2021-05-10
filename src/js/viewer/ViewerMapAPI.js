@@ -20,15 +20,13 @@ export class ViewerMapAPI {
             10);                        // frustum far plane
         this.camera.position.z = 2;     // need to be in [near + 1, far + 1] to be displayed
 
-        this.spriteMap; // for createHUDSprites and updateHUDSprites
-    
         new THREE.TextureLoader().load(mapPicturePath, (texture) => {
             const material = new THREE.SpriteMaterial({ map: texture });
-            this.spriteMap = new THREE.Sprite(material);
-            this.spriteMap.center.set(1.0, 0.0); // bottom right
-            this.spriteMap.scale.set(texture.image.width, texture.image.height, 1);
-            this.spriteMap.position.set(window.innerWidth / 2, -window.innerHeight / 2, 1 ); // bottom right
-            this.scene.add(this.spriteMap);
+            const spriteMap = new THREE.Sprite(material);
+            spriteMap.center.set(1.0, 0.0); // bottom right
+            spriteMap.scale.set(texture.image.width, texture.image.height, 1);
+            spriteMap.position.set(window.innerWidth / 2, -window.innerHeight / 2, 1 ); // bottom right
+            this.scene.add(spriteMap);
         
         });
     
