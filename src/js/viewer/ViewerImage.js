@@ -3,9 +3,9 @@
 // Panorama Image
 export class ViewerImage {
 
-    constructor([panoLon, panoLat, panoZ, w, x, y, z, floorZ], imageIdx) {
+    constructor([panoLon, panoLat, panoZ, w, x, y, z, floorZ], imageIdx, name) {
     
-        this.floor; // : String // Name of floor which contains this image
+        this.floor = name; // : String // Name of floor which contains this image
 
         this.floorZ = floorZ; // : Number // Z coordinate of this image on the floor
 

@@ -6,12 +6,18 @@ import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js";
 
 
-let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer;
+let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerImageAPI;
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
-init();
-animate();
+
+const jsonImageDataFilepath = "../assets/data.json";
+$.getJSON(jsonImageDataFilepath, function(data) {
+    viewerImageAPI = new ViewerImageAPI(data);
+
+    init();
+    animate();
+});
 
 function init() {
     const container = document.getElementById('pano-viewer');
@@ -55,16 +61,6 @@ function init() {
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('wheel', onDocumentMouseWheel);
     document.addEventListener('resize', onWindowResize);
-
-
-    let viewerImageAPI;
-    
-    // hardcoded to work with assets/ for now
-    const jsonImageDataFilepath = "../assets/data.json";
-
-    $.getJSON(jsonImageDataFilepath, function(data) {
-        viewerImageAPI = new ViewerImageAPI(data);
-    });
 
 }
 
