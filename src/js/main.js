@@ -24,11 +24,8 @@ function init() {
     // the only html element we work with (the pano-viewer div)
 
     // ----- init Map scene -----
-    viewerMapAPI = new ViewerMapAPI();
-
+    viewerMapAPI = new ViewerMapAPI("../assets/map-small.jpg");
     // load in map texture (hardcoded for now)
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load( "../assets/map-small.jpg", createHUDSprites );
 
     // ----- init Panorama scene -----
     viewerPanoAPI = new ViewerPanoAPI();
@@ -40,7 +37,7 @@ function init() {
     sphere.scale( -1, 1, 1);
 
     // load the 360-panorama image data (one specific hardcoded for now)
-    const texturePano = textureLoader.load( '../assets/0/0r3.jpg' );
+    const texturePano = new THREE.TextureLoader().load( '../assets/0/0r3.jpg' );
     texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
     
     // put the texture on the spehere and add it to the scene
@@ -131,27 +128,9 @@ function onWindowResize() {
     viewerMapAPI.camera.top = height / 2;
     viewerMapAPI.camera.bottom = - height / 2;
     viewerMapAPI.camera.updateProjectionMatrix();
-    viewerMapAPI.updateHUDSprites();
     
     renderer.setSize(width, height);
     render();
-
-}
-
-function createHUDSprites(texture) {
-    //Texture is Map
-    const material = new THREE.SpriteMaterial( { map: texture } );
-    viewerMapAPI.spriteMap = new THREE.Sprite(material);
-    viewerMapAPI.spriteMap.center.set(1.0, 0.0); // bottom right
-    viewerMapAPI.spriteMap.scale.set( texture.image.width, texture.image.height, 1 );
-    viewerMapAPI.scene.add( viewerMapAPI.spriteMap );
-    updateHUDSprites();
-
-}
-
-function updateHUDSprites() {
-
-    viewerMapAPI.spriteMap.position.set(window.innerWidth / 2, -window.innerHeight / 2, 1 ); // bottom right
 
 }
 
