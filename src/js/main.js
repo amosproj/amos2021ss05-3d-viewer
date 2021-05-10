@@ -10,7 +10,7 @@ let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerImageAPI;
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
-
+// Load the metadata only once
 const jsonImageDataFilepath = "../assets/data.json";
 $.getJSON(jsonImageDataFilepath, function(data) {
     viewerImageAPI = new ViewerImageAPI(data);
@@ -19,14 +19,15 @@ $.getJSON(jsonImageDataFilepath, function(data) {
     animate();
 });
 
+
 function init() {
     const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
 
     // ----- init Map scene -----
-    viewerMapAPI = new ViewerMapAPI("../assets/map-small.jpg");
-    // load in map texture (hardcoded for now)
+    viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png"); // load in map texture 
 
+    
     // ----- init Panorama scene -----
     viewerPanoAPI = new ViewerPanoAPI();
     viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0)
@@ -51,6 +52,7 @@ function init() {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.autoClear = false; // To allow render overlay on top of panorama scene
+    renderer.sortObjects = false; 
     
     container.appendChild(renderer.domElement);
 
@@ -144,4 +146,3 @@ function render() {
     renderer.render( viewerMapAPI.scene, viewerMapAPI.camera );
 
 }
-
