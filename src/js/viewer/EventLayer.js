@@ -17,12 +17,12 @@ export class EventLayer {
         this.viewer_contex; 
     }
     
-    vwr_oncontext (xy, location){
-        //Parameters: 
-        //xy EventPosition:  Pointer position
-        //location THREE.Vector3 : Local coordinates for pointer position+
-        viewer_contex = new ViewerContextItem();
-        return viewer_contex;
+    vwr_oncontext (xy, location ){
+    //Parameters: 
+    //xy EventPosition:  Pointer position
+    //location THREE.Vector3 : Local coordinates for pointer position+
+    viewer_contex = new ViewerContextItem()
+    return viewer_contex; 
     }
 
 }
