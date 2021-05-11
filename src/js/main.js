@@ -6,13 +6,22 @@ import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 
 
-let viewerPanoAPI, viewerViewState, cameraMap, sceneMap, renderer, viewerAPI;
+let viewerPanoAPI, , viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI;
 let spriteMap; // for createHUDSprites and updateHUDSprites
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
-init();
-animate();
+// Load the metadata only once
+const jsonImageDataFilepath = "../assets/data.json";
+$.getJSON(jsonImageDataFilepath, function(data) {
+    viewerImageAPI = new ViewerImageAPI(data);
+    viewerAPI = new ViewerAPI(data,viewerPanoAPI);
+    setTimeout(function() { viewerAPI.move(15,15,1); }, 5000);
+    
+    init();
+    animate();
+});
+
 
 function init() {
     const width = window.innerWidth;
@@ -20,6 +29,9 @@ function init() {
 
     const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
+
+    // ----- init Map scene -----
+    viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png", viewerImageAPI); // load in map texture 
 
     // ----- init Panorama scene -----
     viewerPanoAPI = new ViewerPanoAPI();
@@ -41,21 +53,12 @@ function init() {
     viewerPanoAPI.scene.add(mesh);
     // ----- -----
 
-    // ----- init Map scene -----
-    cameraMap = new THREE.OrthographicCamera( -width / 2, width / 2, height / 2, -height / 2, 1, 10 );
-    cameraMap.position.z = 10;
-    sceneMap = new THREE.Scene();
-
-    //Create new camera for 2D display
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load( "../assets/map-small.jpg", createHUDSprites );
-    // ----- -----
-
     // create the renderer, and embed the attributed dom element in the html page
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.autoClear = false; // To allow render overlay on top of panorama scene
+    renderer.sortObjects = false; 
     
     container.appendChild(renderer.domElement);
 
@@ -66,19 +69,6 @@ function init() {
 
     // Add listener for keyboard
     //document.body.addEventListener('keydown', keyPressed, false);
-
-
-    let viewerImageAPI,viewerAPI;
-    
-    // hardcoded to work with assets/ for now
-    const jsonImageDataFilepath = "../assets/data.json";
-
-    $.getJSON(jsonImageDataFilepath, function(data) {
-        viewerImageAPI = new ViewerImageAPI(data);
-        viewerAPI = new ViewerAPI(data,viewerPanoAPI);
-        setTimeout(function() { viewerAPI.move(15,15,1); }, 5000);
-        
-    });
 
 }
 
@@ -153,44 +143,22 @@ function onWindowResize() {
     viewerPanoAPI.camera().aspect = width / height;
     viewerPanoAPI.camera().updateProjectionMatrix();
     
-    cameraMap.left = - width / 2;
-    cameraMap.right = width / 2;
-    cameraMap.top = height / 2;
-    cameraMap.bottom = - height / 2;
-    cameraMap.updateProjectionMatrix();
-    updateHUDSprites();
+    viewerMapAPI.camera.left = - width / 2;
+    viewerMapAPI.camera.right = width / 2;
+    viewerMapAPI.camera.top = height / 2;
+    viewerMapAPI.camera.bottom = - height / 2;
+    viewerMapAPI.camera.updateProjectionMatrix();
     
     renderer.setSize(width, height);
-
-}
-
-
-function createHUDSprites( texture ) {
-    //Texture is Map
-    const material = new THREE.SpriteMaterial( { map: texture } );
-    const width = material.map.image.width;
-    const height = material.map.image.height;
-    spriteMap = new THREE.Sprite( material );
-    spriteMap.center.set( 1.0, 0.0 ); // bottom right
-    spriteMap.scale.set( width, height, 1 );
-    sceneMap.add( spriteMap );
-    updateHUDSprites();
-
-}
-
-function updateHUDSprites() {
-
-    spriteMap.position.set(window.innerWidth / 2, -window.innerHeight / 2, 1 ); // bottom right
 
 }
 
 function render() {
     
     viewerPanoAPI.view(viewerViewState.lonov, viewerViewState.latov, viewerViewState.fov);
-
     renderer.clear();
     renderer.render( viewerPanoAPI.scene, viewerPanoAPI.camera() );
     renderer.clearDepth();
-    renderer.render( sceneMap, cameraMap );
+    renderer.render( viewerMapAPI.scene, viewerMapAPI.camera );
 
 }
