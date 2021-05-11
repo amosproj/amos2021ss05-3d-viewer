@@ -1,5 +1,6 @@
 "use strict";
 import { ViewerImage } from "./ViewerImage.js";
+import { distanceWGS84TwoPoints } from "./Globals.js";
 
 // Specific API for Panorama Image(s)
 export class ViewerImageAPI {
@@ -20,17 +21,10 @@ export class ViewerImageAPI {
 
             // iterate over imageNums for this floor
             for (let imgIdx = currentFloor.i[0]; imgIdx < currentFloor.i[1]; imgIdx++) {
-                // FOR NOW STOP AT 3, because only 3 images in data model
-                if (imgIdx == 3) break;
-                //
                 let currentImage = new ViewerImage(data.images[imgIdx], imgIdx, key);
                 
-                // Distance calculation math roughly taken from here https://www.mkompf.com/gps/distcalc.html
-                let dx, dy; // distance to origin in kilometers
-                const lon0 = this.origin[0], lat0 = this.origin[0], lon1 = currentImage.pos[0], lat1 = currentImage.pos[1];
-                const avgLat = (lat0 + lat1) / 2 * 0.01745;
-                dx = 111.3 * Math.cos(THREE.MathUtils.degToRad(avgLat)) * (lon0 - lon1);
-                dy = 111.3 * (lat0 - lon0);
+                // dx, dy distance in kilometers
+                let [dx, dy] = distanceWGS84TwoPoints(this.origin[0], this.origin[1], currentImage.pos[0], currentImage.pos[1]);
 
                 let offsetX = currentFloor.mapData.x + currentFloor.mapData.density * (dx * 1000);
                 let offsetY = currentFloor.mapData.y + currentFloor.mapData.density * (dy * 1000);

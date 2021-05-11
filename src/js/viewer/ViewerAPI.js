@@ -1,6 +1,4 @@
 "use strict";
-import { ViewerImageAPI } from "./ViewerImageAPI.js";
-
 
 // API provided by the viewer
 export class ViewerAPI {

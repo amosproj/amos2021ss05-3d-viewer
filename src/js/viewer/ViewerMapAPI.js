@@ -2,9 +2,6 @@
 // Map (2D) Viewer API
 
 // Specific API for the Map View
-
-let  viewerMapAPI; 
-
 export class ViewerMapAPI {
 
     constructor(mapPicturePath, viewerImageAPI) {
