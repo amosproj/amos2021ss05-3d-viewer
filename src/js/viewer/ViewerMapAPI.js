@@ -50,7 +50,7 @@ export class ViewerMapAPI {
     }
 
     // Method: remove an event layer to the map (2D) view.
-    removeLayer (layer) {
+    removeLayer(layer ) {
         // Layer: EventLayer
         this.scene.remove(layer); 
 
@@ -107,5 +107,5 @@ function generateCircularSprite(color) {
     context.fillStyle = 'red';
     context.fill();
     return canvas;
-    
+
 }

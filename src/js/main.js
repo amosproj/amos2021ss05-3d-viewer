@@ -3,10 +3,11 @@ import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
-import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js";
+import { ViewerAPI } from "./viewer/ViewerAPI.js";
 
 
-let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerImageAPI;
+let viewerPanoAPI, , viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI;
+let spriteMap; // for createHUDSprites and updateHUDSprites
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
@@ -14,23 +15,28 @@ let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPo
 const jsonImageDataFilepath = "../assets/data.json";
 $.getJSON(jsonImageDataFilepath, function(data) {
     viewerImageAPI = new ViewerImageAPI(data);
-
+    viewerAPI = new ViewerAPI(data,viewerPanoAPI);
+    setTimeout(function() { viewerAPI.move(15,15,1); }, 5000);
+    
     init();
     animate();
 });
 
 
 function init() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
     const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
 
     // ----- init Map scene -----
     viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png", viewerImageAPI); // load in map texture 
 
-    
     // ----- init Panorama scene -----
     viewerPanoAPI = new ViewerPanoAPI();
     viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0)
+    
 
     // Create a Sphere for the image texture to be displayed on
     const sphere = new THREE.SphereGeometry(500, 60, 40);
@@ -59,7 +65,10 @@ function init() {
     // link event listeners to the corresponding functions
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('wheel', onDocumentMouseWheel);
-    document.addEventListener('resize', onWindowResize);
+    //document.addEventListener('resize', onWindowResize);
+
+    // Add listener for keyboard
+    //document.body.addEventListener('keydown', keyPressed, false);
 
 }
 
@@ -116,6 +125,15 @@ function onDocumentMouseWheel(event) {
 
 }
 
+// function keyPressed(e){
+//     switch(e.key) {
+//         case 'm':
+//             //viewerAPI.move(15,15,1);
+//     }
+//     e.preventDefault();
+//   }
+  
+
 // currently not supported
 function onWindowResize() {
 
@@ -132,7 +150,6 @@ function onWindowResize() {
     viewerMapAPI.camera.updateProjectionMatrix();
     
     renderer.setSize(width, height);
-    render();
 
 }
 
