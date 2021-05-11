@@ -65,7 +65,7 @@ function init() {
     //document.addEventListener('resize', onWindowResize);
 
     // Add listener for keyboard
-    document.body.addEventListener('keydown', keyPressed, false);
+    //document.body.addEventListener('keydown', keyPressed, false);
 
 
     let viewerImageAPI,viewerAPI;
