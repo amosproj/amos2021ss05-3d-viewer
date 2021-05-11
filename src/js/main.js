@@ -4,10 +4,10 @@ import { ViewerViewState } from "./viewer/ViewerViewState.js";
 import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
+import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
 
 
-let viewerPanoAPI, , viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI;
-let spriteMap; // for createHUDSprites and updateHUDSprites
+let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI;
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
@@ -15,17 +15,16 @@ let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPo
 const jsonImageDataFilepath = "../assets/data.json";
 $.getJSON(jsonImageDataFilepath, function(data) {
     viewerImageAPI = new ViewerImageAPI(data);
-    viewerAPI = new ViewerAPI(data,viewerPanoAPI);
-    setTimeout(function() { viewerAPI.move(15,15,1); }, 5000);
-    
+
     init();
     animate();
+
+    viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI);
+    setTimeout(function () { viewerAPI.move(15, 15, 1); }, 5000);
 });
 
 
 function init() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
 
     const container = document.getElementById('pano-viewer');
     // the only html element we work with (the pano-viewer div)
@@ -150,6 +149,7 @@ function onWindowResize() {
     viewerMapAPI.camera.updateProjectionMatrix();
     
     renderer.setSize(width, height);
+    render();
 
 }
 
