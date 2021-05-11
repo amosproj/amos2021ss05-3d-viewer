@@ -139,7 +139,6 @@ function onWindowResize() {
 function render() {
     
     viewerPanoAPI.view(viewerViewState.lonov, viewerViewState.latov, viewerViewState.fov);
-
     renderer.clear();
     renderer.render( viewerPanoAPI.scene, viewerPanoAPI.camera() );
     renderer.clearDepth();
