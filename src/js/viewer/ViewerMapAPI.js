@@ -7,8 +7,9 @@ let  viewerMapAPI;
 
 export class ViewerMapAPI {
 
-    constructor(mapPicturePath) {
+    constructor(mapPicturePath, viewerImageAPI) {
         // hardcoded to work with assets/ for now
+        this.viewerImageAPI = viewerImageAPI;
         this.layers;
         this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
         this.camera = new THREE.OrthographicCamera( 
@@ -21,26 +22,25 @@ export class ViewerMapAPI {
         this.camera.position.z = 2;     // need to be in [near + 1, far + 1] to be displayed
 
         this.spriteGroup = new THREE.Group(); //create an sprite group
+        this.mapScalingFactor = 10;
 
         new THREE.TextureLoader().load(mapPicturePath, (texture) => {
-            const material = new THREE.SpriteMaterial({ map: texture,  blending: THREE.AdditiveBlending, transparent:true  });
-            material.renderOrder=1; 
+            const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
+            material.renderOrder = 1;
             material.depthTest = false;
             const spriteMap = new THREE.Sprite(material);
-            this.scale = [texture.image.width/10, texture.image.height/10, 1]; 
-            spriteMap.scale.set(texture.image.width/10, texture.image.height/10, 1);
+            this.spriteMapScale = [texture.image.width / this.mapScalingFactor, texture.image.height / this.mapScalingFactor, 1];
+            spriteMap.scale.set(this.spriteMapScale[0], this.spriteMapScale[1], 1);
             spriteMap.center.set(1.0, 0.0); // bottom right
-            spriteMap.position.set(0, 0, 1 ); //Send Behind
+            spriteMap.position.set(0, 0, 1); // Send Behind
             //this.scene.add(spriteMap);
-            this.spriteGroup.add(spriteMap); 
-        } );
-        this.redraw(); 
-        //this.spriteGroup.center.set(1.0, 0.0); // bottom right
-        this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0 ); // bottom right
-        this.scene.add( this.spriteGroup );
-        console.log(this.spriteGroup.position) ; 
-        console.log(this.location.position) ; 
+            this.spriteGroup.add(spriteMap);
+        });
+        
+        this.redraw();
 
+        this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
+        this.scene.add(this.spriteGroup);
 
     }
 
@@ -56,12 +56,10 @@ export class ViewerMapAPI {
 
     }
    
-    // Method
+    // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
-        
-        // Schedule a redraw of the three.js scene overlayed over the map (2D) view.
-     
-        var point_text =  new THREE.Texture( generateCircularSprite("red") ); 
+
+        var point_text = new THREE.Texture(generateCircularSprite("red"));
         point_text.needsUpdate = true;
         var mat = new THREE.SpriteMaterial({
             map: point_text,
@@ -71,14 +69,17 @@ export class ViewerMapAPI {
             color: 0xff0000 // RED, 
         });
         // Render on Top
-        mat.renderOrder =3; 
+        mat.renderOrder = 3;
         // Create the point sprite
-        this.location = new THREE.Sprite( mat);//new THREE.SpriteMaterial( { map: point_text//,    blending: THREE.AdditiveBlending  }) );    
+        this.location = new THREE.Sprite(mat);
 
-        // TODO: find appropaiete position of the point on the map
         this.location.center.set(0.0, 0.0);
-        this.location.position.set(-100, 100,-3 );
-        //scale the point 
+
+        // draw it at pixel offset of currently viewed image
+        const offset = this.viewerImageAPI.currentImage.mapOffset;
+        this.location.position.set(offset[0] / -this.mapScalingFactor, offset[1] / this.mapScalingFactor, -3);
+
+        //scale the point
         this.location.scale.set(5,5,1); 
         this.spriteGroup.add(this.location);
     }
@@ -86,40 +87,8 @@ export class ViewerMapAPI {
     // Method
     scale() {
         //Get the scale used by the three.js scene overlayed over the map (2D) view.
-        scale = 1 //  (in meter / pixel)
-        scale = this.scale
-        return scale
+        return this.viewerImageAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
-}
-
-
-
-function createHUDSprites(texture){
-    // Create the point sprite
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( (1.0,1.0,1), 3 ) );
-    
-    //Create a red material 
-    const points = new THREE.Points( geometry, new THREE.PointsMaterial( { color: 0xFF0000 , size: 30,  depthTest: false}));
-    //this.mapgroup = new THREE.Group();
-    //this.mapgroup.add( points );  
-
-
-    //Texture is Map
-    const material = new THREE.SpriteMaterial( { map: texture } );
-    this.spriteMap = new THREE.Sprite(material);
-    this.spriteMap.center.set(1.0, 0.0); // bottom right
-    this.spriteMap.scale.set( texture.image.width/10, texture.image.height/10, 1 );
-    //this.mapgroup.add( this.spriteMap );  
-    this.scene.add( this.spriteMap );
-    
-    updateHUDSprites();
-
-}
-
-function updateHUDSprites() {
-
-    this.spriteMap.position.set(window.innerWidth / 2, -window.innerHeight / 2, 1 ); // bottom right
 
 }
 

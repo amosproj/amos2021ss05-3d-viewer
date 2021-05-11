@@ -25,7 +25,7 @@ function init() {
     // the only html element we work with (the pano-viewer div)
 
     // ----- init Map scene -----
-    viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png"); // load in map texture 
+    viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png", viewerImageAPI); // load in map texture 
 
     
     // ----- init Panorama scene -----
