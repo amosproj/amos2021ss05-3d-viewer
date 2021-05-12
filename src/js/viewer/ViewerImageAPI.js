@@ -49,10 +49,16 @@ export class ViewerImageAPI {
         return this.currentFloor.viewerImages[this.currentImageId];
     }
 
-    all ( callback ) {
-     //    Get all panorama images.
-    // Parameters:  Function called with all images ([ViewerImage]): Array of panorama images
-        //callback(this.viewerImages);
+    all(callback) {
+        // Get all panorama images.
+        // Parameters: Function called with all images ([ViewerImage]): Array of panorama images
+        let allImages = [];
+        for (let floor in this.floors) {
+            for (let img in floor.viewerImages) {
+                allImages.push(img);
+            }
+        }
+        callback(allImages);
     }
 
     changed (  ) {
