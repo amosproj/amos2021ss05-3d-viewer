@@ -2,7 +2,7 @@ import { DEFAULT_FOV, MAX_FOV, MIN_FOV } from "./Globals.js";
 
 export class ViewerPanoAPI{
 
-    constructor() {
+    constructor(viewerImageAPI) {
         this.scene = new THREE.Scene(); // three.js scene used by the panorama (3D) viewer
         this.camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
     
@@ -13,7 +13,9 @@ export class ViewerPanoAPI{
         sphere.scale(-1, 1, 1);
 
         // load the 360-panorama image data (one specific hardcoded for now)
-        const texturePano = new THREE.TextureLoader().load( '../assets/0/0r3.jpg' );
+        this.viewerimageAPI = viewerImageAPI;
+        const texturePano = new THREE.TextureLoader().load( '../assets/0/'+this.viewerimageAPI.currentImageId+'r3.jpg' );
+        console.log(this.viewerimageAPI.currentImageId)
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
         
         // put the texture on the spehere and add it to the scene

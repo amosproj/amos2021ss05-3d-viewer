@@ -30,7 +30,7 @@ function init() {
     viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png", viewerImageAPI); // load in map texture 
 
     // ----- init Panorama scene -----
-    viewerPanoAPI = new ViewerPanoAPI();
+    viewerPanoAPI = new ViewerPanoAPI(viewerImageAPI);
     viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0)
 
     // create the renderer, and embed the attributed dom element in the html page

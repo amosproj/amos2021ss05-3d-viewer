@@ -45,20 +45,24 @@ export class ViewerAPI {
 
         this.min = minkey;
 
-        // Create a Sphere for the image texture to be displayed on
-        const sphere = new THREE.SphereGeometry(500, 60, 40);
-        // invert the geometry on the x-axis so that we look out from the middle of the sphere
-        sphere.scale( -1, 1, 1);
-
-        // load the 360-panorama image data (one specific hardcoded for now)
-        const texturePano = new THREE.TextureLoader().load( '../assets/0/'+this.min+'r3.jpg' );
-        texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
         
-        // put the texture on the spehere and add it to the scene
-        const material = new THREE.MeshBasicMaterial({ map: texturePano });
-        const mesh = new THREE.Mesh(sphere, material);
+        // avoid duplication
+        if (this.min != this.viewerImageAPI.currentImageId){
 
-        this.viewerPanoAPI.scene.add(mesh);
+            // Create a Sphere for the image texture to be displayed on
+            const sphere = new THREE.SphereGeometry(500, 60, 40);
+            // invert the geometry on the x-axis so that we look out from the middle of the sphere
+            sphere.scale( -1, 1, 1);
+
+            // load the 360-panorama image data (one specific hardcoded for now)
+            const texturePano = new THREE.TextureLoader().load( '../assets/0/'+this.min+'r3.jpg' );
+            texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+            
+            // put the texture on the spehere and add it to the scene
+            const material = new THREE.MeshBasicMaterial({ map: texturePano });
+            const mesh = new THREE.Mesh(sphere, material);
+            this.viewerPanoAPI.scene.add(mesh);
+        }
 
         //console.log(minkey);
         //console.log(minval);
