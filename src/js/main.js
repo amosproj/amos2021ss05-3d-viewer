@@ -51,7 +51,7 @@ function init() {
     //document.body.addEventListener('keydown', keyPressed, false);
 
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI);
-    setTimeout(function () { viewerAPI.move(15, 15, 1); }, 5000);
+    //setTimeout(function () { viewerAPI.move(15, 15, 1); }, 5000);
 }
 
 function animate() {

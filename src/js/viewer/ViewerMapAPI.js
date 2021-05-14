@@ -19,14 +19,14 @@ export class ViewerMapAPI {
         this.camera.position.z = 2;     // need to be in [near + 1, far + 1] to be displayed
 
         this.spriteGroup = new THREE.Group(); //create an sprite group
-        this.mapScalingFactor = 10;
+        this.mapScalingFactor = 0.1;
 
         new THREE.TextureLoader().load(mapPicturePath, (texture) => {
             const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
             material.renderOrder = 1;
             material.depthTest = false;
             const spriteMap = new THREE.Sprite(material);
-            this.spriteMapScale = [texture.image.width / this.mapScalingFactor, texture.image.height / this.mapScalingFactor, 1];
+            this.spriteMapScale = [texture.image.width * this.mapScalingFactor, texture.image.height * this.mapScalingFactor, 1];
             spriteMap.scale.set(this.spriteMapScale[0], this.spriteMapScale[1], 1);
             spriteMap.center.set(1.0, 0.0); // bottom right
             spriteMap.position.set(0, 0, 1); // Send Behind
@@ -42,15 +42,14 @@ export class ViewerMapAPI {
     }
 
     // Method: Add an event layer to the map (2D) view.
-    addLayer (layer) {
-        this.scene.add(layer); 
+    addLayer(layer) {
+        this.scene.add(layer);
     }
 
     // Method: remove an event layer to the map (2D) view.
-    removeLayer(layer ) {
+    removeLayer(layer) {
         // Layer: EventLayer
-        this.scene.remove(layer); 
-
+        this.scene.remove(layer);
     }
    
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
@@ -74,11 +73,42 @@ export class ViewerMapAPI {
 
         // draw it at pixel offset of currently viewed image
         const offset = this.viewerImageAPI.currentImage.mapOffset;
-        this.location.position.set(offset[0] / -this.mapScalingFactor, offset[1] / this.mapScalingFactor, -3);
+        this.location.position.set(-this.mapScalingFactor * offset[0], this.mapScalingFactor * offset[1], -3);
 
         //scale the point
         this.location.scale.set(5,5,1); 
         this.spriteGroup.add(this.location);
+
+        return; //comment out this line to draw all points in current model
+        // draw all other points in black
+        let allImages = this.viewerImageAPI.currentFloor.viewerImages;
+        console.log(allImages);
+
+        allImages.forEach(image => {
+            var point_text = new THREE.Texture(generateCircularSprite("black"));
+            point_text.needsUpdate = true;
+            var mat = new THREE.SpriteMaterial({
+                map: point_text,
+                transparent: false, 
+                color: 0xffffff // BLACK, 
+            });
+            // Render on Top
+            mat.renderOrder = 3;
+            // Create the point sprite
+            let pointLocation = new THREE.Sprite(mat);
+
+            pointLocation.center.set(0.0, 0.0);
+
+            // draw it at pixel offset of curren image
+            const offset = image.mapOffset;
+            //console.log(offset);
+            pointLocation.position.set(-this.mapScalingFactor * offset[0] , this.mapScalingFactor * offset[1], -3);
+            console.log(pointLocation.position);
+
+            //scale the point
+            pointLocation.scale.set(5,5,1); 
+            this.spriteGroup.add(pointLocation);
+        });
     }
     
     // Method
@@ -101,7 +131,7 @@ function generateCircularSprite(color) {
 
     context.beginPath();
     context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-    context.fillStyle = 'red';
+    context.fillStyle = color;
     context.fill();
     return canvas;
 

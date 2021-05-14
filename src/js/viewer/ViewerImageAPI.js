@@ -27,7 +27,7 @@ export class ViewerImageAPI {
                 let [dx, dy] = distanceWGS84TwoPoints(this.origin[0], this.origin[1], currentImage.pos[0], currentImage.pos[1]);
 
                 let offsetX = currentFloor.mapData.x + currentFloor.mapData.density * (dx * 1000);
-                let offsetY = currentFloor.mapData.y + currentFloor.mapData.density * (dy * 1000);
+                let offsetY = currentFloor.mapData.y - currentFloor.mapData.density * (dy * 1000);
 
                 currentImage.mapOffset = [offsetX, offsetY];
 
@@ -61,13 +61,12 @@ export class ViewerImageAPI {
         callback(allImages);
     }
 
-    changed (  ) {
+    changed() {
         //  Signal changed image data (e.g. hidden flag) to the viewer.
     }
 
     get get() {
         // Get the currently displayed panorama image.
-
         return this.currentImage();
     }
 
@@ -80,7 +79,6 @@ class Floor {
         this.z = floorData.z; 
         this.viewerImages = [];
         this.mapData = floorData.map;
-
         this.i = floorData.i[0];
     }
 

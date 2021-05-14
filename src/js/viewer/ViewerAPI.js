@@ -1,5 +1,7 @@
 "use strict";
 
+import { getFolderNumber } from "../viewer/Globals.js";
+
 // API provided by the viewer
 export class ViewerAPI {
 
@@ -18,16 +20,11 @@ export class ViewerAPI {
         let minval;
         let minkey;
 
-        //console.log(viewerImageAPI.viewerImages);
         for (let i in this.viewerImageAPI.currentFloor.viewerImages) {
-            //console.log(viewerImageAPI.viewerImages[i].pos);
-            //console.log(viewerImageAPI.viewerImages[i].pos[0]);
-            //console.log(temp[0]);
             let result = Math.sqrt(
                 Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[0] - temp[0], 2) +
                 Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[1] - temp[1], 2) +
-                Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[2] - temp[2], 2) );
-            //console.log(result);
+                Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[2] - temp[2], 2) ); // z value probably doesnt/should matter (see WGS84distance in Globals)
             resultset.push(result);  
         }
 
@@ -55,7 +52,7 @@ export class ViewerAPI {
             sphere.scale( -1, 1, 1);
 
             // load the 360-panorama image data (one specific hardcoded for now)
-            const texturePano = new THREE.TextureLoader().load( '../assets/0/'+this.min+'r3.jpg' );
+            const texturePano = new THREE.TextureLoader().load('../assets/' + getFolderNumber(this.min) + '/' + this.min + 'r3.jpg');
             texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
             
             // put the texture on the spehere and add it to the scene
@@ -63,10 +60,6 @@ export class ViewerAPI {
             const mesh = new THREE.Mesh(sphere, material);
             this.viewerPanoAPI.scene.add(mesh);
         }
-
-        //console.log(minkey);
-        //console.log(minval);
-
     }
 
 

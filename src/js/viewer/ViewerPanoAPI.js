@@ -1,4 +1,4 @@
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV } from "./Globals.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV, getFolderNumber } from "./Globals.js";
 
 export class ViewerPanoAPI{
 
@@ -14,7 +14,7 @@ export class ViewerPanoAPI{
 
         // load the 360-panorama image data (one specific hardcoded for now)
         this.viewerimageAPI = viewerImageAPI;
-        const texturePano = new THREE.TextureLoader().load( '../assets/0/'+this.viewerimageAPI.currentImageId+'r3.jpg' );
+        const texturePano = new THREE.TextureLoader().load('../assets/' + getFolderNumber(this.viewerimageAPI.currentImageId) + '/' + this.viewerimageAPI.currentImageId + 'r3.jpg');
         console.log(this.viewerimageAPI.currentImageId)
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
         
