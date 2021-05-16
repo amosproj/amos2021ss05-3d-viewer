@@ -151,6 +151,6 @@ function render() {
 }
 // Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
 
-document.getElementById(viewerPanoAPI.camera).addEventListener(doubleclick, function(changeimage) {
+document.getElementById(ViewerPanoAPI).addEventListener(doubleclick, function(changeimage) {
 
-        } {
+        }
