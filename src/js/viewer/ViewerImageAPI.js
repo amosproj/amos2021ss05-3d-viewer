@@ -7,11 +7,11 @@ export class ViewerImageAPI {
 
     constructor(data) {
         // The file «data.json» contains the metadata defining the panorama image locations.
-            //"images" Array Images Array
-            //"lon0" Number Reference longitude of model (WGS 84)
-            //"lat0" Number Reference latitude of model (WGS 84)
-            //"floors" Object Floors Object
-    
+        //"images" Array Images Array
+        //"lon0" Number Reference longitude of model (WGS 84)
+        //"lat0" Number Reference latitude of model (WGS 84)
+        //"floors" Object Floors Object
+
         this.origin = [data.lon0, data.lat0];
         this.floors = [];
 
@@ -22,7 +22,7 @@ export class ViewerImageAPI {
             // iterate over imageNums for this floor
             for (let imgIdx = currentFloor.i[0]; imgIdx < currentFloor.i[1]; imgIdx++) {
                 let currentImage = new ViewerImage(data.images[imgIdx], imgIdx, key);
-                
+
                 // dx, dy distance in kilometers
                 let [dx, dy] = distanceWGS84TwoPoints(this.origin[0], this.origin[1], currentImage.pos[0], currentImage.pos[1]);
 
@@ -40,7 +40,7 @@ export class ViewerImageAPI {
         this.currentFloorId = 0;
         this.currentImageId = 0; // inside the range of current Floors viewerImages array;
     }
-    
+
     get currentFloor() {
         return this.floors[this.currentFloorId];
     }
@@ -73,10 +73,10 @@ export class ViewerImageAPI {
 }
 
 class Floor {
-    
+
     constructor(floorData, key) {
         this.name = key;
-        this.z = floorData.z; 
+        this.z = floorData.z;
         this.viewerImages = [];
         this.mapData = floorData.map;
         this.i = floorData.i[0];
