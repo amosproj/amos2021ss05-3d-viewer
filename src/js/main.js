@@ -5,11 +5,15 @@ import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
+import { ViewerImage } from "./viewer/ViewerImage.js";
 
 
 let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI;
 
-let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
+let onPointerDownMouseX = 0,
+    onPointerDownMouseY = 0,
+    onPointerDownLon = 0,
+    onPointerDownLat = 0;
 
 // Load the metadata only once
 const jsonImageDataFilepath = "../assets/data.json";
@@ -38,8 +42,8 @@ function init() {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.autoClear = false; // To allow render overlay on top of panorama scene
-    renderer.sortObjects = false; 
-    
+    renderer.sortObjects = false;
+
     container.appendChild(renderer.domElement);
 
     // link event listeners to the corresponding functions
@@ -85,7 +89,7 @@ function onPointerMove(event) {
     viewerViewState.latov = (event.clientY - onPointerDownMouseY) * 0.1 * scalingFactor + onPointerDownLat;
 
     // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
-    viewerViewState.latov = Math.max( -85, Math.min(85, viewerViewState.latov));
+    viewerViewState.latov = Math.max(-85, Math.min(85, viewerViewState.latov));
 
 }
 
@@ -114,7 +118,7 @@ function onDocumentMouseWheel(event) {
 //     }
 //     e.preventDefault();
 //   }
-  
+
 
 // currently not supported
 function onWindowResize() {
@@ -124,20 +128,20 @@ function onWindowResize() {
 
     viewerPanoAPI.camera.aspect = width / height;
     viewerPanoAPI.camera.updateProjectionMatrix();
-    
-    viewerMapAPI.camera.left = - width / 2;
+
+    viewerMapAPI.camera.left = -width / 2;
     viewerMapAPI.camera.right = width / 2;
     viewerMapAPI.camera.top = height / 2;
-    viewerMapAPI.camera.bottom = - height / 2;
+    viewerMapAPI.camera.bottom = -height / 2;
     viewerMapAPI.camera.updateProjectionMatrix();
-    
+
     renderer.setSize(width, height);
     render();
 
 }
 
 function render() {
-    
+
     viewerPanoAPI.view(viewerViewState.lonov, viewerViewState.latov, viewerViewState.fov);
     renderer.clear();
     renderer.render(viewerPanoAPI.scene, viewerPanoAPI.camera);
@@ -145,3 +149,8 @@ function render() {
     renderer.render(viewerMapAPI.scene, viewerMapAPI.camera);
 
 }
+// Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
+
+document.getElementById(viewerPanoAPI.camera).addEventListener(doubleclick, function(changeimage) {
+
+        } {
