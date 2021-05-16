@@ -50,10 +50,6 @@ function init() {
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('wheel', onDocumentMouseWheel);
     //document.addEventListener('resize', onWindowResize);
-    document.addEventListener("dblclick", function() {
-        let angle = getAngle(viewerPanoAPI.camera);
-        console.log(angle);
-    });
 
     // Add listener for keyboard
     //document.body.addEventListener('keydown', keyPressed, false);
@@ -153,16 +149,8 @@ function render() {
     renderer.render(viewerMapAPI.scene, viewerMapAPI.camera);
 
 }
+// Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
 
-console.log("Doubleclicked!!");
+document.getElementById("pano-viewer").addEventListener("dblclick", function(changeimage) {
+    console.log("Doubleclicked!!");
 });
-
-var vector = new THREE.Vector3(0, 0, -1);
-// Get the direction of the camera 
-vector = camera.getWorldDirection();
-// Compute the viewing angle direction
-var theta = Math.atan2(vector.x, vector.z);
-// Return the angle in degrees
-var angle = THREE.Math.radToDeg(theta);
-return angle;
-}
