@@ -35,7 +35,6 @@ export class ViewerMapAPI {
         });
         
         this.redraw();
-
         this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
         this.scene.add(this.spriteGroup);
 
@@ -50,7 +49,6 @@ export class ViewerMapAPI {
     removeLayer(layer ) {
         // Layer: EventLayer
         this.scene.remove(layer); 
-
     }
    
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
@@ -87,6 +85,8 @@ export class ViewerMapAPI {
         return this.viewerImageAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
 
+    
+
 }
 
 
@@ -106,3 +106,4 @@ function generateCircularSprite(color) {
     return canvas;
 
 }
+
