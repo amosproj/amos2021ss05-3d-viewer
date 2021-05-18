@@ -54,7 +54,7 @@ function init() {
     document.addEventListener("dblclick", onDoubleClick);
 
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI);
-    //setTimeout(function () { viewerAPI.move(15, 15, 1); }, 5000);
+
 }
 
 function animate() {
@@ -79,6 +79,8 @@ function onPointerDown(event) {
 
 }
 
+
+
 // handles continues update of the distance mouse moved
 function onPointerMove(event) {
 
@@ -89,6 +91,13 @@ function onPointerMove(event) {
 
     // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
     viewerViewState.latov = Math.max(-85, Math.min(85, viewerViewState.latov));
+
+    // Get the direction of the camera 
+    var dir = new THREE.Vector3(0,0,1); 
+    viewerPanoAPI.camera.getWorldDirection(dir);
+
+    // Draw on the map 
+    drawArrow(dir, viewerMapAPI.scene);
 
 }
 
@@ -176,4 +185,40 @@ function render() {
     renderer.clearDepth();
     renderer.render(viewerMapAPI.scene, viewerMapAPI.camera);
 
+}
+
+function getAngle(camera){
+    var vector = new THREE.Vector3( 0, 0, - 1 );
+    // Get the direction of the camera 
+    vector = camera.getWorldDirection();
+    // Compute the viewing angle direction
+    var theta = THREE.Math.atan2(vector.x,vector.z);
+    // Return the angle in degrees
+    var angle = THREE.Math.radToDeg( theta );
+    return angle; 
+}
+
+
+function drawArrow(direction, scene ){
+
+    //normalize the direction vector (convert to vector of length 1)
+    direction.normalize();
+
+    //Create the arrow vetor
+    const origin = new THREE.Vector3(0,0, 0 );
+    const length = 20;
+    const hex = 0xff0000; // red color
+    var arrowHelper = new THREE.ArrowHelper( direction, origin, length, hex );
+    scene.add(arrowHelper); 
+
+}
+
+function updateArrow(arrowHelper, direction){
+    // update the arrow position
+    var newSourcePos = new THREE.Vector3(10, 10, 10);
+    var newTargetPos = new THREE.Vector3(60, 10, 10);
+    arrowHelper.position.set(newSourcePos);
+    direction = new THREE.Vector3().sub(newTargetPos, newSourcePos);
+    arrowHelper.setDirection(direction.normalize());
+    arrowHelper.setLength(direction.length());
 }
