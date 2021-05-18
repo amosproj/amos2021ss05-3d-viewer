@@ -11,6 +11,12 @@ export class ViewerAPI {
         this.viewerPanoAPI = viewerPanoAPI;
         this.viewerMapAPI = viewerMapAPI;
         this.libs = libraryInfo(); // List of used third party libraries
+        
+        
+       this.MAJOR =null;//adding in 18.05.2021
+
+      
+       this.MINOR =null;// adding in 18.05.2021
     }
 
 
