@@ -1,6 +1,6 @@
 export class ViewerState {
 
-    constructor(panoLon, panoLat, imageIdx, name,[fov, latov,lonov] ) {
+    constructor(panoLon, panoLat, imageIdx, name,[fov, lonov,latov] ) {
 
         //this.big =
     
@@ -12,7 +12,7 @@ export class ViewerState {
 
         //this.fov = fov; // : Number // Field of view (in degrees)
        // viewerViewState1= new ViewerViewState(DEFAULT_FOV, 0, 0)
-       this.view=[fov, latov, lonov];
+       this.view=[fov, lonov, latov];
       
 
 
