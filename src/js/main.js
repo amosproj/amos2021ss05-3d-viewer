@@ -175,9 +175,6 @@ function basicSetUp(){
     viewerImageAPI.viewerState.view[0]=viewerViewState.fov;
     console.log("The mouse wheel moving angle is: ", viewerImageAPI.viewerState.view[0]);
     console.log("The value of view in viewerState ","lon: "+viewerImageAPI.viewerState.view[1],"lat: "+viewerImageAPI.viewerState.view[2]);
-    //where am I?
-    //
-
 
     viewerAPI.viewerVersionAPI=new ViewerVersionAPI(viewerAPI.MAJOR, viewerAPI.MINOR, viewerImageAPI.viewerState.view);
 
