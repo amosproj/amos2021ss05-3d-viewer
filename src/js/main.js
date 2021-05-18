@@ -140,13 +140,24 @@ function onWindowResize() {
 }
 
 function onDoubleClick(event) {
-    const angle = viewerPanoAPI.getAngle();
     const halfWidth = window.innerWidth / 2;
-    const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the click is
-    const adjustedAngle = angle - (horizontalOffset * viewerViewState.fov / 2); // line from current position towards where the mouse double clicked
+    const halfHeight = window.innerHeight / 2;
 
-    console.log(angle);
-    console.log(adjustedAngle);
+    const horizontalAngle = viewerPanoAPI.getAngle();
+    const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the click is
+    const adjustedHorizontalAngle = horizontalAngle - (horizontalOffset * viewerViewState.fov / 2); // line from current position towards where the mouse double clicked (2D birds eye view angle)
+
+    const cameraDir = viewerPanoAPI.camera.getWorldDirection();
+    const verticalAngle = Math.abs(THREE.Math.radToDeg(Math.atan2(cameraDir.x,cameraDir.y))); // between [0,180]Deg depending on how far up/down the user looks
+    const verticalOffset = (event.y - halfHeight) / halfHeight; // between [-1,1] depending how up-down the mouse click is on the screen
+    const adjustedVerticalAngle = verticalAngle + (verticalOffset * viewerViewState.fov / 2);
+    const realVerticalOffset = (adjustedVerticalAngle - 90) / 90; // between [-1,1] depending how far up/down user looks and clicks
+    
+    const MEDIAN_WALKING_DISTANCE = 5; // in meter
+    const distance = MEDIAN_WALKING_DISTANCE - (realVerticalOffset * MEDIAN_WALKING_DISTANCE); // distance to be walked along adjustedHorizontalAngle from current location
+
+    console.log(adjustedHorizontalAngle);
+    console.log(distance);
 }
 
 function render() {
