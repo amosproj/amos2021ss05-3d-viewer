@@ -1,4 +1,5 @@
 "use strict";
+import {libraryInfo} from "./LibraryInfo.js";
 
 
 // API provided by the viewer
@@ -9,6 +10,7 @@ export class ViewerAPI {
         this.viewerImageAPI = viewerImageAPI;
         this.viewerPanoAPI = viewerPanoAPI;
         this.viewerMapAPI = viewerMapAPI;
+        this.libs = libraryInfo(); // List of used third party libraries
     }
 
 

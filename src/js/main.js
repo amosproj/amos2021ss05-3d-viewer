@@ -119,14 +119,6 @@ function onDocumentMouseWheel(event) {
 
 }
 
-// function keyPressed(e){
-//     switch(e.key) {
-//         case 'm':
-//             //viewerAPI.move(15,15,1);
-//     }
-//     e.preventDefault();
-//   }
-
 
 // currently not supported
 function onWindowResize() {
