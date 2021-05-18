@@ -51,10 +51,7 @@ function init() {
     //document.body.addEventListener('keydown', keyPressed, false);
 
     // Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
-    document.addEventListener("dblclick", function(){
-        let angle = getAngle(viewerPanoAPI.camera);
-        console.log(angle);
-    });
+    document.addEventListener("dblclick", onDoubleClick);
 
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI);
     //setTimeout(function () { viewerAPI.move(15, 15, 1); }, 5000);
@@ -142,6 +139,16 @@ function onWindowResize() {
 
 }
 
+function onDoubleClick(event) {
+    const angle = viewerPanoAPI.getAngle();
+    const halfWidth = window.innerWidth / 2;
+    const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the click is
+    const adjustedAngle = angle - (horizontalOffset * viewerViewState.fov / 2); // line from current position towards where the mouse double clicked
+
+    console.log(angle);
+    console.log(adjustedAngle);
+}
+
 function render() {
 
     viewerPanoAPI.view(viewerViewState.lonov, viewerViewState.latov, viewerViewState.fov);
@@ -150,16 +157,4 @@ function render() {
     renderer.clearDepth();
     renderer.render(viewerMapAPI.scene, viewerMapAPI.camera);
 
-}
-
-// angle returned in realtion to real word: +-0 -> north, -90 -> east, +-180 -> south, +90 -> east
-function getAngle(camera){
-    var vector = new THREE.Vector3( 0, 0, - 1 );
-    // Get the direction of the camera 
-    vector = camera.getWorldDirection();
-    // Compute the viewing angle direction
-    var theta = Math.atan2(vector.x,vector.z);
-    // Return the angle in degrees
-    var angle = THREE.Math.radToDeg( theta );
-    return angle; 
 }
