@@ -55,60 +55,39 @@ export class ViewerMapAPI {
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
 
-        var point_text = new THREE.Texture(generateCircularSprite("red"));
-        point_text.needsUpdate = true;
+        /* remove comment to draw all points on map
+        let allImages = this.viewerImageAPI.currentFloor.viewerImages;
+        allImages.forEach(image => {
+            this.addPoint("black", image.mapOffset);
+        });
+        */
+
+        this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
+    }
+
+    // draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
+    addPoint(color, offset) {
+        const texture = new THREE.Texture(generateCircularSprite(color));
+        texture.needsUpdate = true;
         var mat = new THREE.SpriteMaterial({
-            map: point_text,
+            map: texture,
             transparent: false,
-            //depthTest: false,
-            //blending: THREE.AdditiveBlending , 
-            color: 0xff0000 // RED, 
+            color: 0xffffff // BLACK, 
         });
         // Render on Top
         mat.renderOrder = 3;
         // Create the point sprite
-        this.location = new THREE.Sprite(mat);
+        let pointSprite = new THREE.Sprite(mat);
+        pointSprite.center.set(0.0, 0.0);
 
-        this.location.center.set(0.0, 0.0);
-
-        // draw it at pixel offset of currently viewed image
-        const offset = this.viewerImageAPI.currentImage.mapOffset;
-        this.location.position.set(-this.mapScalingFactor * offset[0], this.mapScalingFactor * offset[1], -3);
+        // draw it at pixel offset of as agruemnt passed pixel offset
+        pointSprite.position.set(-this.mapScalingFactor * offset[0], this.mapScalingFactor * offset[1], -3);
 
         //scale the point
-        this.location.scale.set(5,5,1); 
-        this.spriteGroup.add(this.location);
+        pointSprite.scale.set(5, 5, 1);
+        this.spriteGroup.add(pointSprite);
 
-        return; //comment out this line to draw all points in current model
-        // draw all other points in black
-        let allImages = this.viewerImageAPI.currentFloor.viewerImages;
-        console.log(allImages);
-
-        allImages.forEach(image => {
-            var point_text = new THREE.Texture(generateCircularSprite("black"));
-            point_text.needsUpdate = true;
-            var mat = new THREE.SpriteMaterial({
-                map: point_text,
-                transparent: false, 
-                color: 0xffffff // BLACK, 
-            });
-            // Render on Top
-            mat.renderOrder = 3;
-            // Create the point sprite
-            let pointLocation = new THREE.Sprite(mat);
-
-            pointLocation.center.set(0.0, 0.0);
-
-            // draw it at pixel offset of curren image
-            const offset = image.mapOffset;
-            //console.log(offset);
-            pointLocation.position.set(-this.mapScalingFactor * offset[0] , this.mapScalingFactor * offset[1], -3);
-            console.log(pointLocation.position);
-
-            //scale the point
-            pointLocation.scale.set(5,5,1); 
-            this.spriteGroup.add(pointLocation);
-        });
+        return pointSprite;
     }
     
     // Method
