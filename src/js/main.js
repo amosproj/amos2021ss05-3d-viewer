@@ -5,15 +5,11 @@ import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
-import { ViewerImage } from "./viewer/ViewerImage.js";
 
 
 let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI;
 
-let onPointerDownMouseX = 0,
-    onPointerDownMouseY = 0,
-    onPointerDownLon = 0,
-    onPointerDownLat = 0;
+let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
 // Load the metadata only once
 const jsonImageDataFilepath = "../assets/data.json";
@@ -53,6 +49,12 @@ function init() {
 
     // Add listener for keyboard
     //document.body.addEventListener('keydown', keyPressed, false);
+
+    // Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
+    document.addEventListener("dblclick", function(){
+        let angle = getAngle(viewerPanoAPI.camera);
+        console.log(angle);
+    });
 
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI);
     //setTimeout(function () { viewerAPI.move(15, 15, 1); }, 5000);
@@ -149,8 +151,15 @@ function render() {
     renderer.render(viewerMapAPI.scene, viewerMapAPI.camera);
 
 }
-// Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
 
-document.getElementById("pano-viewer").addEventListener("dblclick", function(changeimage) {
-    console.log("Doubleclicked!!");
-});
+// angle returned in realtion to real word: +-0 -> north, -90 -> east, +-180 -> south, +90 -> east
+function getAngle(camera){
+    var vector = new THREE.Vector3( 0, 0, - 1 );
+    // Get the direction of the camera 
+    vector = camera.getWorldDirection();
+    // Compute the viewing angle direction
+    var theta = Math.atan2(vector.x,vector.z);
+    // Return the angle in degrees
+    var angle = THREE.Math.radToDeg( theta );
+    return angle; 
+}
