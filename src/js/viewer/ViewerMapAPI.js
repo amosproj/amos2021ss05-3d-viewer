@@ -19,7 +19,7 @@ export class ViewerMapAPI {
         this.camera.position.z = 2;     // need to be in [near + 1, far + 1] to be displayed
 
         this.spriteGroup = new THREE.Group(); //create an sprite group
-        this.mapScalingFactor = 0.1;
+        this.mapScalingFactor = 0.2;
 
         new THREE.TextureLoader().load(mapPicturePath, (texture) => {
             const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
@@ -60,7 +60,7 @@ export class ViewerMapAPI {
         allImages.forEach(image => {
             this.addPoint("black", image.mapOffset);
         });
-        */
+        //*/
 
         this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
     }

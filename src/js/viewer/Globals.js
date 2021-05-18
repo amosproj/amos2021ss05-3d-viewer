@@ -16,7 +16,7 @@ export function distanceWGS84TwoPoints(lon1, lat1, lon2, lat2) {
 
 // takes in a location (in lot/lat), a direction (as a *angle*[rad, in birds eye view), and a distance (in meters) to move in the direction
 export function newLocationFromPointAngle(lon1, lat1, angle, distance) {
-    // angle: +-0 -> south, +pi/2 -> west, +-pi -> north, -pi/2 -> east
+    // angle: +-0 -> west, +pi/2 -> south, +-pi -> east, -pi/2 -> north
     let lon2, lat2;
 
     const dx = (distance / 1000) * Math.cos(angle);

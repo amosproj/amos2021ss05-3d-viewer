@@ -2,7 +2,7 @@
 import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
-import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
+import { MAX_FOV, DEFAULT_FOV, newLocationFromPointAngle } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
 
@@ -53,7 +53,7 @@ function init() {
     // Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
     document.addEventListener("dblclick", onDoubleClick);
 
-    viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI);
+    viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI);
     //setTimeout(function () { viewerAPI.move(15, 15, 1); }, 5000);
 }
 
@@ -154,10 +154,18 @@ function onDoubleClick(event) {
     const realVerticalOffset = (adjustedVerticalAngle - 90) / 90; // between [-1,1] depending how far up/down user looks and clicks
     
     const MEDIAN_WALKING_DISTANCE = 5; // in meter
-    const distance = MEDIAN_WALKING_DISTANCE - (realVerticalOffset * MEDIAN_WALKING_DISTANCE); // distance to be walked along adjustedHorizontalAngle from current location
+    // distance to be walked along adjustedHorizontalAngle from current location
+    const distance = MEDIAN_WALKING_DISTANCE - (realVerticalOffset * MEDIAN_WALKING_DISTANCE);
+    
+    // adjustedHorizontalAngle converted to represent directions like specified in newLocationFromPointAngle
+    let convertedAngle = (adjustedHorizontalAngle > -90) ? adjustedHorizontalAngle - 90 : adjustedHorizontalAngle + 270;
+    convertedAngle = THREE.Math.degToRad(convertedAngle);
+    const currentPos = viewerImageAPI.currentImage.pos;
+    
+    const newPos = newLocationFromPointAngle(currentPos[0], currentPos[1], convertedAngle, distance)
 
-    console.log(adjustedHorizontalAngle);
-    console.log(distance);
+    viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
+
 }
 
 function render() {

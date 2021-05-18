@@ -4,10 +4,11 @@
 // API provided by the viewer
 export class ViewerAPI {
 
-    constructor(viewerImageAPI, viewerPanoAPI) {
+    constructor(viewerImageAPI, viewerPanoAPI, viewerMapAPI) {
         this.min = 1;
         this.viewerImageAPI = viewerImageAPI;
         this.viewerPanoAPI = viewerPanoAPI;
+        this.viewerMapAPI = viewerMapAPI;
     }
 
 
@@ -43,6 +44,7 @@ export class ViewerAPI {
         if (this.min != this.viewerImageAPI.currentImageId){
 
             this.viewerPanoAPI.display(this.min);
+            this.viewerMapAPI.redraw();
 
         }
     }
