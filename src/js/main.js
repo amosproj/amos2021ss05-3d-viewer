@@ -5,10 +5,11 @@ import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV, newLocationFromPointAngle } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
-
+//adding class
+import {ViewerState} from "./viewer/ViewerState.js";
+import {ViewerVersionAPI} from "./viewer/ViewerVersionAPI.js";
 
 let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI;
-
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
 // Load the metadata only once
