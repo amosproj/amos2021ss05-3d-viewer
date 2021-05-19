@@ -188,13 +188,24 @@ function render() {
 
 
 function basicSetUp(){
+var loc_para1=viewerImageAPI.currentImage.pos[0];
+ var loc_para2=viewerImageAPI.currentImage.pos[1];
+ var loc_para3=viewerImageAPI.currentImage.pos[2];
+ var imageId=viewerImageAPI.currentImageId;
+ var floors_name=viewerImageAPI.floors[viewerImageAPI.currentFloorId].name;
+ var latov_rad=viewerViewState.latov* Math.PI / 180.0;
+ var lonov_rad=viewerViewState.lonov* Math.PI / 180.0;
+ var viewer_fov=viewerViewState.fov;
+ var vMajor=viewerAPI.MAJOR;
+ var vMinor=viewerAPI.MINOR;
+ var view_para=[];
+ 
+ 
+ viewerImageAPI.viewerState=new ViewerState([loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad]) ;
 
+ view_para=viewerImageAPI.viewerState.view;
 
-   viewerImageAPI.viewerState=new ViewerState(viewerImageAPI.currentImage.pos[0],viewerImageAPI.currentImage.pos[1],viewerImageAPI.currentImageId,viewerImageAPI.floors[viewerImageAPI.currentFloorId].name,[viewerViewState.fov,viewerViewState.latov* Math.PI / 180.0,viewerViewState.lonov* Math.PI / 180.0]) ;
-
-
-
-   viewerAPI.viewerVersionAPI=new ViewerVersionAPI(viewerAPI.MAJOR, viewerAPI.MINOR, viewerImageAPI.viewerState.view);
+ viewerAPI.viewerVersionAPI=new ViewerVersionAPI(vMajor, vMinor,view_para);
 
 
 
