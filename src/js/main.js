@@ -5,7 +5,7 @@ import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV, newLocationFromPointAngle, baseURL } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
-//adding class
+
 import {ViewerState} from "./viewer/ViewerState.js";
 import {ViewerVersionAPI} from "./viewer/ViewerVersionAPI.js";
 
@@ -186,52 +186,20 @@ function render() {
 
 }
 
-//---------------------changes basic set up 18.05.2021---------------------------------------------
+
 function basicSetUp(){
 
-    viewerImageAPI.viewerState=new ViewerState(null,null,null,null,[]) ;
 
-    //console.log("----The origin in the 3d diagram: -----",viewerImageAPI.origin);
-    
-    viewerImageAPI.viewerState.loc=viewerImageAPI.origin;
-    console.log("----The origin in the 3d diagram: -----");
-    console.log( viewerImageAPI.viewerState.loc);
-    //console.log();
-    //console.log("The ID of the currecntImage: ",viewerImageAPI.currentImageId);
+   viewerImageAPI.viewerState=new ViewerState(viewerImageAPI.currentImage.pos[0],viewerImageAPI.currentImage.pos[1],viewerImageAPI.currentImageId,viewerImageAPI.floors[viewerImageAPI.currentFloorId].name,[viewerViewState.fov,viewerViewState.latov* Math.PI / 180.0,viewerViewState.lonov* Math.PI / 180.0]) ;
 
 
-    viewerImageAPI.viewerState.imageNum=viewerImageAPI.currentImageId;
-    console.log("The ID of the currecntImage: ",viewerImageAPI.viewerState.imageNum);
 
-       //console.log();
-    //console.log("The name of the floor map: ",viewerImageAPI.floors[viewerImageAPI.currentFloorId].name);
-   
+   viewerAPI.viewerVersionAPI=new ViewerVersionAPI(viewerAPI.MAJOR, viewerAPI.MINOR, viewerImageAPI.viewerState.view);
 
-    /*for(let key in viewerImageAPI.floors){
-        console.log(key);
-        console.log(viewerImageAPI.floors[key]);
-    }*/
-    viewerImageAPI.viewerState.floor=viewerImageAPI.floors[viewerImageAPI.currentFloorId].name;
-    console.log("The name of the floor map: ",viewerImageAPI.viewerState.floor);
-
-    //console.log("The number of the floor: ",viewerImageAPI.floors.z);
-   //console.log("The mouse moving lon is: ",viewerViewState.lonov * Math.PI / 180.0);
-   // console.log("The mouse moving lat is: ",viewerViewState.latov * Math.PI / 180.0);
-
-    viewerImageAPI.viewerState.view[2]=viewerViewState.latov* Math.PI / 180.0;
-    viewerImageAPI.viewerState.view[1]=viewerViewState.lonov* Math.PI / 180.0;
-    viewerImageAPI.viewerState.view[0]=viewerViewState.fov;
-    console.log("The mouse wheel moving angle is: ", viewerImageAPI.viewerState.view[0]);
-    console.log("The value of view in viewerState ","lon: "+viewerImageAPI.viewerState.view[1],"lat: "+viewerImageAPI.viewerState.view[2]);
-
-    viewerAPI.viewerVersionAPI=new ViewerVersionAPI(viewerAPI.MAJOR, viewerAPI.MINOR, viewerImageAPI.viewerState.view);
-
-
-    console.log("show the value of view value in viewerVersionAPI: ",viewerAPI.viewerVersionAPI.viewer);
 
 
 }
-//---------------------changes basic set up 18.05.2021---------------------------------------------
+
 
 function getAngle(camera){
     var vector = new THREE.Vector3( 0, 0, - 1 );
