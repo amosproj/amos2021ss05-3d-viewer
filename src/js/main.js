@@ -2,7 +2,7 @@
 import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
-import { MAX_FOV, DEFAULT_FOV } from "./viewer/Globals.js"
+import { MAX_FOV, DEFAULT_FOV, newLocationFromPointAngle } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
 
@@ -38,8 +38,8 @@ function init() {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.autoClear = false; // To allow render overlay on top of panorama scene
-    renderer.sortObjects = false; 
-    
+    renderer.sortObjects = false;
+
     container.appendChild(renderer.domElement);
 
     // link event listeners to the corresponding functions
@@ -50,8 +50,11 @@ function init() {
     // Add listener for keyboard
     //document.body.addEventListener('keydown', keyPressed, false);
 
-    viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI);
-    setTimeout(function () { viewerAPI.move(15, 15, 1); }, 5000);
+    // Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
+    document.addEventListener("dblclick", onDoubleClick);
+
+    viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI);
+
 }
 
 function animate() {
@@ -76,6 +79,8 @@ function onPointerDown(event) {
 
 }
 
+
+
 // handles continues update of the distance mouse moved
 function onPointerMove(event) {
 
@@ -85,7 +90,14 @@ function onPointerMove(event) {
     viewerViewState.latov = (event.clientY - onPointerDownMouseY) * 0.1 * scalingFactor + onPointerDownLat;
 
     // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
-    viewerViewState.latov = Math.max( -85, Math.min(85, viewerViewState.latov));
+    viewerViewState.latov = Math.max(-85, Math.min(85, viewerViewState.latov));
+
+    // Get the direction of the camera 
+    var dir = new THREE.Vector3(0,0,1); 
+    viewerPanoAPI.camera.getWorldDirection(dir);
+
+    // Draw on the map 
+    drawArrow(dir, viewerMapAPI.scene);
 
 }
 
@@ -107,14 +119,6 @@ function onDocumentMouseWheel(event) {
 
 }
 
-// function keyPressed(e){
-//     switch(e.key) {
-//         case 'm':
-//             //viewerAPI.move(15,15,1);
-//     }
-//     e.preventDefault();
-//   }
-  
 
 // currently not supported
 function onWindowResize() {
@@ -124,24 +128,136 @@ function onWindowResize() {
 
     viewerPanoAPI.camera.aspect = width / height;
     viewerPanoAPI.camera.updateProjectionMatrix();
-    
-    viewerMapAPI.camera.left = - width / 2;
+
+    viewerMapAPI.camera.left = -width / 2;
     viewerMapAPI.camera.right = width / 2;
     viewerMapAPI.camera.top = height / 2;
-    viewerMapAPI.camera.bottom = - height / 2;
+    viewerMapAPI.camera.bottom = -height / 2;
     viewerMapAPI.camera.updateProjectionMatrix();
-    
+
     renderer.setSize(width, height);
     render();
 
 }
 
-function render() {
+function onDoubleClick(event) {
+    const halfWidth = window.innerWidth / 2;
+    const halfHeight = window.innerHeight / 2;
+
+    const horizontalAngle = viewerPanoAPI.getAngle();
+    const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the click is
+    const adjustedHorizontalAngle = horizontalAngle - (horizontalOffset * viewerViewState.fov / 2); // line from current position towards where the mouse double clicked (2D birds eye view angle)
+
+    const cameraDir = viewerPanoAPI.camera.getWorldDirection();
+    const verticalAngle = Math.abs(THREE.Math.radToDeg(Math.atan2(cameraDir.x,cameraDir.y))); // between [0,180]Deg depending on how far up/down the user looks
+    const verticalOffset = (event.y - halfHeight) / halfHeight; // between [-1,1] depending how up-down the mouse click is on the screen
+    const adjustedVerticalAngle = verticalAngle + (verticalOffset * viewerViewState.fov / 2);
+    const realVerticalOffset = (adjustedVerticalAngle - 90) / 90; // between [-1,1] depending how far up/down user looks and clicks
     
+    const MEDIAN_WALKING_DISTANCE = 5; // in meter
+    // distance to be walked along adjustedHorizontalAngle from current location
+    const distance = MEDIAN_WALKING_DISTANCE - (realVerticalOffset * MEDIAN_WALKING_DISTANCE);
+    
+    // adjustedHorizontalAngle converted to represent directions like specified in newLocationFromPointAngle
+    let convertedAngle = (adjustedHorizontalAngle > -90) ? adjustedHorizontalAngle - 90 : adjustedHorizontalAngle + 270;
+    convertedAngle = THREE.Math.degToRad(convertedAngle);
+    const currentPos = viewerImageAPI.currentImage.pos;
+    
+    const newPos = newLocationFromPointAngle(currentPos[0], currentPos[1], convertedAngle, distance)
+
+    viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
+
+}
+
+function render() {
+
     viewerPanoAPI.view(viewerViewState.lonov, viewerViewState.latov, viewerViewState.fov);
     renderer.clear();
     renderer.render(viewerPanoAPI.scene, viewerPanoAPI.camera);
     renderer.clearDepth();
     renderer.render(viewerMapAPI.scene, viewerMapAPI.camera);
 
+}
+
+//---------------------changes basic set up 18.05.2021---------------------------------------------
+function basicSetUp(){
+
+    viewerImageAPI.viewerState=new ViewerState(null,null,null,null,[]) ;
+
+    //console.log("----The origin in the 3d diagram: -----",viewerImageAPI.origin);
+    
+    viewerImageAPI.viewerState.loc=viewerImageAPI.origin;
+    console.log("----The origin in the 3d diagram: -----");
+    console.log( viewerImageAPI.viewerState.loc);
+    //console.log();
+    //console.log("The ID of the currecntImage: ",viewerImageAPI.currentImageId);
+
+
+    viewerImageAPI.viewerState.imageNum=viewerImageAPI.currentImageId;
+    console.log("The ID of the currecntImage: ",viewerImageAPI.viewerState.imageNum);
+
+       //console.log();
+    //console.log("The name of the floor map: ",viewerImageAPI.floors[viewerImageAPI.currentFloorId].name);
+   
+
+    /*for(let key in viewerImageAPI.floors){
+        console.log(key);
+        console.log(viewerImageAPI.floors[key]);
+    }*/
+    viewerImageAPI.viewerState.floor=viewerImageAPI.floors[viewerImageAPI.currentFloorId].name;
+    console.log("The name of the floor map: ",viewerImageAPI.viewerState.floor);
+
+    //console.log("The number of the floor: ",viewerImageAPI.floors.z);
+   //console.log("The mouse moving lon is: ",viewerViewState.lonov * Math.PI / 180.0);
+   // console.log("The mouse moving lat is: ",viewerViewState.latov * Math.PI / 180.0);
+
+    viewerImageAPI.viewerState.view[2]=viewerViewState.latov* Math.PI / 180.0;
+    viewerImageAPI.viewerState.view[1]=viewerViewState.lonov* Math.PI / 180.0;
+    viewerImageAPI.viewerState.view[0]=viewerViewState.fov;
+    console.log("The mouse wheel moving angle is: ", viewerImageAPI.viewerState.view[0]);
+    console.log("The value of view in viewerState ","lon: "+viewerImageAPI.viewerState.view[1],"lat: "+viewerImageAPI.viewerState.view[2]);
+
+    viewerAPI.viewerVersionAPI=new ViewerVersionAPI(viewerAPI.MAJOR, viewerAPI.MINOR, viewerImageAPI.viewerState.view);
+
+
+    console.log("show the value of view value in viewerVersionAPI: ",viewerAPI.viewerVersionAPI.viewer);
+
+
+}
+//---------------------changes basic set up 18.05.2021---------------------------------------------
+
+function getAngle(camera){
+    var vector = new THREE.Vector3( 0, 0, - 1 );
+    // Get the direction of the camera 
+    vector = camera.getWorldDirection();
+    // Compute the viewing angle direction
+    var theta = THREE.Math.atan2(vector.x,vector.z);
+    // Return the angle in degrees
+    var angle = THREE.Math.radToDeg( theta );
+    return angle; 
+}
+
+
+function drawArrow(direction, scene ){
+
+    //normalize the direction vector (convert to vector of length 1)
+    direction.normalize();
+
+    //Create the arrow vetor
+    const origin = new THREE.Vector3(0,0, 0 );
+    const length = 20;
+    const hex = 0xff0000; // red color
+    var arrowHelper = new THREE.ArrowHelper( direction, origin, length, hex );
+    scene.add(arrowHelper); 
+
+}
+
+function updateArrow(arrowHelper, direction){
+    // update the arrow position
+    var newSourcePos = new THREE.Vector3(10, 10, 10);
+    var newTargetPos = new THREE.Vector3(60, 10, 10);
+    arrowHelper.position.set(newSourcePos);
+    direction = new THREE.Vector3().sub(newTargetPos, newSourcePos);
+    arrowHelper.setDirection(direction.normalize());
+    arrowHelper.setLength(direction.length());
 }
