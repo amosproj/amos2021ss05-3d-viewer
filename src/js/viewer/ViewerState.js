@@ -1,6 +1,6 @@
 export class ViewerState {
 
-    constructor(panoLon, panoLat, imageIdx, name,[fov, lonov,latov] ) {
+    constructor([panoLon, panoLat, panz],imageIdx, name,[fov, lonov,latov] ) {
 
         //this.big =
     
@@ -8,7 +8,7 @@ export class ViewerState {
 
         this.imageNum = imageIdx; // : Number // Image number
     
-        this.loc = [panoLon, panoLat]; // : [Number] // WGS 84 coordinates [longitude, latitude, z] of this image
+        this.loc = [panoLon, panoLat,panz]; // : [Number] // WGS 84 coordinates [longitude, latitude, z] of this image
 
         //this.fov = fov; // : Number // Field of view (in degrees)
        // viewerViewState1= new ViewerViewState(DEFAULT_FOV, 0, 0)
