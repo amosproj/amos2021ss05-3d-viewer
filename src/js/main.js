@@ -2,7 +2,7 @@
 import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
-import { MAX_FOV, DEFAULT_FOV, newLocationFromPointAngle } from "./viewer/Globals.js"
+import { MAX_FOV, DEFAULT_FOV, newLocationFromPointAngle, baseURL } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
 //adding class
@@ -14,8 +14,12 @@ let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerIma
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
 // Load the metadata only once
-const jsonImageDataFilepath = "../assets/data.json";
-$.getJSON(jsonImageDataFilepath, function(data) {
+$.ajax({
+    url: baseURL + "data.json",
+    xhrFields: {
+        withCredentials: true
+    }
+}).done(function (data) {
     viewerImageAPI = new ViewerImageAPI(data);
 
     init();
@@ -29,7 +33,8 @@ function init() {
     // the only html element we work with (the pano-viewer div)
 
     // ----- init Map scene -----
-    viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png", viewerImageAPI); // load in map texture 
+    //viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png", viewerImageAPI); // load in map texture 
+    viewerMapAPI = new ViewerMapAPI(viewerImageAPI); // load in map texture 
 
     // ----- init Panorama scene -----
     viewerPanoAPI = new ViewerPanoAPI(viewerImageAPI);

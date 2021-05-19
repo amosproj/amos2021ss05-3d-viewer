@@ -31,3 +31,8 @@ export function newLocationFromPointAngle(lon1, lat1, angle, distance) {
 export function getFolderNumber(imageNumber) {
     return Math.trunc(imageNumber / 100);
 }
+
+export const textureLoader = new THREE.TextureLoader().setCrossOrigin('use-credentials');
+
+export const baseURL = "https://bora.bup-nbg.de/amos2floors/";
+//export const baseURL = "../assets/";

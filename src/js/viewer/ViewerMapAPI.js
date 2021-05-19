@@ -1,10 +1,12 @@
+import { textureLoader, baseURL } from "./Globals.js";
+
 
 // Map (2D) Viewer API
 
 // Specific API for the Map View
 export class ViewerMapAPI {
 
-    constructor(mapPicturePath, viewerImageAPI) {
+    constructor(viewerImageAPI) {
         // hardcoded to work with assets/ for now
         this.viewerImageAPI = viewerImageAPI;
         this.layers;
@@ -20,8 +22,9 @@ export class ViewerMapAPI {
 
         this.spriteGroup = new THREE.Group(); //create an sprite group
         this.mapScalingFactor = 0.2;
-
-        new THREE.TextureLoader().load(mapPicturePath, (texture) => {
+        
+        const mapPicturePath = baseURL + viewerImageAPI.currentFloor.mapData.name + ".png";
+        textureLoader.load(mapPicturePath, (texture) => {
             const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
             material.renderOrder = 1;
             material.depthTest = false;
@@ -54,7 +57,7 @@ export class ViewerMapAPI {
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
 
-        /* remove comment to draw all points on map
+        //* remove comment to draw all points on map
         let allImages = this.viewerImageAPI.currentFloor.viewerImages;
         allImages.forEach(image => {
             this.addPoint("black", image.mapOffset);
