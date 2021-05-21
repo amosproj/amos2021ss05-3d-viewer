@@ -1,15 +1,16 @@
 "use strict";
-import {libraryInfo} from "./LibraryInfo.js";
+import { libraryInfo } from "./LibraryInfo.js";
 
 
 // API provided by the viewer
 export class ViewerAPI {
 
-    constructor(viewerImageAPI, viewerPanoAPI, viewerMapAPI) {
+    constructor(viewerImageAPI, viewerPanoAPI, viewerMapAPI, viewerFloorAPI) {
         this.min = 1;
         this.viewerImageAPI = viewerImageAPI;
         this.viewerPanoAPI = viewerPanoAPI;
         this.viewerMapAPI = viewerMapAPI;
+        this.viewerFloorAPI = viewerFloorAPI;
         this.libs = libraryInfo(); // List of used third party libraries
         
         
@@ -28,11 +29,11 @@ export class ViewerAPI {
         let minval;
         let minkey;
 
-        for (let i in this.viewerImageAPI.currentFloor.viewerImages) {
+        for (let i in this.viewerFloorAPI.currentFloor.viewerImages) {
             let result = Math.sqrt(
-                Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[0] - temp[0], 2) +
-                Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[1] - temp[1], 2) +
-                Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[2] - temp[2], 2) ); // z value probably doesnt/should matter (see WGS84distance in Globals)
+                Math.pow(this.viewerFloorAPI.currentFloor.viewerImages[i].pos[0] - temp[0], 2) +
+                Math.pow(this.viewerFloorAPI.currentFloor.viewerImages[i].pos[1] - temp[1], 2) +
+                Math.pow(this.viewerFloorAPI.currentFloor.viewerImages[i].pos[2] - temp[2], 2) ); // z value probably doesnt/should matter (see WGS84distance in Globals)
             resultset.push(result);  
         }
 

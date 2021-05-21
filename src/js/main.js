@@ -1,5 +1,6 @@
 "use strict";
 import { ViewerImageAPI } from "./viewer/ViewerImageAPI.js";
+import { ViewerFloorAPI } from "./viewer/ViewerFloorAPI.js"
 import { ViewerViewState } from "./viewer/ViewerViewState.js";
 import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV, newLocationFromPointAngle, baseURL } from "./viewer/Globals.js"
@@ -9,7 +10,7 @@ import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
 import {ViewerState} from "./viewer/ViewerState.js";
 import {ViewerVersionAPI} from "./viewer/ViewerVersionAPI.js";
 
-let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI;
+let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI, viewerFloorAPI;
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
 
@@ -20,7 +21,8 @@ $.ajax({
         withCredentials: true
     }
 }).done(function (data) {
-    viewerImageAPI = new ViewerImageAPI(data);
+    viewerImageAPI = new ViewerImageAPI(data.images);
+    viewerFloorAPI = new ViewerFloorAPI(data, viewerImageAPI);
 
     init();
     animate();
@@ -34,7 +36,7 @@ function init() {
 
     // ----- init Map scene -----
     //viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png", viewerImageAPI); // load in map texture 
-    viewerMapAPI = new ViewerMapAPI(viewerImageAPI); // load in map texture 
+    viewerMapAPI = new ViewerMapAPI(viewerImageAPI, viewerFloorAPI); // load in map texture 
 
     // ----- init Panorama scene -----
     viewerPanoAPI = new ViewerPanoAPI(viewerImageAPI);
@@ -60,7 +62,7 @@ function init() {
     // Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
     document.addEventListener("dblclick", onDoubleClick);
 
-    viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI);
+    viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI, viewerFloorAPI);
 
 }
 
@@ -68,24 +70,24 @@ function keyPressed(e) {
     switch(e.key) {
         case 'u':
             // change to higher floor
-            if (viewerImageAPI.currentFloorId >= viewerImageAPI.floors.length - 1) {
+            if (viewerFloorAPI.currentFloorId >= viewerFloorAPI.floors.length - 1) {
                 console.log("Cant change floors alredy on highest");
             } else {
-                viewerImageAPI.currentFloorId++;
+                viewerFloorAPI.currentFloorId++;
                 
-                const firstImageInFloor = viewerImageAPI.floors[viewerImageAPI.currentFloorId].i[0];
+                const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
                 viewerPanoAPI.display(firstImageInFloor);
                 viewerMapAPI.redraw();
             }
             break;
         case 'd':
             // change to lower floor
-            if (viewerImageAPI.currentFloorId < 1) {
+            if (viewerFloorAPI.currentFloorId < 1) {
                 console.log("Cant change floors alredy on lowest");
             } else {
-                viewerImageAPI.currentFloorId--;
+                viewerFloorAPI.currentFloorId--;
                 
-                const firstImageInFloor = viewerImageAPI.floors[viewerImageAPI.currentFloorId].i[0];
+                const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
                 viewerPanoAPI.display(firstImageInFloor);
                 viewerMapAPI.redraw();
             }
