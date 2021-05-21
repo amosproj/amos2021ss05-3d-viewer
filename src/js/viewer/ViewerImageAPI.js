@@ -14,6 +14,7 @@ export class ViewerImageAPI {
 
         this.origin = [data.lon0, data.lat0];
         this.floors = [];
+        this.images = [];
 
         // iterate over floors
         Object.keys(data.floors).forEach((key) => {
@@ -24,21 +25,25 @@ export class ViewerImageAPI {
                 let currentImage = new ViewerImage(data.images[imgIdx], imgIdx, key);
 
                 // dx, dy distance in kilometers
-                let [dx, dy] = distanceWGS84TwoPoints(this.origin[0], this.origin[1], currentImage.pos[0], currentImage.pos[1]);
+                const [dx, dy] = distanceWGS84TwoPoints(this.origin[0], this.origin[1], currentImage.pos[0], currentImage.pos[1]);
 
-                let offsetX = currentFloor.mapData.x + currentFloor.mapData.density * (dx * 1000);
-                let offsetY = currentFloor.mapData.y - currentFloor.mapData.density * (dy * 1000);
+                const offsetX = currentFloor.mapData.x + currentFloor.mapData.density * (dx * 1000);
+                const offsetY = currentFloor.mapData.y - currentFloor.mapData.density * (dy * 1000);
 
                 currentImage.mapOffset = [offsetX, offsetY];
 
                 currentFloor.viewerImages.push(currentImage);
+                this.images.push(currentImage);
             }
 
             this.floors.push(currentFloor);
         });
 
-        this.currentFloorId = 0.0;
-        this.currentImageId = 0.0; // inside the range of current Floors viewerImages array;
+        // lowest floor will be at lowest index and highest floor at floors.length-1
+        this.floors.sort((a, b) => (a.z > b.z) ? 1 : -1);
+
+        this.currentFloorId = 0.0; // in range of floors.length
+        this.currentImageId = this.floors[this.currentFloorId].i[0];
     }
 
     get currentFloor() {
@@ -46,19 +51,13 @@ export class ViewerImageAPI {
     }
 
     get currentImage() {
-        return this.currentFloor.viewerImages[this.currentImageId];
+        return this.images[this.currentImageId];
     }
 
     all(callback) {
         // Get all panorama images.
         // Parameters: Function called with all images ([ViewerImage]): Array of panorama images
-        let allImages = [];
-        for (let floor in this.floors) {
-            for (let img in floor.viewerImages) {
-                allImages.push(img);
-            }
-        }
-        callback(allImages);
+        callback(this.images);
     }
 
     changed() {

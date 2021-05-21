@@ -54,14 +54,43 @@ function init() {
     document.addEventListener('wheel', onDocumentMouseWheel);
     //document.addEventListener('resize', onWindowResize);
 
-    // Add listener for keyboard
-    //document.body.addEventListener('keydown', keyPressed, false);
+    // Add listener for keyboard to test floor changing backend
+    document.body.addEventListener('keydown', keyPressed, false);
 
     // Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
     document.addEventListener("dblclick", onDoubleClick);
 
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI);
 
+}
+
+function keyPressed(e) {
+    switch(e.key) {
+        case 'u':
+            // change to higher floor
+            if (viewerImageAPI.currentFloorId >= viewerImageAPI.floors.length - 1) {
+                console.log("Cant change floors alredy on highest");
+            } else {
+                viewerImageAPI.currentFloorId++;
+                
+                const firstImageInFloor = viewerImageAPI.floors[viewerImageAPI.currentFloorId].i[0];
+                viewerPanoAPI.display(firstImageInFloor);
+                viewerMapAPI.redraw();
+            }
+            break;
+        case 'd':
+            // change to lower floor
+            if (viewerImageAPI.currentFloorId < 1) {
+                console.log("Cant change floors alredy on lowest");
+            } else {
+                viewerImageAPI.currentFloorId--;
+                
+                const firstImageInFloor = viewerImageAPI.floors[viewerImageAPI.currentFloorId].i[0];
+                viewerPanoAPI.display(firstImageInFloor);
+                viewerMapAPI.redraw();
+            }
+            break;
+    }
 }
 
 function animate() {

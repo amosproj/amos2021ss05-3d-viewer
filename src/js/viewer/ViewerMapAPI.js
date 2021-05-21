@@ -56,7 +56,8 @@ export class ViewerMapAPI {
    
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
-
+        this.spriteGroup.clear();
+        
         //* remove comment to draw all points on map
         let allImages = this.viewerImageAPI.currentFloor.viewerImages;
         allImages.forEach(image => {
