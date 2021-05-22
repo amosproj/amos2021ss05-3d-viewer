@@ -57,6 +57,25 @@ function init() {
 
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI);
 
+    //----Control Menu (GUI)-----
+    //Get current floor
+    let currentFloor = viewerImageAPI.currentFloor.name;
+    //Show current floor
+    $(".control").append("Current Floor: "+ currentFloor);
+
+    //push all floor names into an array
+    let totalFloors = [];
+    viewerImageAPI.floors.forEach(function(item){
+        totalFloors.push(item.name);
+    });
+
+    //Create Drop down Menus by floor names
+    for(let i = 0; i < totalFloors.length; i++) {
+        $('.control select').append('<option value='+i+'>'+totalFloors[i]+'</option>');
+     }
+
+    
+
 }
 
 function animate() {

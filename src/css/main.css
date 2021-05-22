@@ -22,3 +22,8 @@ body {
     cursor: -webkit-grabbing;
 }
 
+.control{
+    position: relative;
+    bottom: 100px;
+}
+
