@@ -25,5 +25,6 @@ body {
 .control{
     position: relative;
     bottom: 100px;
+    color: #fff;
 }
 

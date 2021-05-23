@@ -58,6 +58,16 @@ function init() {
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI);
 
     //----Control Menu (GUI)-----
+    console.log(viewerImageAPI);
+
+    //Get number of Floors
+    let numOfFloors = viewerImageAPI.floors.length;
+    //console.log(numOfFloors);
+
+    //Show number of Floors
+    $(".control").append("Number of Florrs: "+ numOfFloors+". ");
+
+
     //Get current floor
     let currentFloor = viewerImageAPI.currentFloor.name;
     //Show current floor
@@ -73,6 +83,7 @@ function init() {
     for(let i = 0; i < totalFloors.length; i++) {
         $('.control select').append('<option value='+i+'>'+totalFloors[i]+'</option>');
      }
+
 
     
 
