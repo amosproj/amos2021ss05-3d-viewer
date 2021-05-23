@@ -78,7 +78,22 @@ function init() {
     viewerImageAPI.floors.forEach(function(item){
         totalFloors.push(item.name);
     });
-    console.log(totalFloors);
+
+    //Checking if the current floor is on the highest or lowest floor
+    if(currentFloor == totalFloors[0]){
+        $('button[name="buttonUp"]').hide();
+        $('button[name="buttonDown"]').show();
+    }
+    else if (currentFloor == totalFloors[totalFloors.length-1]){
+        $('button[name="buttonDown"]').hide();
+        $('button[name="buttonUp"]').show();
+    }
+    else{
+        $('button[name="buttonUp"]').show();
+        $('button[name="buttonDown"]').show();
+    }
+
+
 
     //Create Drop down Menus by floor names
     for(let i = 0; i < totalFloors.length; i++) {
@@ -91,6 +106,19 @@ function init() {
              console.log($( this ).text());
              currentFloor = $( this ).text();
              $("#cf").text("Current Floor: "+ currentFloor+". ");
+             //Checking if the current floor is on the highest or lowest floor
+             if(currentFloor == totalFloors[0]){
+                 $('button[name="buttonUp"]').hide();
+                 $('button[name="buttonDown"]').show();
+             }
+             else if (currentFloor == totalFloors[totalFloors.length-1]){
+                 $('button[name="buttonDown"]').hide();
+                 $('button[name="buttonUp"]').show();
+             }
+             else{
+                 $('button[name="buttonUp"]').show();
+                 $('button[name="buttonDown"]').show();
+             }
          });
      });
 
@@ -106,11 +134,11 @@ function init() {
          if(currentFloor == totalFloors[0]){
             $('button[name="buttonUp"]').hide();
             $('button[name="buttonDown"]').show();
-        }
-        else{
-            $('button[name="buttonUp"]').show();
-            $('button[name="buttonDown"]').show();
-        }
+         }
+         else{
+             $('button[name="buttonUp"]').show();
+             $('button[name="buttonDown"]').show();
+         }
 
      });
 
