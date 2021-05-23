@@ -78,6 +78,7 @@ function init() {
     viewerImageAPI.floors.forEach(function(item){
         totalFloors.push(item.name);
     });
+    console.log(totalFloors);
 
     //Create Drop down Menus by floor names
     for(let i = 0; i < totalFloors.length; i++) {
@@ -92,6 +93,29 @@ function init() {
              $("#cf").text("Current Floor: "+ currentFloor+". ");
          });
      });
+
+     //Up Button for changing currentfloor
+     $('button[name="buttonUp"]').click(function(){
+         for (let i in totalFloors){
+             if (totalFloors[i]==currentFloor){
+                 currentFloor = totalFloors[parseInt(i)-1];
+                 break;
+             }
+         }
+         $("#cf").text("Current Floor: "+ currentFloor+". ");
+
+     });
+
+     //Down Button for changing currentfloor
+     $('button[name="buttonDown"]').click(function(){
+        for (let i in totalFloors){
+            if (totalFloors[i]==currentFloor){
+                currentFloor = totalFloors[parseInt(i)+1]
+                break;
+            }
+        }
+        $("#cf").text("Current Floor: "+ currentFloor+". ");
+    });
 
     
 
