@@ -103,6 +103,14 @@ function init() {
              }
          }
          $("#cf").text("Current Floor: "+ currentFloor+". ");
+         if(currentFloor == totalFloors[0]){
+            $('button[name="buttonUp"]').hide();
+            $('button[name="buttonDown"]').show();
+        }
+        else{
+            $('button[name="buttonUp"]').show();
+            $('button[name="buttonDown"]').show();
+        }
 
      });
 
@@ -115,6 +123,14 @@ function init() {
             }
         }
         $("#cf").text("Current Floor: "+ currentFloor+". ");
+        if(currentFloor == totalFloors[totalFloors.length-1]){
+            $('button[name="buttonDown"]').hide();
+            $('button[name="buttonUp"]').show();
+        }
+        else {
+            $('button[name="buttonUp"]').show();
+            $('button[name="buttonDown"]').show();
+        }
     });
 
     
