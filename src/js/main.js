@@ -65,13 +65,13 @@ function init() {
     //console.log(numOfFloors);
 
     //Show number of Floors
-    $(".control").append("Number of Florrs: "+ numOfFloors+". ");
+    $("#nof").text("Total Number of Available Florrs: "+ numOfFloors+". ");
 
 
     //Get current floor
     let currentFloor = viewerImageAPI.currentFloor.name;
     //Show current floor
-    $(".control").append("Current Floor: "+ currentFloor);
+    $("#cf").text("Current Floor: "+ currentFloor+". ");
 
     //push all floor names into an array
     let totalFloors = [];
@@ -84,6 +84,14 @@ function init() {
         $('.control select').append('<option value='+i+'>'+totalFloors[i]+'</option>');
      }
 
+     //Change current floor by dropdown menu
+     $('.control select').change(function(){
+         $( "select option:selected" ).each(function(){
+             console.log($( this ).text());
+             currentFloor = $( this ).text();
+             $("#cf").text("Current Floor: "+ currentFloor+". ");
+         });
+     });
 
     
 
