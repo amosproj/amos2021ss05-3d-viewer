@@ -257,8 +257,6 @@ function basicSetUp(){
     var loc_para1=trackPosLon;
     var loc_para2=trackPosLat;
     var loc_para3=trackPosVert;
-    console.log("The para of loc_para1 ")
-    console.log(loc_para1);
     var imageId=trackImageID;
     var floors_name=trackFloorName;
     var latov_rad=viewerViewState.latov* Math.PI / 180.0;
