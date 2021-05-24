@@ -64,6 +64,165 @@ function init() {
 
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI, viewerFloorAPI);
 
+
+    //----Control Menu (GUI)-----
+
+    //Get number of Floors
+    let numOfFloors = viewerFloorAPI.floors.length;
+
+    //Show number of Floors
+    $("#nof").text("Total Available Floors: "+ numOfFloors+". ");
+
+
+    //Get current floor
+    console.log(viewerFloorAPI.currentFloorId);
+
+    //Show current floor
+    $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+
+    //push all floor names into an array
+    let totalFloorsname = [];
+    viewerFloorAPI.floors.forEach(function(item){
+        totalFloorsname.push(item.name);
+    });
+
+    // temp totalfloors
+    let totalFloors = [0,1];
+    console.log(totalFloors);
+    console.log(viewerFloorAPI.floors[viewerFloorAPI.currentFloorId])
+
+
+    //Checking if the current floor is on the highest or lowest floor
+    if(viewerFloorAPI.currentFloorId == totalFloors[0]){
+        $('button[name="buttonDown"]').prop('disabled', true);
+        console.log(viewerFloorAPI.currentFloorId)
+    }
+    else if (viewerFloorAPI.currentFloorId == totalFloors[totalFloors.length-1]){
+        $('button[name="buttonUp"]').prop('disabled', true);
+        console.log(viewerFloorAPI.currentFloorId)
+    }
+    console.log(viewerFloorAPI.currentFloorId)
+    //Create Drop down Menus by floor names
+    for(let i = 0; i < totalFloors.length; i++) {
+        $('.control select').append('<option value='+i+'>'+totalFloorsname[i]+'</option>');
+     }
+     
+     //Change current floor by dropdown menu
+     $('.control select').change(function(){
+         $( "select option:selected" ).each(function(){
+
+            // conversion between currentFloorID with viewerFloorAPI.floors.name
+             console.log($( this ).text());
+             let index_in_floor_name = totalFloorsname.indexOf($( this ).text())
+             viewerFloorAPI.currentFloorId = totalFloors[index_in_floor_name];
+             console.log(viewerFloorAPI.currentFloorId)
+
+             $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+
+             //Checking if the current floor is on the highest or lowest floor
+             // lowest
+             if(viewerFloorAPI.currentFloorId == totalFloors[0]){
+                $('button[name="buttonUp"]').prop('disabled', false);
+                $('button[name="buttonDown"]').prop('disabled', true);
+                const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+                viewerPanoAPI.display(firstImageInFloor);
+                viewerMapAPI.redraw();
+             }
+             //highest
+             else if (viewerFloorAPI.currentFloorId == totalFloors[totalFloors.length-1]){
+                $('button[name="buttonUp"]').prop('disabled', true);
+                $('button[name="buttonDown"]').prop('disabled', false);
+                const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+                viewerPanoAPI.display(firstImageInFloor);
+                viewerMapAPI.redraw();
+             }
+             else{
+                $('button[name="buttonUp"]').prop('disabled', false);
+                $('button[name="buttonDown"]').prop('disabled', false);
+                const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+                viewerPanoAPI.display(firstImageInFloor);
+                viewerMapAPI.redraw();
+             }
+         });
+     });
+
+     //Up Button for changing currentfloor
+     $('button[name="buttonUp"]').click(function(){
+        
+        viewerFloorAPI.currentFloorId++;
+        $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+
+        // change to higher floor
+        if (viewerFloorAPI.currentFloorId == viewerFloorAPI.floors.length - 1) {
+
+            console.log("Cant change floors more, it's already on highest");
+
+            // disable the up button if it's already at the highest floor
+            $('button[name="buttonUp"]').prop('disabled', true); 
+            $('button[name="buttonDown"]').prop('disabled', false);
+            $('.control select').val(viewerFloorAPI.currentFloorId).change(); 
+            // $('button[name="buttonUp"]').hide();
+            // $('button[name="buttonDown"]').show();
+
+            // show map
+            const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+            viewerPanoAPI.display(firstImageInFloor);
+            viewerMapAPI.redraw();
+
+        } else {
+
+            //enable the up button if it's not in the highest floor
+            $('button[name="buttonUp"]').prop('disabled', false);
+            $('button[name="buttonDown"]').prop('disabled', false);
+            $('.control select').val(viewerFloorAPI.currentFloorId).change();
+            // $('button[name="buttonUp"]').show();
+            // $('button[name="buttonDown"]').show();
+             
+            // show map
+            const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+            viewerPanoAPI.display(firstImageInFloor);
+            viewerMapAPI.redraw();
+        }
+     });
+
+     //Down Button for changing currentfloor
+     $('button[name="buttonDown"]').click(function(){
+        
+        viewerFloorAPI.currentFloorId--;
+        $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+
+        // change to lower floor
+        if (viewerFloorAPI.currentFloorId < 1 ) {
+
+            console.log("Cant change floors more, it's already on lowest");
+
+            // disable the down button if it's already at the lowest floor
+            $('button[name="buttonUp"]').prop('disabled', false);
+            $('button[name="buttonDown"]').prop('disabled', true);
+            $('.control select').val(viewerFloorAPI.currentFloorId).change();
+            // $('button[name="buttonUp"]').show();
+            // $('button[name="buttonDown"]').hide();
+
+            // show map
+            const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+            viewerPanoAPI.display(firstImageInFloor);
+            viewerMapAPI.redraw();
+
+        } else {
+
+            //enable the down button if it's not in the lowest floor
+            $('button[name="buttonUp"]').prop('disabled', false);
+            $('button[name="buttonDown"]').prop('disabled', false);
+            $('.control select').val(viewerFloorAPI.currentFloorId).change();
+            // $('button[name="buttonUp"]').show();
+            // $('button[name="buttonDown"]').show();
+            
+            // show map
+            const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+            viewerPanoAPI.display(firstImageInFloor);
+            viewerMapAPI.redraw();
+        }
+    });
 }
 
 function keyPressed(e) {

@@ -22,3 +22,10 @@ body {
     cursor: -webkit-grabbing;
 }
 
+.control{
+    position: relative;
+    bottom: 200px;
+    left: 1500px;
+    color: #fff;
+}
+
