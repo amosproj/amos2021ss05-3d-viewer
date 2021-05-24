@@ -21,7 +21,6 @@ export class ViewerPanoAPI{
         sphere.scale(-1, 1, 1);
 
         // load the 360-panorama image data (one specific hardcoded for now)
-        //const texturePano = textureLoader.load('../assets/' + getFolderNumber(this.viewerImageAPI.currentImageId) + '/' + this.viewerImageAPI.currentImageId + 'r3.jpg');
         const texturePano = textureLoader.load(baseURL + getFolderNumber(this.viewerImageAPI.currentImageId) + '/' + this.viewerImageAPI.currentImageId + 'r3.jpg');
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
         
@@ -29,7 +28,9 @@ export class ViewerPanoAPI{
         const material = new THREE.MeshBasicMaterial({ map: texturePano });
         const mesh = new THREE.Mesh(sphere, material);
         const orientation = this.viewerImageAPI.currentImage.orientation;
-        // applyQuaternion(orientation); on something
+        mesh.applyQuaternion(orientation);
+
+        this.scene.clear();
         this.scene.add(mesh);
     }
 
@@ -55,6 +56,7 @@ export class ViewerPanoAPI{
 
     }
 
+    // TODO: remove because can be replaced by viewer longitude offset now
     // angle returned in realtion to real word: +-0 -> north, -90 -> east, +-180 -> south, +90 -> east
     getAngle(){
         var vector = new THREE.Vector3( 0, 0, - 1 );

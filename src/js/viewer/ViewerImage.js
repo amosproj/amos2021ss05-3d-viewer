@@ -16,7 +16,12 @@ export class ViewerImage {
     
         this.pos = [panoLon, panoLat, panoZ]; // : [Number] // WGS 84 coordinates [longitude, latitude, z] of this image
 
-        this.orientation = new THREE.Quaternion(x, y, z, w);
+        // The quaternion data available in the json is not quite compatible with the translation we need in our scene
+        const threeX = y;
+        const threeY = z;
+        const threeZ = x;
+
+        this.orientation = new THREE.Quaternion(threeX, threeY, threeZ, w);
 
         this.mapOffset; // : [offsetX, offsetY] // in pixels, offset from map png
         
