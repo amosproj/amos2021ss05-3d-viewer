@@ -361,7 +361,7 @@ function onDoubleClick(event) {
     convertedAngle = THREE.Math.degToRad(convertedAngle);
     const currentPos = viewerImageAPI.currentImage.pos;
     
-    const newPos = newLocationFromPointAngle(currentPos[0], currentPos[1], convertedAngle, distance)
+    const newPos = newLocationFromPointAngle(currentPos[0], currentPos[1], convertedAngle, distance);
 
     viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
 
