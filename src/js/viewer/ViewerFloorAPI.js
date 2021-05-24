@@ -50,22 +50,16 @@ export class ViewerFloorAPI {
             });
 
             this.floors.push(currentFloor);
-            console.log(currentFloor);
+           // console.log(currentFloor);
             
         });
 
         //lowest floor will be at lowest index and highest floor at floors.length-1
         this.floors.sort((a, b) => (a.z > b.z) ? 1 : -1);
-        //var currentImage={};
-        //this.currentImage=currentImage;
-        
-       // console.log("Currecut image id :"+currentImage.id);
-        //console.log(currentImage);
+
         this.currentFloorId = 0.0;
         viewerImageAPI.currentImageId = this.floors[this.currentFloorId].i[0][0];
-         console.log("------------The value of currentImageId------------------");
-        console.log(viewerImageAPI.currentImageId);
-       // this.currentImage=viewerImageAPI.currentImageId;
+   
        
     }
 
