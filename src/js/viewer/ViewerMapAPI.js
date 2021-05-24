@@ -1,12 +1,15 @@
+import { textureLoader, baseURL } from "./Globals.js";
+
 
 // Map (2D) Viewer API
 
 // Specific API for the Map View
 export class ViewerMapAPI {
 
-    constructor(mapPicturePath, viewerImageAPI) {
+    constructor(viewerImageAPI, viewerFloorAPI) {
         // hardcoded to work with assets/ for now
         this.viewerImageAPI = viewerImageAPI;
+        this.viewerFloorAPI = viewerFloorAPI;
         this.layers;
         this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
         this.camera = new THREE.OrthographicCamera( 
@@ -20,8 +23,9 @@ export class ViewerMapAPI {
 
         this.spriteGroup = new THREE.Group(); //create an sprite group
         this.mapScalingFactor = 0.2;
-
-        new THREE.TextureLoader().load(mapPicturePath, (texture) => {
+        
+        const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
+        textureLoader.load(mapPicturePath, (texture) => {
             const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
             material.renderOrder = 1;
             material.depthTest = false;
@@ -53,9 +57,10 @@ export class ViewerMapAPI {
    
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
-
-        /* remove comment to draw all points on map
-        let allImages = this.viewerImageAPI.currentFloor.viewerImages;
+        this.spriteGroup.clear();
+        
+        //* remove comment to draw all points on map
+        let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
         allImages.forEach(image => {
             this.addPoint("black", image.mapOffset);
         });
@@ -92,7 +97,7 @@ export class ViewerMapAPI {
     // Method
     scale() {
         //Get the scale used by the three.js scene overlayed over the map (2D) view.
-        return this.viewerImageAPI.currentFloor.mapData.density; //  (in meter / pixel)
+        return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
 
     

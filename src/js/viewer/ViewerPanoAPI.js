@@ -1,4 +1,4 @@
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV, getFolderNumber } from "./Globals.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV, getFolderNumber, textureLoader, baseURL } from "./Globals.js";
 
 export class ViewerPanoAPI{
 
@@ -21,7 +21,8 @@ export class ViewerPanoAPI{
         sphere.scale(-1, 1, 1);
 
         // load the 360-panorama image data (one specific hardcoded for now)
-        const texturePano = new THREE.TextureLoader().load('../assets/' + getFolderNumber(this.viewerImageAPI.currentImageId) + '/' + this.viewerImageAPI.currentImageId + 'r3.jpg');
+        //const texturePano = textureLoader.load('../assets/' + getFolderNumber(this.viewerImageAPI.currentImageId) + '/' + this.viewerImageAPI.currentImageId + 'r3.jpg');
+        const texturePano = textureLoader.load(baseURL + getFolderNumber(this.viewerImageAPI.currentImageId) + '/' + this.viewerImageAPI.currentImageId + 'r3.jpg');
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
         
         // put the texture on the spehere and add it to the scene
