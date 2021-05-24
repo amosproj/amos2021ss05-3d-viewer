@@ -10,6 +10,12 @@ import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
 import {ViewerState} from "./viewer/ViewerState.js";
 import {ViewerVersionAPI} from "./viewer/ViewerVersionAPI.js";
 
+let trackPosLon,trackPosLat,trackPosVert=0.0;
+
+let trackImageID,trackFloorName=0.0;
+
+let viewerState=null;
+
 let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI, viewerFloorAPI;
 
 let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
@@ -114,8 +120,24 @@ function onPointerDown(event) {
     // Two new event listeneres are called to handle *how far* the user drags
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
+    basicSetUp();
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -144,6 +166,7 @@ function onPointerUp() {
 
     document.removeEventListener('pointermove', onPointerMove);
     document.removeEventListener('pointerup', onPointerUp);
+   // basicSetUp();
 
 }
 
@@ -205,6 +228,15 @@ function onDoubleClick(event) {
 
     viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
 
+    trackPosLon=currentPos[0];
+    trackPosLat=currentPos[1];
+    trackPosVert=currentPos[2];
+    trackImageID=viewerImageAPI.currentImageId;
+    trackFloorName=viewerImageAPI.currentImage.floor;
+
+
+
+
 }
 
 function render() {
@@ -217,52 +249,43 @@ function render() {
 
 }
 
-//---------------------changes basic set up 18.05.2021---------------------------------------------
+
+   
 function basicSetUp(){
 
-    viewerImageAPI.viewerState=new ViewerState(null,null,null,null,[]) ;
 
-    //console.log("----The origin in the 3d diagram: -----",viewerImageAPI.origin);
-    
-    viewerImageAPI.viewerState.loc=viewerImageAPI.origin;
-    console.log("----The origin in the 3d diagram: -----");
-    console.log( viewerImageAPI.viewerState.loc);
-    //console.log();
-    //console.log("The ID of the currecntImage: ",viewerImageAPI.currentImageId);
-
-
-    viewerImageAPI.viewerState.imageNum=viewerImageAPI.currentImageId;
-    console.log("The ID of the currecntImage: ",viewerImageAPI.viewerState.imageNum);
-
-       //console.log();
-    //console.log("The name of the floor map: ",viewerImageAPI.floors[viewerImageAPI.currentFloorId].name);
-   
-
-    /*for(let key in viewerImageAPI.floors){
-        console.log(key);
-        console.log(viewerImageAPI.floors[key]);
-    }*/
-    viewerImageAPI.viewerState.floor=viewerImageAPI.floors[viewerImageAPI.currentFloorId].name;
-    console.log("The name of the floor map: ",viewerImageAPI.viewerState.floor);
-
-    //console.log("The number of the floor: ",viewerImageAPI.floors.z);
-   //console.log("The mouse moving lon is: ",viewerViewState.lonov * Math.PI / 180.0);
-   // console.log("The mouse moving lat is: ",viewerViewState.latov * Math.PI / 180.0);
-
-    viewerImageAPI.viewerState.view[2]=viewerViewState.latov* Math.PI / 180.0;
-    viewerImageAPI.viewerState.view[1]=viewerViewState.lonov* Math.PI / 180.0;
-    viewerImageAPI.viewerState.view[0]=viewerViewState.fov;
-    console.log("The mouse wheel moving angle is: ", viewerImageAPI.viewerState.view[0]);
-    console.log("The value of view in viewerState ","lon: "+viewerImageAPI.viewerState.view[1],"lat: "+viewerImageAPI.viewerState.view[2]);
-
-    viewerAPI.viewerVersionAPI=new ViewerVersionAPI(viewerAPI.MAJOR, viewerAPI.MINOR, viewerImageAPI.viewerState.view);
-
-
-    console.log("show the value of view value in viewerVersionAPI: ",viewerAPI.viewerVersionAPI.viewer);
-
+    var loc_para1=trackPosLon;
+    var loc_para2=trackPosLat;
+    var loc_para3=trackPosVert;
+    console.log("The para of loc_para1 ")
+    console.log(loc_para1);
+    var imageId=trackImageID;
+    var floors_name=trackFloorName;
+    var latov_rad=viewerViewState.latov* Math.PI / 180.0;
+    var lonov_rad=viewerViewState.lonov* Math.PI / 180.0;
+    var viewer_fov=viewerViewState.fov;
+    var vMajor=viewerAPI.MAJOR;
+    var vMinor=viewerAPI.MINOR;
+    var view_para=[];
+        
+   viewerState=new ViewerState([loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad]) ;
+   view_para=viewerState.view;
+   viewerAPI.viewerVersionAPI=new ViewerVersionAPI(vMajor, vMinor,view_para);
+   console.log("------------------------Test demo------------");
+   console.log("The currect position : "+viewerState.loc);
+ 
+   console.log("The ID of the currentImage: "+viewerState.imageNum);
+   console.log("The name of the floor map: "+viewerState.floor);
+   console.log("The mouse wheel moving angle is: ", viewerState.view[0]+" degree");
+   console.log("The value of view in viewerState ","lon: "+viewerState.view[1]," lat: "+viewerState.view[2]);
+  console.log("Show the value of view value in viewerVersionAPI: ",viewerAPI.viewerVersionAPI.viewer);
 
 }
-//---------------------changes basic set up 18.05.2021---------------------------------------------
+
+
+
+
+
 
 function getAngle(camera){
     var vector = new THREE.Vector3( 0, 0, - 1 );

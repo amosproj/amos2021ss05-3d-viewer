@@ -1,10 +1,12 @@
 "use strict";
 
 import { distanceWGS84TwoPoints } from "./Globals.js";
-
+//let currentImage;
+let currentImagepara;
 export class ViewerFloorAPI {
-
+   
     constructor(data, viewerImageAPI) {
+       // let currentImage;
         // The file «data.json» contains the metadata defining the panorama image locations.
             //"images" Array Images Array
             //"lon0" Number Reference longitude of model (WGS 84)
@@ -21,11 +23,14 @@ export class ViewerFloorAPI {
 
             // add ViewerImages corresponding to this floor
             viewerImageAPI.images.forEach((currentImage) => {
+
+              
                 // check if imageidx in any of the i intervalls
                 currentFloor.i.forEach((interval) => {
                     if (currentImage.id >= interval[0] && currentImage.id <= interval[1]) {
                         currentImage.floor = key;
-
+                       console.log("Currecut image id :"+currentImage.id);
+                        //id_temp=currentImage.id;
                         // dx, dy distance in kilometers
                         const [dx, dy] = distanceWGS84TwoPoints(data.lon0, data.lat0, currentImage.pos[0], currentImage.pos[1]);
 
@@ -35,18 +40,33 @@ export class ViewerFloorAPI {
                         currentImage.mapOffset = [offsetX, offsetY];
 
                         currentFloor.viewerImages.push(currentImage);
+                       
+                        
                     }
-                });
+                    
+                 });
+
+                 //currentImagepara=currentImage;
             });
 
             this.floors.push(currentFloor);
+            console.log(currentFloor);
+            
         });
 
         //lowest floor will be at lowest index and highest floor at floors.length-1
         this.floors.sort((a, b) => (a.z > b.z) ? 1 : -1);
-
+        //var currentImage={};
+        //this.currentImage=currentImage;
+        
+       // console.log("Currecut image id :"+currentImage.id);
+        //console.log(currentImage);
         this.currentFloorId = 0.0;
         viewerImageAPI.currentImageId = this.floors[this.currentFloorId].i[0][0];
+         console.log("------------The value of currentImageId------------------");
+        console.log(viewerImageAPI.currentImageId);
+       // this.currentImage=viewerImageAPI.currentImageId;
+       
     }
 
     all(callback) {
