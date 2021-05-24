@@ -23,9 +23,9 @@ body {
 }
 
 .control{
-    position: absolute;
-    bottom: 36%;
-    left: 86%;
+    position: fixed;
+    bottom: 30%;
+    right: 3%;
     color: #fff;
 }
 
