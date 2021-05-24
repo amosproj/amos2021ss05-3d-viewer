@@ -23,9 +23,9 @@ body {
 }
 
 .control{
-    position: relative;
-    bottom: 200px;
-    left: 1500px;
+    position: absolute;
+    bottom: 340px;
+    left: 1240px;
     color: #fff;
 }
 
