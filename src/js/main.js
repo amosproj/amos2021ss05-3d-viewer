@@ -271,14 +271,7 @@ function basicSetUp(){
    viewerState=new ViewerState([loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad]) ;
    view_para=viewerState.view;
    viewerAPI.viewerVersionAPI=new ViewerVersionAPI(vMajor, vMinor,view_para);
-   console.log("------------------------Test demo------------");
-   console.log("The currect position : "+viewerState.loc);
- 
-   console.log("The ID of the currentImage: "+viewerState.imageNum);
-   console.log("The name of the floor map: "+viewerState.floor);
-   console.log("The mouse wheel moving angle is: ", viewerState.view[0]+" degree");
-   console.log("The value of view in viewerState ","lon: "+viewerState.view[1]," lat: "+viewerState.view[2]);
-  console.log("Show the value of view value in viewerVersionAPI: ",viewerAPI.viewerVersionAPI.viewer);
+
 
 }
 
