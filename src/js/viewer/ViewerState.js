@@ -1,6 +1,6 @@
 export class ViewerState {
 
-    constructor([panoLon, panoLat, panz],imageIdx, name,[fov, lonov,latov] ) {
+   constructor([panoLon, panoLat, panz],imageIdx, name,[fov, lonov,latov]  ) {
 
         //this.big =
     
