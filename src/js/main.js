@@ -64,6 +64,7 @@ function init() {
 
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI, viewerFloorAPI);
 
+
     //----Control Menu (GUI)-----
 
     //Get number of Floors
@@ -228,7 +229,6 @@ function keyPressed(e) {
     switch(e.key) {
         case 'u':
             // change to higher floor
-            console.log(viewerFloorAPI.currentFloorId)
             if (viewerFloorAPI.currentFloorId >= viewerFloorAPI.floors.length - 1) {
                 console.log("Cant change floors alredy on highest");
             } else {
@@ -241,7 +241,6 @@ function keyPressed(e) {
             break;
         case 'd':
             // change to lower floor
-            console.log(viewerFloorAPI.currentFloorId)
             if (viewerFloorAPI.currentFloorId < 1) {
                 console.log("Cant change floors alredy on lowest");
             } else {
