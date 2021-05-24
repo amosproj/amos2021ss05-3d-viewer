@@ -252,54 +252,34 @@ function render() {
 
    
 function basicSetUp(){
-
-  
-    var loc_para1;
-    var loc_para2;
-    var loc_para3;
+   var loc_para1;
+   var loc_para2;
+   var loc_para3;
    var imageId;
    var floors_name;
-   
-   if(trackPosVert==0&&trackPosLat==null||trackPosVert==0&&trackPosLon==null){
-
-     loc_para1=viewerFloorAPI.floors[1].viewerImages[0].pos[0];
-     loc_para2=viewerFloorAPI.floors[1].viewerImages[0].pos[1];
-    loc_para3=viewerFloorAPI.floors[1].viewerImages[0].pos[2];
-    imageId=viewerFloorAPI.floors[1].viewerImages[0].id;
-    floors_name=viewerFloorAPI.floors[1].name;
-      
-
-
-
+if(trackPosVert==0&&trackPosLat==null||trackPosVert==0&&trackPosLon==null){
+   loc_para1=viewerFloorAPI.floors[1].viewerImages[0].pos[0];
+   loc_para2=viewerFloorAPI.floors[1].viewerImages[0].pos[1];
+   loc_para3=viewerFloorAPI.floors[1].viewerImages[0].pos[2];
+   imageId=viewerFloorAPI.floors[1].viewerImages[0].id;
+   floors_name=viewerFloorAPI.floors[1].name;
  }
   else{
-
-
-    loc_para1=trackPosLon;
-    loc_para2=trackPosLat;
+   loc_para1=trackPosLon;
+   loc_para2=trackPosLat;
    loc_para3=trackPosVert;
    imageId=trackImageID;
    floors_name=trackFloorName;
-
-
   }
-  
-
-
-
-
-  
-    var latov_rad=viewerViewState.latov* Math.PI / 180.0;
-    var lonov_rad=viewerViewState.lonov* Math.PI / 180.0;
-    var viewer_fov=viewerViewState.fov;
-    var vMajor=viewerAPI.MAJOR;
-    var vMinor=viewerAPI.MINOR;
-    var view_para=[];
-        
+   var latov_rad=viewerViewState.latov* Math.PI / 180.0;
+   var lonov_rad=viewerViewState.lonov* Math.PI / 180.0;
+   var viewer_fov=viewerViewState.fov;
+   var vMajor=viewerAPI.MAJOR;
+   var vMinor=viewerAPI.MINOR;
+   var view_para=[];
    viewerState=new ViewerState([loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad]) ;
    view_para=viewerState.view;
    viewerAPI.viewerVersionAPI=new ViewerVersionAPI(vMajor, vMinor,view_para);
-
 }
 
 
