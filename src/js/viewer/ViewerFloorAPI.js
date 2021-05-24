@@ -1,7 +1,10 @@
 "use strict";
 
 import { distanceWGS84TwoPoints } from "./Globals.js";
+//-------------------adding parameter-------------------------
+let currentImage;
 
+//--------------------------------------------
 export class ViewerFloorAPI {
 
     constructor(data, viewerImageAPI) {
@@ -20,7 +23,8 @@ export class ViewerFloorAPI {
             const currentFloor = new ViewerFloor(data.floors[key], key);
 
             // add ViewerImages corresponding to this floor
-            viewerImageAPI.images.forEach((currentImage) => {
+            //-----------change the name of currectImage to currentImagePara
+            viewerImageAPI.images.forEach((currentImagePara) => {
                 // check if imageidx in any of the i intervalls
                 currentFloor.i.forEach((interval) => {
                     if (currentImage.id >= interval[0] && currentImage.id <= interval[1]) {
@@ -47,6 +51,10 @@ export class ViewerFloorAPI {
 
         this.currentFloorId = 0.0;
         viewerImageAPI.currentImageId = this.floors[this.currentFloorId].i[0][0];
+        
+        //--------------adding new parameter of object-------------
+        this.currentImage=currentImage;
+        //--------------adding new parameter of object-------------
     }
 
     all(callback) {
