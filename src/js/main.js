@@ -287,12 +287,7 @@ function basicSetUp(){
 
 
 
-  console.log("The para of loc_para1 ")
-  console.log(loc_para1);
 
-   
-    console.log("The para of loc_para1 ")
-    console.log(loc_para1);
   
     var latov_rad=viewerViewState.latov* Math.PI / 180.0;
     var lonov_rad=viewerViewState.lonov* Math.PI / 180.0;
