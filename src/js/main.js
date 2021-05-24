@@ -189,25 +189,42 @@ function render() {
 
 
 function basicSetUp(){
-var loc_para1=viewerImageAPI.currentImage.pos[0];
- var loc_para2=viewerImageAPI.currentImage.pos[1];
- var loc_para3=viewerImageAPI.currentImage.pos[2];
- var imageId=viewerImageAPI.currentImageId;
- var floors_name=viewerImageAPI.floors[viewerImageAPI.currentFloorId].name;
- var latov_rad=viewerViewState.latov* Math.PI / 180.0;
- var lonov_rad=viewerViewState.lonov* Math.PI / 180.0;
- var viewer_fov=viewerViewState.fov;
- var vMajor=viewerAPI.MAJOR;
- var vMinor=viewerAPI.MINOR;
- var view_para=[];
- 
- 
- viewerImageAPI.viewerState=new ViewerState([loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad]) ;
 
- view_para=viewerImageAPI.viewerState.view;
+    //viewerImageAPI.viewerState=new ViewerState(null,null,null,null,[]) ;
 
- viewerAPI.viewerVersionAPI=new ViewerVersionAPI(vMajor, vMinor,view_para);
+    //console.log("----The origin in the 3d diagram: -----",viewerImageAPI.origin);
+    
+   // viewerImageAPI.viewerState.loc=viewerImageAPI.origin;
 
+     var object_para=viewerFloorAPI;
+     var loc_para1=object_para.currentImage.pos[0];
+     var loc_para2=object_para.currentImage.pos[1];
+     var loc_para3=object_para.currentImage.pos[2];
+     var imageId=object_para.currentImage.id;
+      console.log("Test demo");
+     console.log("-------------The current image id:--------------------",imageId);
+     var floors_name=object_para.floors[object_para.currentFloorId].name;
+     var latov_rad=viewerViewState.latov* Math.PI / 180.0;
+     var lonov_rad=viewerViewState.lonov* Math.PI / 180.0;
+     var viewer_fov=viewerViewState.fov;
+     var vMajor=viewerAPI.MAJOR;
+     var vMinor=viewerAPI.MINOR;
+     var view_para=[];
+     
+     
+     object_para.viewerState=new ViewerState([loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad]) ;
+
+     view_para=object_para.viewerState.view;
+    
+    viewerAPI.viewerVersionAPI=new ViewerVersionAPI(vMajor, vMinor,view_para);
+    
+    console.log("----The origin in the 3d diagram : -----");
+    console.log( object_para.viewerState.loc);
+    console.log("The ID of the currentImage: ",object_para.viewerState.imageNum);
+    console.log("The name of the floor map: "+object_para.viewerState.floor);
+    console.log("The mouse wheel moving angle is: ", object_para.viewerState.view[0]+" degree");
+    console.log("The value of view in viewerState ","lon: "+object_para.viewerState.view[1],"lat: "+object_para.viewerState.view[2]);
+    console.log("Show the value of view value in viewerVersionAPI: ",viewerAPI.viewerVersionAPI.viewer);
 
 
 }
