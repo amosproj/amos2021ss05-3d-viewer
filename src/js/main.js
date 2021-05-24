@@ -114,6 +114,7 @@ function onPointerDown(event) {
     // Two new event listeneres are called to handle *how far* the user drags
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
+    basicSetUp();//calling function basicSetUp();
 
 }
 
