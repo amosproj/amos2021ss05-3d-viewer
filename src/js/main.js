@@ -86,10 +86,11 @@ function init() {
         totalFloorsname.push(item.name);
     });
 
-    // temp totalfloors
-    let totalFloors = [0,1];
-    console.log(totalFloors);
-    console.log(viewerFloorAPI.floors[viewerFloorAPI.currentFloorId])
+    // push totalfloors into an array
+    let totalFloors = [];
+    for(var i = 0; i < viewerFloorAPI.floors.length; i++){
+        totalFloors.push(i); 
+    }
 
 
     //Checking if the current floor is on the highest or lowest floor
