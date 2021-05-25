@@ -6,15 +6,14 @@ import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV, newLocationFromPointAngle, baseURL } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
-//adding class
-import {ViewerState} from "./viewer/ViewerState.js";
-import {ViewerVersionAPI} from "./viewer/ViewerVersionAPI.js";
+import { ViewerState}  from "./viewer/ViewerState.js";
+import { ViewerVersionAPI } from "./viewer/ViewerVersionAPI.js";
 
-let trackPosLon,trackPosLat,trackPosVert=0.0;
+let trackPosLon, trackPosLat, trackPosVert = 0.0;
 
-let trackImageID,trackFloorName=0.0;
+let trackImageID, trackFloorName = 0.0;
 
-let viewerState=null;
+let viewerState = null;
 
 let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI, viewerFloorAPI;
 
@@ -41,7 +40,6 @@ function init() {
     // the only html element we work with (the pano-viewer div)
 
     // ----- init Map scene -----
-    //viewerMapAPI = new ViewerMapAPI("../assets/map-wb50.png", viewerImageAPI); // load in map texture 
     viewerMapAPI = new ViewerMapAPI(viewerImageAPI, viewerFloorAPI); // load in map texture 
 
     // ----- init Panorama scene -----
@@ -62,9 +60,6 @@ function init() {
     document.addEventListener('wheel', onDocumentMouseWheel);
     //document.addEventListener('resize', onWindowResize);
 
-    // Add listener for keyboard to test floor changing backend
-    document.body.addEventListener('keydown', keyPressed, false);
-
     // Create a function so that when the mouse is double clicked on any part of the panorama it leads to an event (change in image)
     document.addEventListener("dblclick", onDoubleClick);
 
@@ -78,10 +73,6 @@ function init() {
 
     //Show number of Floors
     $("#nof").text("Total Available Floors: "+ numOfFloors+". ");
-
-
-    //Get current floor
-    console.log(viewerFloorAPI.currentFloorId);
 
     //Show current floor
     $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
@@ -100,81 +91,66 @@ function init() {
 
 
     //Checking if the current floor is on the highest or lowest floor
-    if(viewerFloorAPI.currentFloorId == totalFloors[0]){
+    if (viewerFloorAPI.currentFloorId == totalFloors[0]) {
         $('button[name="buttonDown"]').prop('disabled', true);
-        console.log(viewerFloorAPI.currentFloorId)
     }
-    else if (viewerFloorAPI.currentFloorId == totalFloors[totalFloors.length-1]){
+    else if (viewerFloorAPI.currentFloorId == totalFloors[totalFloors.length - 1]) {
         $('button[name="buttonUp"]').prop('disabled', true);
-        console.log(viewerFloorAPI.currentFloorId)
     }
-    console.log(viewerFloorAPI.currentFloorId)
+
     //Create Drop down Menus by floor names
     for(let i = 0; i < totalFloors.length; i++) {
-        $('.control select').append('<option value='+i+'>'+totalFloorsname[i]+'</option>');
-     }
-     
-     //Change current floor by dropdown menu
-     $('.control select').change(function(){
-         $( "select option:selected" ).each(function(){
+        $('.control select').append('<option value=' + i + '>' + totalFloorsname[i] + '</option>');
+    }
+    
+    //Change current floor by dropdown menu
+    $('.control select').change(function () {
+        $("select option:selected").each(function (){
+        // conversion between currentFloorID with viewerFloorAPI.floors.name
+            let index_in_floor_name = totalFloorsname.indexOf($(this).text());
+            viewerFloorAPI.currentFloorId = totalFloors[index_in_floor_name];
 
-            // conversion between currentFloorID with viewerFloorAPI.floors.name
-             console.log($( this ).text());
-             let index_in_floor_name = totalFloorsname.indexOf($( this ).text())
-             viewerFloorAPI.currentFloorId = totalFloors[index_in_floor_name];
-             console.log(viewerFloorAPI.currentFloorId)
+            $("#cf").text("Current Floor: " + viewerFloorAPI.currentFloor.name + ". ");
 
-             $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
-
-             //Checking if the current floor is on the highest or lowest floor
-             // lowest
-             if(viewerFloorAPI.currentFloorId == totalFloors[0]){
+            // Checking if the current floor is on the highest or lowest floor
+            // lowest
+            if(viewerFloorAPI.currentFloorId == totalFloors[0]){
                 $('button[name="buttonUp"]').prop('disabled', false);
                 $('button[name="buttonDown"]').prop('disabled', true);
                 const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
                 viewerPanoAPI.display(firstImageInFloor);
                 viewerMapAPI.redraw();
-             }
-             //highest
-             else if (viewerFloorAPI.currentFloorId == totalFloors[totalFloors.length-1]){
+            }
+            //highest
+            else if (viewerFloorAPI.currentFloorId == totalFloors[totalFloors.length-1]){
                 $('button[name="buttonUp"]').prop('disabled', true);
                 $('button[name="buttonDown"]').prop('disabled', false);
                 const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
                 viewerPanoAPI.display(firstImageInFloor);
                 viewerMapAPI.redraw();
-             }
-             else{
+            } else {
                 $('button[name="buttonUp"]').prop('disabled', false);
                 $('button[name="buttonDown"]').prop('disabled', false);
                 const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
                 viewerPanoAPI.display(firstImageInFloor);
                 viewerMapAPI.redraw();
-             }
-         });
-     });
+            }
+        });
+    });
 
-     //Up Button for changing currentfloor
-     $('button[name="buttonUp"]').click(function(){
-        
+    //Up Button for changing currentfloor
+    $('button[name="buttonUp"]').click(function(){
+    
         viewerFloorAPI.currentFloorId++;
         $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
 
         // change to higher floor
         if (viewerFloorAPI.currentFloorId == viewerFloorAPI.floors.length - 1) {
 
-            console.log("Cant change floors more, it's already on highest");
-
             // disable the up button if it's already at the highest floor
             $('button[name="buttonUp"]').prop('disabled', true); 
             $('button[name="buttonDown"]').prop('disabled', false);
             $('.control select').val(viewerFloorAPI.currentFloorId).change(); 
-            // $('button[name="buttonUp"]').hide();
-            // $('button[name="buttonDown"]').show();
-
-            // show map
-            const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
-            viewerPanoAPI.display(firstImageInFloor);
-            viewerMapAPI.redraw();
 
         } else {
 
@@ -182,38 +158,29 @@ function init() {
             $('button[name="buttonUp"]').prop('disabled', false);
             $('button[name="buttonDown"]').prop('disabled', false);
             $('.control select').val(viewerFloorAPI.currentFloorId).change();
-            // $('button[name="buttonUp"]').show();
-            // $('button[name="buttonDown"]').show();
-             
-            // show map
-            const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
-            viewerPanoAPI.display(firstImageInFloor);
-            viewerMapAPI.redraw();
-        }
-     });
 
-     //Down Button for changing currentfloor
-     $('button[name="buttonDown"]').click(function(){
-        
+        }
+
+        // display pano from new floor and show new map
+        const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+        viewerPanoAPI.display(firstImageInFloor);
+        viewerMapAPI.redraw();
+    
+    });
+
+    //Down Button for changing currentfloor
+    $('button[name="buttonDown"]').click(function(){
+    
         viewerFloorAPI.currentFloorId--;
         $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
 
         // change to lower floor
         if (viewerFloorAPI.currentFloorId < 1 ) {
 
-            console.log("Cant change floors more, it's already on lowest");
-
             // disable the down button if it's already at the lowest floor
             $('button[name="buttonUp"]').prop('disabled', false);
             $('button[name="buttonDown"]').prop('disabled', true);
             $('.control select').val(viewerFloorAPI.currentFloorId).change();
-            // $('button[name="buttonUp"]').show();
-            // $('button[name="buttonDown"]').hide();
-
-            // show map
-            const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
-            viewerPanoAPI.display(firstImageInFloor);
-            viewerMapAPI.redraw();
 
         } else {
 
@@ -221,44 +188,14 @@ function init() {
             $('button[name="buttonUp"]').prop('disabled', false);
             $('button[name="buttonDown"]').prop('disabled', false);
             $('.control select').val(viewerFloorAPI.currentFloorId).change();
-            // $('button[name="buttonUp"]').show();
-            // $('button[name="buttonDown"]').show();
             
-            // show map
-            const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
-            viewerPanoAPI.display(firstImageInFloor);
-            viewerMapAPI.redraw();
         }
-    });
-}
 
-function keyPressed(e) {
-    switch(e.key) {
-        case 'u':
-            // change to higher floor
-            if (viewerFloorAPI.currentFloorId >= viewerFloorAPI.floors.length - 1) {
-                console.log("Cant change floors alredy on highest");
-            } else {
-                viewerFloorAPI.currentFloorId++;
-                
-                const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
-                viewerPanoAPI.display(firstImageInFloor);
-                viewerMapAPI.redraw();
-            }
-            break;
-        case 'd':
-            // change to lower floor
-            if (viewerFloorAPI.currentFloorId < 1) {
-                console.log("Cant change floors alredy on lowest");
-            } else {
-                viewerFloorAPI.currentFloorId--;
-                
-                const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
-                viewerPanoAPI.display(firstImageInFloor);
-                viewerMapAPI.redraw();
-            }
-            break;
-    }
+        // display pano from new floor and show new map
+        const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+        viewerPanoAPI.display(firstImageInFloor);
+        viewerMapAPI.redraw();
+    });
 }
 
 function animate() {
@@ -309,7 +246,6 @@ function onPointerUp() {
 
     document.removeEventListener('pointermove', onPointerMove);
     document.removeEventListener('pointerup', onPointerUp);
-   // basicSetUp();
 
 }
 
@@ -391,36 +327,36 @@ function render() {
 
    
 function basicSetUp() {
-   var loc_para1;
-   var loc_para2;
-   var loc_para3;
-   var imageId;
-   var floors_name;
-   if (trackPosVert == 0 && trackPosLat == null || trackPosVert == 0 && trackPosLon == null) {
-      imageId = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].id;
-      floors_name = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].name;
-      loc_para1 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[0];
-      loc_para2 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[1];
-      loc_para3 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[2];
- 
-   } else {
-     loc_para1 = trackPosLon;
-     loc_para2 = trackPosLat;
-     loc_para3 = trackPosVert;
-     imageId = trackImageID;
-     floors_name = trackFloorName;
-  
-   }
-   var latov_rad = viewerViewState.latov * Math.PI / 180.0;
-   var lonov_rad = viewerViewState.lonov * Math.PI / 180.0;
-   var viewer_fov = viewerViewState.fov;
-   var vMajor = viewerAPI.MAJOR;
-   var vMinor = viewerAPI.MINOR;
-   var view_para = [];
-   viewerState = new ViewerState( [loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad] ) ;
-   view_para = viewerState.view;
-   viewerAPI.viewerVersionAPI = new ViewerVersionAPI(vMajor, vMinor,view_para);
- 
+    var loc_para1;
+    var loc_para2;
+    var loc_para3;
+    var imageId;
+    var floors_name;
+    if (trackPosVert == 0 && trackPosLat == null || trackPosVert == 0 && trackPosLon == null) {
+        imageId = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].id;
+        floors_name = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].name;
+        loc_para1 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[0];
+        loc_para2 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[1];
+        loc_para3 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[2];
+    
+    } else {
+        loc_para1 = trackPosLon;
+        loc_para2 = trackPosLat;
+        loc_para3 = trackPosVert;
+        imageId = trackImageID;
+        floors_name = trackFloorName;
+    
+    }
+    var latov_rad = viewerViewState.latov * Math.PI / 180.0;
+    var lonov_rad = viewerViewState.lonov * Math.PI / 180.0;
+    var viewer_fov = viewerViewState.fov;
+    var vMajor = viewerAPI.MAJOR;
+    var vMinor = viewerAPI.MINOR;
+    var view_para = [];
+    viewerState = new ViewerState( [loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad] ) ;
+    view_para = viewerState.view;
+    viewerAPI.viewerVersionAPI = new ViewerVersionAPI(vMajor, vMinor,view_para);
+    
 }
 
 
