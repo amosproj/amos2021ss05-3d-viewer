@@ -216,10 +216,6 @@ function onDoubleClick(event) {
     trackPosVert=currentPos[2];
     trackImageID=viewerImageAPI.currentImageId;
     trackFloorName=viewerImageAPI.currentImage.floor;
-
-
-
-
 }
 
 function render() {
