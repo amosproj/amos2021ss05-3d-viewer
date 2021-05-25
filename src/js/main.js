@@ -233,7 +233,7 @@ function onPointerMove(event) {
     viewerViewState.latov = Math.max(-85, Math.min(85, viewerViewState.latov));
 
     // Get the direction of the camera 
-    var dir = new THREE.Vector3(0,0,1); 
+    var dir = new THREE.Vector3(0, 0, 1);
     viewerPanoAPI.camera.getWorldDirection(dir);
 
     // Draw on the map 

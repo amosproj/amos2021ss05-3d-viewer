@@ -10,10 +10,10 @@ export class ViewerState {
     
         this.loc = [panoLon, panoLat, panz]; // : [Number] // WGS 84 coordinates [longitude, latitude, z] of this image
 
-        //this.fov = fov; // : Number // Field of view (in degrees)
-       // viewerViewState1= new ViewerViewState(DEFAULT_FOV, 0, 0)
-       this.view=[fov, lonov, latov];
-   
+        this.fov = fov; // : Number // Field of view (in degrees)
+        
+        this.view = [fov, lonov, latov];
+
     }
 
 }
