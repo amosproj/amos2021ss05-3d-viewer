@@ -27,8 +27,14 @@ export class ViewerPanoAPI{
         // put the texture on the spehere and add it to the scene
         const material = new THREE.MeshBasicMaterial({ map: texturePano });
         const mesh = new THREE.Mesh(sphere, material);
+    
         const orientation = this.viewerImageAPI.currentImage.orientation;
-        // applyQuaternion(orientation); on something
+        const quaternion = new THREE.Quaternion(orientation);
+
+        this.camera.applyQuaternion(quaternion); // Apply Quaternion
+
+        this.camera.quaternion.normalize();  // Normalize Quaternion
+
         this.scene.add(mesh);
     }
 
