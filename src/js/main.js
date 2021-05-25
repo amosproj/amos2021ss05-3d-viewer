@@ -94,8 +94,12 @@ function onPointerMove(event) {
     // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
     viewerViewState.latov = Math.max(-85, Math.min(85, viewerViewState.latov));
 
-    // Draw and update the viewing angle on the Map
-    //viewerMapAPI.addVieweingDirection(viewerViewState.lonov, viewerViewImage.pos);  //drawArrow(viewerViewImage.pos, viewerMapAPI.scene);
+    // Get the direction of the camera 
+    var dir = new THREE.Vector3(0,0,1); 
+    viewerPanoAPI.camera.getWorldDirection(dir);
+
+    // Draw on the map 
+    drawArrow(dir, viewerMapAPI.scene);
 
 }
 
@@ -236,37 +240,19 @@ function getAngle(camera){
 }
 
 
-function drawArrow(position  , scene ){
-    console.log(position );
-    direction = new THREE.Vector3(position);
+function drawArrow(direction, scene ){
+
     //normalize the direction vector (convert to vector of length 1)
     direction.normalize();
 
-
     //Create the arrow vetor
-    const origin = new THREE.Vector3(0,0,0);
+    const origin = new THREE.Vector3(0,0, 0 );
     const length = 20;
     const hex = 0xff0000; // red color
     var arrowHelper = new THREE.ArrowHelper( direction, origin, length, hex );
     scene.add(arrowHelper); 
 
 }
-
-function calcPosFromLatLonRad(radius, lat, lon) {
-
-    var spherical = new THREE.Spherical(
-      radius,
-      THREE.Math.degToRad(90 - lon),
-      THREE.Math.degToRad(lat)
-    );
-  
-    var vector = new THREE.Vector3();
-    vector.setFromSpherical(spherical);
-  
-    // console.log(vector.x, vector.y, vector.z);
-    return vector;
-  }
-
 
 function updateArrow(arrowHelper, direction){
     // update the arrow position

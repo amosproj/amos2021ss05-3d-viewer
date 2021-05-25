@@ -7,7 +7,6 @@ export class ViewerMapAPI {
     constructor(mapPicturePath, viewerImageAPI) {
         // hardcoded to work with assets/ for now
         this.viewerImageAPI = viewerImageAPI;
-
         this.layers;
         this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
         this.camera = new THREE.OrthographicCamera( 
@@ -55,16 +54,15 @@ export class ViewerMapAPI {
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
 
-        // /* remove comment to draw all points on map
+        /* remove comment to draw all points on map
         let allImages = this.viewerImageAPI.currentFloor.viewerImages;
         allImages.forEach(image => {
             this.addPoint("black", image.mapOffset);
         });
         //*/
-        this.addViewingDirection("yellow", this.viewerImageAPI.currentImage.mapOffset); 
-        //this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
-    }
 
+        this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
+    }
 
     // draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
     addPoint(color, offset) {
@@ -97,47 +95,10 @@ export class ViewerMapAPI {
         return this.viewerImageAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
 
+    
 
-    addViewingDirection(color, position){
-        const texture = new THREE.Texture(generateTriangleCanvas(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture
-        });
-
-        // Create the sprite
-        let triangleSprite = new THREE.Sprite(mat);
-        triangleSprite.center.set(0.0, 0.0);
-
-        // Draw it at The localization point
-        triangleSprite.position.set(-this.mapScalingFactor * position[0], this.mapScalingFactor * position[1], -3);
-
-        //scale the point
-        triangleSprite.scale.set(10, 10, 1);
-        this.spriteGroup.add(triangleSprite);
-
-    }
-
- 
 }
 
-function createTriangle(color)
-{
-    var geometry = new THREE.Geometry();
-    var v1 = new THREE.Vector3(0,0,0);   // Vector3 used to specify position
-    var v2 = new THREE.Vector3(3,0,0);
-    var v3 = new THREE.Vector3(0,3,0);   // 2d = all vertices in the same plane.. z = 0
-
-    // add new geometry based on the specified positions
-    geometry.vertices.push(v1);
-    geometry.vertices.push(v2);
-    geometry.vertices.push(v3);
-    geometry.faces.push(new THREE.Face3(0, 2, 1));
-
-    var redMat = new THREE.MeshBasicMaterial({color: 0xff0000}); //black
-    var triangle = new THREE.Mesh(geometry, redMat);     
-    return triangle;
-}
 
 function generateCircularSprite(color) {
     var canvas = document.createElement('canvas');
@@ -156,27 +117,3 @@ function generateCircularSprite(color) {
 
 }
 
-function generateTriangleCanvas(color){
-    var canvasTri = document.createElement('canvas');
-    //canvas.height = 300;
-    //canvas.width = 300;
-    var context = canvasTri.getContext('2d');
-
-    //Cretae triangle shape
-    context.beginPath();
-    context.moveTo(200, 100);
-    context.lineTo(300, 300);
-    context.lineTo(100, 300);
-    context.closePath();
-    
-    // outline
-    context.lineWidth = 10;
-    context.strokeStyle = '0xff0000'; //black
-    context.stroke();
-    
-    // the fill color
-    context.fillStyle = color;
-    //context.globalAlpha(0.5); 
-    context.fill();
-    return context; 
-}
