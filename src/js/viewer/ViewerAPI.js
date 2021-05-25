@@ -11,13 +11,9 @@ export class ViewerAPI {
         this.viewerPanoAPI = viewerPanoAPI;
         this.viewerMapAPI = viewerMapAPI;
         this.viewerFloorAPI = viewerFloorAPI;
-        this.libs = libraryInfo(); // List of used third party libraries
-        
-        
-       this.MAJOR =null;//adding in 18.05.2021
-
-      
-       this.MINOR =null;// adding in 18.05.2021
+        this.libs = libraryInfo(); // List of used third party libraries     
+        this.MAJOR =null; 
+        this.MINOR =null; 
     }
 
 
@@ -29,14 +25,11 @@ export class ViewerAPI {
         this.viewerFloorAPI.currentFloor.viewerImages.forEach(element => {
             const currDistances = distanceWGS84TwoPoints(lon, lat, element.pos[0], element.pos[1]);
             const currDistance = Math.sqrt(currDistances[0] * currDistances[0] + currDistances[1] * currDistances[1]);
-
-            // found new best?
             if (currDistance < minDistance) {
                 minDistance = currDistance;
                 bestImg = element;
             }
         });
-
 
         // avoid duplication
         if (bestImg != this.viewerImageAPI.currentImage) {
