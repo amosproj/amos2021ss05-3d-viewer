@@ -124,23 +124,6 @@ function onPointerDown(event) {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // handles continues update of the distance mouse moved
 function onPointerMove(event) {
 
