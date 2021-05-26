@@ -31,3 +31,96 @@ Non-functional properties of the software shall be:
 &nbsp; &nbsp;   ● Can be integrated into other web applications
   
 The computer science department would like to use this viewer to display its 50 years of computer science department exhibition on the web.
+
+# 3D Panorama Viewer | AMOS Project 5
+## Software Build and Deployment Document
+
+- [Introduction](#introduction)
+- [Project Repository](#project-repository)
+- [Bill of Material:](#bill-of-material)
+- [Build Process](#build-process)
+- [Deployment](#deployment)
+- [Launching](#laaunching)
+- [Testing](#testing)
+  
+  * [Testing](#testing)
+
+# Introduction
+
+The purpose of this Software was to create an easy, user-friendly 3D Panorama viewer which has different functions like zooming in, rotating, switching between panoramas. A map should also be included to enable the user to know their location whilst moving through the rooms/floors. This document provides information on how to build/deploy the 3D Panorama viewer.
+
+
+# Project Repository
+
+
+## Github organisation structure
+
+### base folder: [/main](https://github.com/amosproj/amos-ss2021-3d-viewer/find/main):
+
+-   **/deliverables**:
+     textual deliverables, i.e. documents (pdf, doc, etc.), or software deliverables
+
+
+-   **/assets**:
+    manages URL generation and versioning of web assets such as CSS stylesheets, JavaScript files, and image files
+
+-   **/src**:
+    stands for source, and is the raw code before minification or concatenation or some other compilation - used to read/edit the code
+
+
+-   **/gitignore**:
+   is a text file that tells Git which files or folders to ignore in a project
+   
+   
+-   **/license**:
+    MIT License
+    A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
+    
+
+##  Folder Structure
+### base folder: [/src](https://github.com/amosproj/amos-ss2021-3d-viewer/tree/main/src):
+
+It includes css(inside PanoViewer div),js,libs and index.html
+
+*  **/src/js/viewer**:
+  includes the general viewer files
+  
+*  **/src/libs**:
+  includes jQuery and Three.js Library files
+
+
+## Folder Structure
+
+### base folder: (/backend):
+
+Includes 
+
+
+
+# Bill of Material
+
+- [Node.js](https://nodejs.org/en/): JavaScript runtime environment Backend
+
+- [the three.js NPM package](https://www.npmjs.com/package/three): JavaScript library and API for animated 3D graphics
+
+- [WebGL Overview - The Khronos Group Inc](https://www.khronos.org/webgl/): JavaScript API for rendering interactive 2D and 3D graphics
+
+- [License | jQuery Foundation](https://jquery.org/license/): JavaScript library for simple HTML DOM manipulation
+
+- [org.w3c.dom (Java Platform SE 8 ](https://docs.oracle.com/javase/8/docs/api/org/w3c/dom/package-summary.html): Web APIs frontend for display Visualizations basics
+
+
+# Build Process
+## Setup and start the Frontend
+  * As the software is written in web technologies (html, css and mostly javascript), the files will be delivered to the client end of users. 
+  * There the browser will compile the javascript, link all the files together and render the final result in the browser window on the users monitor.
+  
+# Deployment
+The codebase includes everything from the HTML index file to minified versions of the javascript libraries in use. Thus the deployment is simply to copy it on a webserver and have it deliver the content via HTTP to the user. The base directory for a panorama image dataset has to be set in “Globals.js”(https://github.com/amosproj/amos-ss2021-3d-viewer/blob/main/src/js/viewer/Globals.js).
+
+# Launching
+ - It is recommended to launch the backend in Visual Studio via Live Server. The launch settings can be found in the index.html file in the (/https://github.com/amosproj/amos-ss2021-3d-viewer/blob/main/src/index.html).
+- The launch can be done using any common Web browser.
+
+# Testing
+- Once the Solution is running in the Browser you can test all the functions. 
