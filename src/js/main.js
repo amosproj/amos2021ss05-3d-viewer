@@ -111,7 +111,7 @@ function onPointerMove(event) {
     viewerPanoAPI.camera.getWorldDirection(dir);
 
     // Draw on the map 
-    drawArrow(dir, viewerMapAPI.scene);
+    //viewer. drawArrow(dir, viewerMapAPI.scene);
 
 }
 

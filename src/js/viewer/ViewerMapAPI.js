@@ -67,6 +67,7 @@ export class ViewerMapAPI {
         //*/
 
         this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
+        //this.addViewingDirection("yellow",  this.viewerImageAPI.currentImage.mapOffset);
     }
 
     // draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
@@ -99,8 +100,29 @@ export class ViewerMapAPI {
         //Get the scale used by the three.js scene overlayed over the map (2D) view.
         return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
-
     
+    addViewingDirection(color, position){
+        const texture = new THREE.Texture(generateTriangleCanvas(color));
+        texture.needsUpdate = true;
+        var mat = new THREE.SpriteMaterial({
+            map: texture
+        });
+        position 
+        // Create the sprite
+        let triangleSprite = new THREE.Sprite(mat);
+        triangleSprite.center.set(0.0, 0.0);
+
+        // Draw it at The localization point
+        triangleSprite.position.set(-this.mapScalingFactor * position[0], this.mapScalingFactor * position[1], -3);
+
+        //var quartenion = new THREE.Quaternion(this.viewerImageAPI.currentImage.orientation);
+        //triangleSprite.transform.rotation = rotation;
+        //scale the point
+        triangleSprite.scale.set(10, 10, 1);
+        this.spriteGroup.add(triangleSprite);
+
+    }
+
 
 }
 
@@ -122,3 +144,24 @@ function generateCircularSprite(color) {
 
 }
 
+function generateTriangleCanvas(color){
+    var canvasTri = document.createElement('canvas');
+    var context = canvasTri.getContext('2d');
+
+    //Cretae triangle shape
+    context.beginPath();
+    context.moveTo(200, 100);
+    context.lineTo(300, 300);
+    context.lineTo(100, 300);
+    context.closePath();
+    
+    // outline
+    context.lineWidth = 10;
+    context.strokeStyle = '0xff0000'; //blue
+    context.stroke();
+    
+    // the fill color
+    context.fillStyle = color;
+    context.fill();
+    return context; 
+}
