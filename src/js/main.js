@@ -108,9 +108,8 @@ function onPointerMove(event) {
     // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
     viewerViewState.latov = Math.max(-85, Math.min(85, viewerViewState.latov));
 
-    // Get the direction of the camera 
-    var dir = new THREE.Vector3(0, 0, 1);
-    viewerPanoAPI.camera.getWorldDirection(dir);
+    // keep lonov between 0 and 360
+    viewerViewState.lonov = (viewerViewState.lonov + 360) % 360;
 
     // Draw on the map 
     //viewer. drawArrow(dir, viewerMapAPI.scene);
@@ -160,7 +159,7 @@ function onDoubleClick(event) {
     const halfWidth = window.innerWidth / 2;
     const halfHeight = window.innerHeight / 2;
 
-    const horizontalAngle = viewerPanoAPI.getAngle();
+    const horizontalAngle = (viewerViewState.lonov > 270) ? 450 - viewerViewState.lonov : -(viewerViewState.lonov - 90);
     const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the click is
     const adjustedHorizontalAngle = horizontalAngle - (horizontalOffset * viewerViewState.fov / 2); // line from current position towards where the mouse double clicked (2D birds eye view angle)
 

@@ -56,16 +56,4 @@ export class ViewerPanoAPI{
 
     }
 
-    // TODO: remove because can be replaced by viewer longitude offset now
-    // angle returned in realtion to real word: +-0 -> north, -90 -> east, +-180 -> south, +90 -> east
-    getAngle(){
-        var vector = new THREE.Vector3( 0, 0, - 1 );
-        // Get the direction of the camera 
-        vector = this.camera.getWorldDirection();
-        // Compute the viewing angle direction
-        var theta = Math.atan2(vector.x,vector.z);
-        // Return the angle in degrees
-        var angle = THREE.Math.radToDeg( theta );
-        return angle; 
-    }
 }
