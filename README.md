@@ -37,9 +37,8 @@ The computer science department would like to use this viewer to display its 50 
 
 - [Project Repository](#project-repository)
 - [Bill of Material](#bill-of-material)
-- [Build Process](#build-process)
- 
 
+ 
 # Project Repository
 
 
@@ -100,11 +99,6 @@ Includes the js files and main.js
 - [org.w3c.dom (Java Platform SE 8 ](https://docs.oracle.com/javase/8/docs/api/org/w3c/dom/package-summary.html): Web APIs frontend for display Visualizations basics
 
 
-# Build Process
-## Setup and start the Frontend
-  * As the software is written in web technologies (html, css and mostly javascript), the files will be delivered to the client end of users. 
-  * There the browser will compile the javascript, link all the files together and render the final result in the browser window on the users monitor.
-  
 
  You can find further details about the project in the associated documents.
  
