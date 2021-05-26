@@ -37,7 +37,7 @@ The computer science department would like to use this viewer to display its 50 
 
 - [Introduction](#introduction)
 - [Project Repository](#project-repository)
-- [Bill of Material:](#bill-of-material)
+- [Bill of Material](#bill-of-material)
 - [Build Process](#build-process)
 - [Deployment](#deployment)
 - [Launching](#laaunching)
