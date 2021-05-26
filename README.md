@@ -43,7 +43,6 @@ The computer science department would like to use this viewer to display its 50 
 - [Launching](#laaunching)
 - [Testing](#testing)
   
-  * [Testing](#testing)
 
 # Introduction
 
@@ -78,7 +77,7 @@ The purpose of this Software was to create an easy, user-friendly 3D Panorama vi
     
 
 ##  Folder Structure
-### base folder: [/src](https://github.com/amosproj/amos-ss2021-3d-viewer/tree/main/src):
+### base folder: [/src](https://github.com/amosproj/amos-ss2021-3d-viewer/tree/main/src): Frontend
 
 It includes css(inside PanoViewer div),js,libs and index.html
 
@@ -91,9 +90,9 @@ It includes css(inside PanoViewer div),js,libs and index.html
 
 ## Folder Structure
 
-### base folder: (/backend):
+### base folder: [/src](https://github.com/amosproj/amos-ss2021-3d-viewer/tree/main/src/js): Backend
 
-Includes 
+Includes the js files and main.js
 
 
 
