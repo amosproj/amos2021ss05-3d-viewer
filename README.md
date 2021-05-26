@@ -35,15 +35,10 @@ The computer science department would like to use this viewer to display its 50 
 # 3D Panorama Viewer | AMOS Project 5
 ## Software Build and Deployment Document
 
-- [Introduction](#introduction)
 - [Project Repository](#project-repository)
 - [Bill of Material](#bill-of-material)
 - [Build Process](#build-process)
-  
-
-# Introduction
-
-The purpose of this Software was to create an easy, user-friendly 3D Panorama viewer which has different functions like zooming in, rotating, switching between panoramas. A map should also be included to enable the user to know their location whilst moving through the rooms/floors. This document provides information on how to build/deploy the 3D Panorama viewer.
+ 
 
 
 # Project Repository
