@@ -5,6 +5,8 @@ import { distanceWGS84TwoPoints } from "./Globals.js";
 export class ViewerFloorAPI {
    
     constructor(data, viewerImageAPI) {
+        this.viewerPanoAPI;
+        this.viewerMapAPI;
         // The file «data.json» contains the metadata defining the panorama image locations.
             //"images" Array Images Array
             //"lon0" Number Reference longitude of model (WGS 84)
@@ -58,6 +60,27 @@ export class ViewerFloorAPI {
     get currentFloor() {
         return this.floors[this.currentFloorId];
     }
+
+    set(name) {
+        this.floors.forEach(function (element, index) {
+            // found the floor
+            if (element.name == name) {
+                this.currentFloorId = index;
+
+                // display pano from new floor and show new map
+                const firstImageInFloor = this.floors[this.currentFloorId].i[0][0];
+                this.viewerPanoAPI.display(firstImageInFloor);
+                this.viewerMapAPI.redraw();
+                return;
+            }
+        });
+    }
+
+    setViewerPanoAndImageAPI(viewerPanoAPI, viewerMapAPI) {
+        this.viewerPanoAPI = viewerPanoAPI;
+        this.viewerMapAPI = viewerMapAPI;
+    }
+
 }
 
 class ViewerFloor {
