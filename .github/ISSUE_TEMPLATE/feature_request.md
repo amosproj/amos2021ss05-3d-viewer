@@ -14,5 +14,8 @@ about: Suggest new feature (using user story)
 * ...
 
 ## Definition of done
-* Added only after week 5
-* The same for all features
+* Code has been peer reviewed
+* Documentation has been updated
+* Code has been included into the release (candidate)
+* No syntax / runtime errors
+* Code is well structured and formatted

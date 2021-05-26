@@ -359,19 +359,37 @@ function createControlMenuButtons() {
 }
 
 
-function drawArrow(direction, scene ){
-
+function drawArrow(position  , scene ){
+    console.log(position );
+    direction = new THREE.Vector3(position);
     //normalize the direction vector (convert to vector of length 1)
     direction.normalize();
 
+
     //Create the arrow vetor
-    const origin = new THREE.Vector3(0,0, 0 );
+    const origin = new THREE.Vector3(0,0,0);
     const length = 20;
     const hex = 0xff0000; // red color
     var arrowHelper = new THREE.ArrowHelper( direction, origin, length, hex );
     scene.add(arrowHelper); 
 
 }
+
+function calcPosFromLatLonRad(radius, lat, lon) {
+
+    var spherical = new THREE.Spherical(
+      radius,
+      THREE.Math.degToRad(90 - lon),
+      THREE.Math.degToRad(lat)
+    );
+  
+    var vector = new THREE.Vector3();
+    vector.setFromSpherical(spherical);
+  
+    // console.log(vector.x, vector.y, vector.z);
+    return vector;
+  }
+
 
 function updateArrow(arrowHelper, direction){
     // update the arrow position
