@@ -39,9 +39,6 @@ The computer science department would like to use this viewer to display its 50 
 - [Project Repository](#project-repository)
 - [Bill of Material](#bill-of-material)
 - [Build Process](#build-process)
-- [Deployment](#deployment)
-- [Launching](#laaunching)
-- [Testing](#testing)
   
 
 # Introduction
@@ -114,12 +111,8 @@ Includes the js files and main.js
   * As the software is written in web technologies (html, css and mostly javascript), the files will be delivered to the client end of users. 
   * There the browser will compile the javascript, link all the files together and render the final result in the browser window on the users monitor.
   
-# Deployment
-The codebase includes everything from the HTML index file to minified versions of the javascript libraries in use. Thus the deployment is simply to copy it on a webserver and have it deliver the content via HTTP to the user. The base directory for a panorama image dataset has to be set in “Globals.js”(https://github.com/amosproj/amos-ss2021-3d-viewer/blob/main/src/js/viewer/Globals.js).
 
-# Launching
- - It is recommended to launch the backend in Visual Studio via Live Server. The launch settings can be found in the index.html file in the (/https://github.com/amosproj/amos-ss2021-3d-viewer/blob/main/src/index.html).
-- The launch can be done using any common Web browser.
-
-# Testing
-- Once the Solution is running in the Browser you can test all the functions. 
+ You can find further details about the project in the associated documents.
+1. [User Documentation](https://github.com/amosproj/amos-ss2021-3d-viewer/wiki/User-Documentation)
+2. [Build/Deployment Documentation](https://github.com/amosproj/amos-ss2021-3d-viewer/wiki/Build--deploy-Documentation)
+3. [Technical Documentation](https://github.com/amosproj/amos-ss2021-3d-viewer/wiki/Technical-Documentation)
