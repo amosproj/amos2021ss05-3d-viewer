@@ -40,7 +40,6 @@ The computer science department would like to use this viewer to display its 50 
 - [Build Process](#build-process)
  
 
-
 # Project Repository
 
 
@@ -108,6 +107,7 @@ Includes the js files and main.js
   
 
  You can find further details about the project in the associated documents.
+ 
 1. [User Documentation](https://github.com/amosproj/amos-ss2021-3d-viewer/wiki/User-Documentation)
 2. [Build/Deployment Documentation](https://github.com/amosproj/amos-ss2021-3d-viewer/wiki/Build--deploy-Documentation)
 3. [Technical Documentation](https://github.com/amosproj/amos-ss2021-3d-viewer/wiki/Technical-Documentation)
