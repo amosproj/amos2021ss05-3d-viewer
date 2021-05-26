@@ -1,6 +1,7 @@
 "use strict";
 
 export class ViewerViewState{
+
     constructor(fov, latov, lonov) {
         this.fov = fov; // : Number // Field of view (in degrees)
 
@@ -8,4 +9,5 @@ export class ViewerViewState{
 
         this.lonov = lonov; // : Number // View longitude (in degrees)
     }
+    
 }

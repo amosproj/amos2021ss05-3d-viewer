@@ -1,12 +1,15 @@
+import { textureLoader, baseURL } from "./Globals.js";
+
 
 // Map (2D) Viewer API
 
 // Specific API for the Map View
 export class ViewerMapAPI {
 
-    constructor(mapPicturePath, viewerImageAPI) {
+    constructor(viewerImageAPI, viewerFloorAPI) {
         // hardcoded to work with assets/ for now
         this.viewerImageAPI = viewerImageAPI;
+        this.viewerFloorAPI = viewerFloorAPI;
 
         this.layers;
         this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
@@ -21,8 +24,9 @@ export class ViewerMapAPI {
 
         this.spriteGroup = new THREE.Group(); //create an sprite group
         this.mapScalingFactor = 0.2;
-
-        new THREE.TextureLoader().load(mapPicturePath, (texture) => {
+        
+        const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
+        textureLoader.load(mapPicturePath, (texture) => {
             const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
             material.renderOrder = 1;
             material.depthTest = false;
@@ -54,15 +58,19 @@ export class ViewerMapAPI {
    
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
+        this.spriteGroup.clear();
+        
+        //* remove comment to draw all points on map
+        let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
 
-        // /* remove comment to draw all points on map
-        let allImages = this.viewerImageAPI.currentFloor.viewerImages;
         allImages.forEach(image => {
             this.addPoint("black", image.mapOffset);
         });
         //*/
-        this.addViewingDirection("yellow", this.viewerImageAPI.currentImage.mapOffset); 
-        //this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
+
+        this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
+        //this.addViewingDirection("yellow",  this.viewerImageAPI.currentImage.mapOffset);
+
     }
 
 
@@ -94,7 +102,29 @@ export class ViewerMapAPI {
     // Method
     scale() {
         //Get the scale used by the three.js scene overlayed over the map (2D) view.
-        return this.viewerImageAPI.currentFloor.mapData.density; //  (in meter / pixel)
+        return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
+    }
+    
+    addViewingDirection(color, position){
+        const texture = new THREE.Texture(generateTriangleCanvas(color));
+        texture.needsUpdate = true;
+        var mat = new THREE.SpriteMaterial({
+            map: texture
+        });
+        position 
+        // Create the sprite
+        let triangleSprite = new THREE.Sprite(mat);
+        triangleSprite.center.set(0.0, 0.0);
+
+        // Draw it at The localization point
+        triangleSprite.position.set(-this.mapScalingFactor * position[0], this.mapScalingFactor * position[1], -3);
+
+        //var quartenion = new THREE.Quaternion(this.viewerImageAPI.currentImage.orientation);
+        //triangleSprite.transform.rotation = rotation;
+        //scale the point
+        triangleSprite.scale.set(10, 10, 1);
+        this.spriteGroup.add(triangleSprite);
+
     }
 
 
@@ -158,8 +188,6 @@ function generateCircularSprite(color) {
 
 function generateTriangleCanvas(color){
     var canvasTri = document.createElement('canvas');
-    //canvas.height = 300;
-    //canvas.width = 300;
     var context = canvasTri.getContext('2d');
 
     //Cretae triangle shape
@@ -171,12 +199,11 @@ function generateTriangleCanvas(color){
     
     // outline
     context.lineWidth = 10;
-    context.strokeStyle = '0xff0000'; //black
+    context.strokeStyle = '0xff0000'; //blue
     context.stroke();
     
     // the fill color
     context.fillStyle = color;
-    //context.globalAlpha(0.5); 
     context.fill();
     return context; 
 }

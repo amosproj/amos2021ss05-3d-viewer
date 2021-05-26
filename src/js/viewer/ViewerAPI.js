@@ -1,61 +1,43 @@
 "use strict";
-import {libraryInfo} from "./LibraryInfo.js";
+import { libraryInfo } from "./LibraryInfo.js";
+import { distanceWGS84TwoPoints } from "./Globals.js";
 
 
 // API provided by the viewer
 export class ViewerAPI {
 
-    constructor(viewerImageAPI, viewerPanoAPI, viewerMapAPI) {
-        this.min = 1;
+    constructor(viewerImageAPI, viewerPanoAPI, viewerMapAPI, viewerFloorAPI) {
         this.viewerImageAPI = viewerImageAPI;
         this.viewerPanoAPI = viewerPanoAPI;
         this.viewerMapAPI = viewerMapAPI;
-        this.libs = libraryInfo(); // List of used third party libraries
-        
-        
-       this.MAJOR =null;//adding in 18.05.2021
-
-      
-       this.MINOR =null;// adding in 18.05.2021
+        this.viewerFloorAPI = viewerFloorAPI;
+        this.libs = libraryInfo(); // List of used third party libraries     
+        this.MAJOR =null; 
+        this.MINOR =null; 
     }
 
 
-    //Move the view to the given position.
+    //Move the view to the nearest (euclidian distance) panorama to the given position. (ignore z value because only called on same floor)
     move(lon, lat, z) {
 
-        let temp = [lon, lat, z];
-        let resultset = [];
-        let minval;
-        let minkey;
-
-        for (let i in this.viewerImageAPI.currentFloor.viewerImages) {
-            let result = Math.sqrt(
-                Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[0] - temp[0], 2) +
-                Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[1] - temp[1], 2) +
-                Math.pow(this.viewerImageAPI.currentFloor.viewerImages[i].pos[2] - temp[2], 2) ); // z value probably doesnt/should matter (see WGS84distance in Globals)
-            resultset.push(result);  
-        }
-
-        minkey = 0;
-        minval = resultset[0];
-        for (let i in resultset) {
-            if (resultset[i] < minval) {
-                minval = resultset[i];
-                minkey = i;
+        let minDistance = 1000000000;
+        let bestImg;
+        this.viewerFloorAPI.currentFloor.viewerImages.forEach(element => {
+            const currDistances = distanceWGS84TwoPoints(lon, lat, element.pos[0], element.pos[1]);
+            const currDistance = Math.sqrt(currDistances[0] * currDistances[0] + currDistances[1] * currDistances[1]);
+            if (currDistance < minDistance) {
+                minDistance = currDistance;
+                bestImg = element;
             }
-        }
+        });
 
-        this.min = minkey;
-
-        
         // avoid duplication
-        if (this.min != this.viewerImageAPI.currentImageId){
-
-            this.viewerPanoAPI.display(this.min);
+        if (bestImg != this.viewerImageAPI.currentImage) {
+            
+            this.viewerPanoAPI.display(bestImg.id);
             this.viewerMapAPI.redraw();
 
         }
     }
-
 
 }

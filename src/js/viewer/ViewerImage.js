@@ -3,9 +3,10 @@
 // Panorama Image
 export class ViewerImage {
 
-    constructor([panoLon, panoLat, panoZ, w, x, y, z, floorZ], imageIdx, name) {
-    
-        this.floor = name; // : String // Name of floor which contains this image
+    constructor([panoLon, panoLat, panoZ, w, x, y, z, floorZ], imageIdx) {
+        // floor and mapOffset calculated and set in ViewerFloorAPI
+
+        this.floor; // : String // Name of floor which contains this image 
 
         this.floorZ = floorZ; // : Number // Z coordinate of this image on the floor
 
@@ -15,9 +16,15 @@ export class ViewerImage {
     
         this.pos = [panoLon, panoLat, panoZ]; // : [Number] // WGS 84 coordinates [longitude, latitude, z] of this image
 
-        this.orientation = new THREE.Quaternion(x, y, z, w);
+        // The quaternion data available in the json is not quite compatible with the translation we need in our scene
+        const threeX = y;
+        const threeY = z;
+        const threeZ = x;
 
-        this.mapOffset; // : [offsetX, offsetY] // in pixels, offset from map png. Values initalized in ViewerMapAPI shortly after object creation
+        this.orientation = new THREE.Quaternion(threeX, threeY, threeZ, w);
+
+        this.mapOffset; // : [offsetX, offsetY] // in pixels, offset from map png
+        
     }
 
 }
