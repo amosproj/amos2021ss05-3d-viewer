@@ -5,7 +5,7 @@ import { distanceWGS84TwoPoints } from "./Globals.js";
 export class ViewerFloorAPI {
    
     constructor(data, viewerImageAPI) {
-        this.viewerPanoAPI;
+        this.viewerAPI;
         this.viewerMapAPI;
         // The file «data.json» contains the metadata defining the panorama image locations.
             //"images" Array Images Array
@@ -65,19 +65,23 @@ export class ViewerFloorAPI {
         this.floors.forEach(function (element, index) {
             // found the floor
             if (element.name == name) {
+                const oldPos = viewerImageAPI.currentImage.pos;
+                
+                // set new floor 
                 this.currentFloorId = index;
 
-                // display pano from new floor and show new map
-                const firstImageInFloor = this.floors[this.currentFloorId].i[0][0];
-                this.viewerPanoAPI.display(firstImageInFloor);
+                // display pano from new floor closest to current one
+                this.viewerAPI.move(oldPos[0], oldPos[1], oldPos[2]); // only checks images in correct floor because FloorId is set before
+                
+                // show new map
                 this.viewerMapAPI.redraw();
                 return;
             }
         });
     }
 
-    setViewerPanoAndImageAPI(viewerPanoAPI, viewerMapAPI) {
-        this.viewerPanoAPI = viewerPanoAPI;
+    setViewerAndImageAPI(viewerAPI, viewerMapAPI) {
+        this.viewerAPI = viewerAPI;
         this.viewerMapAPI = viewerMapAPI;
     }
 

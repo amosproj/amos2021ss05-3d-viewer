@@ -46,7 +46,6 @@ function init() {
     viewerPanoAPI = new ViewerPanoAPI(viewerImageAPI);
     viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0)
 
-    viewerFloorAPI.setViewerPanoAndImageAPI(viewerPanoAPI, viewerMapAPI);
 
     // create the renderer, and embed the attributed dom element in the html page
     renderer = new THREE.WebGLRenderer();
@@ -67,7 +66,8 @@ function init() {
 
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI, viewerFloorAPI);
 
-
+    viewerFloorAPI.setViewerAndImageAPI(viewerAPI, viewerMapAPI);
+    
     //----Control Menu (GUI)-----
 
     createControlMenuButtons();
