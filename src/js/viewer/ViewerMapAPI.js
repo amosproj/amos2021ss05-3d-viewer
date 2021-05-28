@@ -6,10 +6,10 @@ import { textureLoader, baseURL } from "./Globals.js";
 // Specific API for the Map View
 export class ViewerMapAPI {
 
-    constructor(viewerImageAPI, viewerFloorAPI) {
-        // hardcoded to work with assets/ for now
-        this.viewerImageAPI = viewerImageAPI;
-        this.viewerFloorAPI = viewerFloorAPI;
+    constructor(viewerAPI) {
+        this.viewerImageAPI = viewerAPI.viewerImageAPI;
+        this.viewerFloorAPI = viewerAPI.viewerFloorAPI;
+        viewerAPI.viewerFloorAPI.viewerMapAPI = this; // set reference to mapAPI in floorAPI
 
         this.layers;
         this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view

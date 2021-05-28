@@ -51,14 +51,14 @@ The computer science department would like to use this viewer to display its 50 
 
 
 -   **/assets**:
-    manages URL generation and versioning of web assets such as CSS stylesheets, JavaScript files, and image files
+    panaroma image dataset as an example to try the viewer software
 
 -   **/src**:
     stands for source, and is the raw code before minification or concatenation or some other compilation - used to read/edit the code
 
 
 -   **/gitignore**:
-  is a text file that tells Git which files or folders to ignore in a project
+    is a text file that tells Git which files or folders to ignore in a project
 
 
 -   **/license**:
@@ -96,7 +96,6 @@ Includes the js files and main.js
 
 - [License | jQuery Foundation](https://jquery.org/license/): JavaScript library for simple HTML DOM manipulation
 
-- [org.w3c.dom (Java Platform SE 8 ](https://docs.oracle.com/javase/8/docs/api/org/w3c/dom/package-summary.html): Web APIs frontend for display Visualizations basics
 
 
 
