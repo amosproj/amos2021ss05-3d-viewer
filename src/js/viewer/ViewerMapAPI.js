@@ -180,7 +180,7 @@ function displayMap(mapURL){
 
     var map = new ol.Map({
     layers: [
-        new ol.layer.ImageLayer({
+        new ol.layer.Image({
         source: new ol.source.ImageStatic({
             attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
             url: mapURL,
@@ -189,9 +189,9 @@ function displayMap(mapURL){
         }),
         }) ],
     target: 'map',
-    view: new ol.view.View({
+    view: new ol.View({
         projection: projection,
-        center: ol.extent.getCenter(extent),
+        center: new ol.extent.getCenter(extent),
         zoom: 2,
         maxZoom: 8,
     }),
