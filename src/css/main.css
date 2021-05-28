@@ -28,4 +28,13 @@ body {
     right: 3%;
     color: #fff;
 }
+.map{
+    position: fixed;
+    bottom: 40%;
+    right: 3%;
+    width: 20%;
+    height:20%;
+    color: #fff;
+}
+
 

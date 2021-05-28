@@ -1,6 +1,7 @@
 import { textureLoader, baseURL } from "./Globals.js";
 
 
+
 // Map (2D) Viewer API
 
 // Specific API for the Map View
@@ -25,6 +26,7 @@ export class ViewerMapAPI {
         this.mapScalingFactor = 0.2;
         
         const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
+        displayMap(mapPicturePath); 
         textureLoader.load(mapPicturePath, (texture) => {
             const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
             material.renderOrder = 1;
@@ -35,7 +37,7 @@ export class ViewerMapAPI {
             spriteMap.center.set(1.0, 0.0); // bottom right
             spriteMap.position.set(0, 0, 1); // Send Behind
             //this.scene.add(spriteMap);
-            this.spriteGroup.add(spriteMap);
+            //this.spriteGroup.add(spriteMap);
         });
         
         this.redraw();
@@ -164,4 +166,34 @@ function generateTriangleCanvas(color){
     context.fillStyle = color;
     context.fill();
     return context; 
+}
+
+function displayMap(mapURL){
+
+    var extent = [0, 0, 1024, 1024];
+    //  Projection map image coordinates directly to map coordinates in pixels. 
+    var projection = new ol.proj.Projection({
+    code: 'map-image',
+    units: 'pixels',
+    extent: extent,
+    });
+
+    var map = new ol.Map({
+    layers: [
+        new ol.layer.ImageLayer({
+        source: new ol.source.ImageStatic({
+            attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
+            url: mapURL,
+            projection: projection,
+            imageExtent: extent,
+        }),
+        }) ],
+    target: 'map',
+    view: new ol.view.View({
+        projection: projection,
+        center: ol.extent.getCenter(extent),
+        zoom: 2,
+        maxZoom: 8,
+    }),
+    });
 }
