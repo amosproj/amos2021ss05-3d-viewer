@@ -1,3 +1,5 @@
+"use strict";
+
 export const DEFAULT_FOV = 80, MAX_FOV = 100, MIN_FOV = 10;
 
 export function distanceWGS84TwoPoints(lon1, lat1, lon2, lat2) {

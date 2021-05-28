@@ -4,6 +4,7 @@ import { ViewerImageAPI } from "./ViewerImageAPI.js";
 import { ViewerFloorAPI } from "./ViewerFloorAPI.js"
 import { ViewerPanoAPI } from "./ViewerPanoAPI.js";
 import { ViewerMapAPI } from "./ViewerMapAPI.js"
+import { ViewerState } from "./ViewerState.js";
 import { libraryInfo } from "./LibraryInfo.js";
 import { distanceWGS84TwoPoints } from "./Globals.js";
 
@@ -109,7 +110,14 @@ export class ViewerAPI {
         - state (ViewerState): State of the viewer
     */
     state(callback) {
+        const currentState = new ViewerState(
+            this.viewerImageAPI.currentImage.pos,
+            this.viewerImageAPI.currentImage.id,
+            this.viewerFloorAPI.currentFloor.name,
+            this.viewerPanoAPI.viewerViewState
+        );
 
+        callback(currentState);
     }
 
     // TODO: swap() and big(wanted) 

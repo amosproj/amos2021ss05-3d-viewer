@@ -1,4 +1,5 @@
 "use strict";
+
 import { ViewerImage } from "./ViewerImage.js";
 
 // Specific API for Panorama Image(s)
