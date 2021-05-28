@@ -20,6 +20,8 @@ export class ViewerAPI {
         this.version;                           // ViewerVersionAPI tba and replaces MAJOR/MINOR
         this.MAJOR =null; 
         this.MINOR = null;
+
+        this.listeners = [];
         
         this.renderer;
         // Load the metadata only once
@@ -98,7 +100,13 @@ export class ViewerAPI {
         - human (Boolean): Event caused by human
     */
     listen(listener) {
-        
+        this.listeners.push(listener);
+    }
+
+    propagateEvent(name, payload, human) {
+        this.listeners.forEach((listener) => {
+            listener(name, payload, human);
+        });
     }
 
     /*

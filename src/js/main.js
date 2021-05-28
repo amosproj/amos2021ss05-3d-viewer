@@ -15,6 +15,15 @@ let viewerAPI, viewerViewState, viewerFloorAPI;
 // only call executed in this file
 viewerAPI = new ViewerAPI(baseURL);
 
+function logIt(name, payload, human) {
+    if (name == "moved") {
+        console.log(name + " to " + payload);
+    } else if (name == "viewed") {
+        console.log(name + " " + payload.lonov + " " + payload.latov + " " + payload.fov);
+    }
+}
+
+viewerAPI.listen(logIt);
 
 function basicSetUp() {
     var loc_para1;
