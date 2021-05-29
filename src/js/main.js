@@ -6,7 +6,7 @@ import { ViewerPanoAPI } from "./viewer/ViewerPanoAPI.js";
 import { MAX_FOV, DEFAULT_FOV, newLocationFromPointAngle, baseURL } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerMapAPI } from "./viewer/ViewerMapAPI.js"
-import { ViewerState}  from "./viewer/ViewerState.js";
+import { ViewerState } from "./viewer/ViewerState.js";
 import { ViewerVersionAPI } from "./viewer/ViewerVersionAPI.js";
 
 let trackPosLon, trackPosLat, trackPosVert = 0.0;
@@ -17,7 +17,10 @@ let viewerState = null;
 
 let viewerPanoAPI, viewerMapAPI, viewerViewState, renderer, viewerAPI, viewerImageAPI, viewerFloorAPI;
 
-let onPointerDownMouseX = 0, onPointerDownMouseY = 0, onPointerDownLon = 0, onPointerDownLat = 0;
+let onPointerDownMouseX = 0,
+    onPointerDownMouseY = 0,
+    onPointerDownLon = 0,
+    onPointerDownLat = 0;
 
 // Load the metadata only once
 $.ajax({
@@ -25,7 +28,7 @@ $.ajax({
     xhrFields: {
         withCredentials: true
     }
-}).done(function (data) {
+}).done(function(data) {
     viewerImageAPI = new ViewerImageAPI(data.images);
     viewerFloorAPI = new ViewerFloorAPI(data, viewerImageAPI);
 
@@ -67,7 +70,7 @@ function init() {
     viewerAPI = new ViewerAPI(viewerImageAPI, viewerPanoAPI, viewerMapAPI, viewerFloorAPI);
 
     viewerFloorAPI.setViewerAndImageAPI(viewerAPI, viewerMapAPI);
-    
+
     //----Control Menu (GUI)-----
 
     createControlMenuButtons();
@@ -164,20 +167,20 @@ function onDoubleClick(event) {
     const adjustedHorizontalAngle = horizontalAngle - (horizontalOffset * viewerViewState.fov / 2); // line from current position towards where the mouse double clicked (2D birds eye view angle)
 
     const cameraDir = viewerPanoAPI.camera.getWorldDirection();
-    const verticalAngle = Math.abs(THREE.Math.radToDeg(Math.atan2(cameraDir.x,cameraDir.y))); // between [0,180]Deg depending on how far up/down the user looks
+    const verticalAngle = Math.abs(THREE.Math.radToDeg(Math.atan2(cameraDir.x, cameraDir.y))); // between [0,180]Deg depending on how far up/down the user looks
     const verticalOffset = (event.y - halfHeight) / halfHeight; // between [-1,1] depending how up-down the mouse click is on the screen
     const adjustedVerticalAngle = verticalAngle + (verticalOffset * viewerViewState.fov / 2);
     const realVerticalOffset = (adjustedVerticalAngle - 90) / 90; // between [-1,1] depending how far up/down user looks and clicks
-    
+
     const MEDIAN_WALKING_DISTANCE = 5; // in meter
     // distance to be walked along adjustedHorizontalAngle from current location
     const distance = MEDIAN_WALKING_DISTANCE - (realVerticalOffset * MEDIAN_WALKING_DISTANCE);
-    
+
     // adjustedHorizontalAngle converted to represent directions like specified in newLocationFromPointAngle
     let convertedAngle = (adjustedHorizontalAngle > -90) ? adjustedHorizontalAngle - 90 : adjustedHorizontalAngle + 270;
     convertedAngle = THREE.Math.degToRad(convertedAngle);
     const currentPos = viewerImageAPI.currentImage.pos;
-    
+
     const newPos = newLocationFromPointAngle(currentPos[0], currentPos[1], convertedAngle, distance);
 
     viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
@@ -200,7 +203,7 @@ function render() {
 }
 
 
-   
+
 function basicSetUp() {
     var loc_para1;
     var loc_para2;
@@ -213,14 +216,14 @@ function basicSetUp() {
         loc_para1 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[0];
         loc_para2 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[1];
         loc_para3 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[2];
-    
+
     } else {
         loc_para1 = trackPosLon;
         loc_para2 = trackPosLat;
         loc_para3 = trackPosVert;
         imageId = trackImageID;
         floors_name = trackFloorName;
-    
+
     }
     var latov_rad = viewerViewState.latov * Math.PI / 180.0;
     var lonov_rad = viewerViewState.lonov * Math.PI / 180.0;
@@ -228,10 +231,10 @@ function basicSetUp() {
     var vMajor = viewerAPI.MAJOR;
     var vMinor = viewerAPI.MINOR;
     var view_para = [];
-    viewerState = new ViewerState( [loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad] ) ;
+    viewerState = new ViewerState([loc_para1, loc_para2, loc_para3], imageId, floors_name, [viewer_fov, latov_rad, lonov_rad]);
     view_para = viewerState.view;
-    viewerAPI.viewerVersionAPI = new ViewerVersionAPI(vMajor, vMinor,view_para);
-    
+    viewerAPI.viewerVersionAPI = new ViewerVersionAPI(vMajor, vMinor, view_para);
+
 }
 
 
@@ -240,21 +243,21 @@ function createControlMenuButtons() {
     let numOfFloors = viewerFloorAPI.floors.length;
 
     // Show number of Floors
-    $("#nof").text("Total Available Floors: "+ numOfFloors+". ");
+    $("#nof").text("Total Available Floors: " + numOfFloors + ". ");
 
     // Show current floor
-    $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+    $("#cf").text("Current Floor: " + viewerFloorAPI.currentFloor.name + ". ");
 
     // push all floor names into an array
     let totalFloorsname = [];
-    viewerFloorAPI.floors.forEach(function (item) {
+    viewerFloorAPI.floors.forEach(function(item) {
         totalFloorsname.push(item.name);
     });
 
     // push totalfloors into an array
     let totalFloors = [];
-    for(var i = 0; i < viewerFloorAPI.floors.length; i++){
-        totalFloors.push(i); 
+    for (var i = 0; i < viewerFloorAPI.floors.length; i++) {
+        totalFloors.push(i);
     }
 
 
@@ -269,13 +272,13 @@ function createControlMenuButtons() {
     }
 
     // Create Drop down Menus by floor names
-    for(let i = 0; i < totalFloors.length; i++) {
+    for (let i = 0; i < totalFloors.length; i++) {
         $('.control select').append('<option value=' + i + '>' + totalFloorsname[i] + '</option>');
     }
-    
+
     // Change current floor by dropdown menu
-    $('.control select').change(function () {
-        $("select option:selected").each(function () {
+    $('.control select').change(function() {
+        $("select option:selected").each(function() {
             // conversion between currentFloorID with viewerFloorAPI.floors.name
             let index_in_floor_name = totalFloorsname.indexOf($(this).text());
             viewerFloorAPI.currentFloorId = totalFloors[index_in_floor_name];
@@ -289,31 +292,31 @@ function createControlMenuButtons() {
             if (viewerFloorAPI.currentFloorId == totalFloors[0]) {
                 // lowest floor
                 $('button[name="buttonDown"]').prop('disabled', true);
-                
+
             } else if (viewerFloorAPI.currentFloorId == totalFloors[totalFloors.length - 1]) {
                 // highest floor
                 $('button[name="buttonUp"]').prop('disabled', true);
-                
+
             }
             // display pano from new floor and show new map
             const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
             viewerPanoAPI.display(firstImageInFloor);
             viewerMapAPI.redraw();
-            
+
         });
     });
 
     //Up Button for changing currentfloor
-    $('button[name="buttonUp"]').click(function () {
-    
+    $('button[name="buttonUp"]').click(function() {
+
         viewerFloorAPI.currentFloorId++;
-        $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+        $("#cf").text("Current Floor: " + viewerFloorAPI.currentFloor.name + ". ");
 
         // change to higher floor
         if (viewerFloorAPI.currentFloorId == viewerFloorAPI.floors.length - 1) {
 
             // disable the up button if it's already at the highest floor
-            $('button[name="buttonUp"]').prop('disabled', true);  
+            $('button[name="buttonUp"]').prop('disabled', true);
 
         } else {
 
@@ -327,17 +330,17 @@ function createControlMenuButtons() {
         const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
         viewerPanoAPI.display(firstImageInFloor);
         viewerMapAPI.redraw();
-    
+
     });
 
     //Down Button for changing currentfloor
-    $('button[name="buttonDown"]').click(function(){
-    
+    $('button[name="buttonDown"]').click(function() {
+
         viewerFloorAPI.currentFloorId--;
-        $("#cf").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+        $("#cf").text("Current Floor: " + viewerFloorAPI.currentFloor.name + ". ");
 
         // change to lower floor
-        if (viewerFloorAPI.currentFloorId < 1 ) {
+        if (viewerFloorAPI.currentFloorId < 1) {
 
             // disable the down button if it's already at the lowest floor
             $('button[name="buttonDown"]').prop('disabled', true);
@@ -346,7 +349,7 @@ function createControlMenuButtons() {
 
             //enable the down button if it's not in the lowest floor
             $('button[name="buttonDown"]').prop('disabled', false);
-            
+
         }
         $('.control select').val(viewerFloorAPI.currentFloorId).change();
 
@@ -359,39 +362,39 @@ function createControlMenuButtons() {
 }
 
 
-function drawArrow(position  , scene ){
-    console.log(position );
+function drawArrow(position, scene) {
+    console.log(position);
     direction = new THREE.Vector3(position);
     //normalize the direction vector (convert to vector of length 1)
     direction.normalize();
 
 
     //Create the arrow vetor
-    const origin = new THREE.Vector3(0,0,0);
+    const origin = new THREE.Vector3(0, 0, 0);
     const length = 20;
     const hex = 0xff0000; // red color
-    var arrowHelper = new THREE.ArrowHelper( direction, origin, length, hex );
-    scene.add(arrowHelper); 
+    var arrowHelper = new THREE.ArrowHelper(direction, origin, length, hex);
+    scene.add(arrowHelper);
 
 }
 
 function calcPosFromLatLonRad(radius, lat, lon) {
 
     var spherical = new THREE.Spherical(
-      radius,
-      THREE.Math.degToRad(90 - lon),
-      THREE.Math.degToRad(lat)
+        radius,
+        THREE.Math.degToRad(90 - lon),
+        THREE.Math.degToRad(lat)
     );
-  
+
     var vector = new THREE.Vector3();
     vector.setFromSpherical(spherical);
-  
+
     // console.log(vector.x, vector.y, vector.z);
     return vector;
-  }
+}
 
 
-function updateArrow(arrowHelper, direction){
+function updateArrow(arrowHelper, direction) {
     // update the arrow position
     var newSourcePos = new THREE.Vector3(10, 10, 10);
     var newTargetPos = new THREE.Vector3(60, 10, 10);
