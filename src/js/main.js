@@ -67,8 +67,12 @@ function init() {
 
 
     //----Control Menu (GUI)-----
+    //createControlMenuButtons();
 
-    createControlMenuButtons();
+    //----Control Menu (GUI) OpenLayer Button
+    createControlMenuButtonsOL();
+
+
 
 }
 
@@ -355,6 +359,152 @@ function createControlMenuButtons() {
         viewerMapAPI.redraw();
     });
 
+}
+
+function createControlMenuButtonsOL() {
+
+    $('button[name="buttonUp"]').hide();
+    $('button[name="buttonDown"]').hide();
+    $('.control select').hide();
+    
+
+    // Get number of Floors
+    let numOfFloors = viewerFloorAPI.floors.length;
+
+    // Show number of Floors
+    $("#nofOL").text("Total Available Floors: "+ numOfFloors+". ");
+
+    // Show current floor
+    $("#cfOL").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+
+    // push all floor names into an array
+    let totalFloorsname = [];
+    viewerFloorAPI.floors.forEach(function (item) {
+        totalFloorsname.push(item.name);
+    });
+
+    // push totalfloors into an array
+    let totalFloors = [];
+    for(var i = 0; i < viewerFloorAPI.floors.length; i++){
+        totalFloors.push(i); 
+    }
+
+    // get buttonUp and buttonDown for enable/disable
+    let buttonUp = document.getElementById('buttonUpOL');
+    let buttonDown = document.getElementById('buttonDownOL');
+
+    // get droplist
+    var dropdownFloorsOL = document.getElementById("dropdown-floors-OL");
+    
+    // Checking if the current floor is on the highest or lowest floor
+    if (totalFloors.length == 1) {
+        buttonDown.disabled = true;
+        buttonUp.disabled = true;
+    } else if (viewerFloorAPI.currentFloorId == totalFloors[0]) {
+        buttonDown.disabled = true;
+    } else if (viewerFloorAPI.currentFloorId == totalFloors[totalFloors.length - 1]) {
+        buttonUp.disabled = true;
+    }
+
+    // Create Drop down Menus by floor names
+    for(let i = 0; i < totalFloors.length; i++) {
+        var option = document.createElement('option');
+        option.text = option.value = totalFloorsname[i];
+        dropdownFloorsOL.add(option, 0);
+    }
+    
+    // Change current floor by dropdown menu
+    dropdownFloorsOL.onchange = function () {
+        let selectValue = dropdownFloorsOL.value;
+
+        let index_in_floor_name = totalFloorsname.indexOf(selectValue);
+        viewerFloorAPI.currentFloorId = totalFloors[index_in_floor_name];
+       
+        $("#cfOL").text("Current Floor: " + viewerFloorAPI.currentFloor.name + ". ");
+
+        buttonUp.disabled = false;
+        buttonDown.disabled = false;
+
+        // Checking if the current floor is on the highest or lowest floor
+        if (viewerFloorAPI.currentFloorId == totalFloors[0]) {
+            // lowest floor
+            buttonDown.disabled = true;
+            
+        } else if (viewerFloorAPI.currentFloorId == totalFloors[totalFloors.length - 1]) {
+            // highest floor
+            buttonUp.disabled = true;
+            
+        }
+        // display pano from new floor and show new map
+        const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+        viewerPanoAPI.display(firstImageInFloor);
+        viewerMapAPI.redraw();
+
+    };
+
+    //Up Button for changing currentfloor
+    buttonUp.addEventListener('click', function () {
+    
+        viewerFloorAPI.currentFloorId++;
+        $("#cfOL").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+
+        // change to higher floor
+        if (viewerFloorAPI.currentFloorId == viewerFloorAPI.floors.length - 1) {
+
+            // disable the up button if it's already at the highest floor
+            buttonUp.disabled = true;
+            buttonDown.disabled = false;  
+
+        } else {
+
+            //enable the up button if it's not in the highest floor
+            buttonUp.disabled = false;
+            buttonDown.disabled = false; 
+
+        }
+
+        //$('.control select').val(viewerFloorAPI.currentFloorId).change();
+        let index_in_totalfloor = totalFloors.indexOf(viewerFloorAPI.currentFloorId);
+        dropdownFloorsOL.value= totalFloorsname[index_in_totalfloor];
+
+        // display pano from new floor and show new map
+        const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+        viewerPanoAPI.display(firstImageInFloor);
+        viewerMapAPI.redraw();
+
+    });
+
+    //Down Button for changing currentfloor
+    buttonDown.addEventListener('click', function () {
+    
+        viewerFloorAPI.currentFloorId--;
+        $("#cfOL").text("Current Floor: "+ viewerFloorAPI.currentFloor.name+". ");
+
+        // change to lower floor
+        if (viewerFloorAPI.currentFloorId < 1 ) {
+
+            // disable the down button if it's already at the lowest floor
+            buttonUp.disabled = false; 
+            buttonDown.disabled = true;
+
+        } else {
+
+            //enable the down button if it's not in the lowest floor
+            buttonUp.disabled = false; 
+            buttonDown.disabled = false;
+            
+        }
+
+        //$('.control select').val(viewerFloorAPI.currentFloorId).change();
+        let index_in_totalfloor = totalFloors.indexOf(viewerFloorAPI.currentFloorId);
+        dropdownFloorsOL.value= totalFloorsname[index_in_totalfloor];
+
+        // display pano from new floor and show new map
+        const firstImageInFloor = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].i[0][0];
+        viewerPanoAPI.display(firstImageInFloor);
+        viewerMapAPI.redraw();
+
+    });
 }
 
 

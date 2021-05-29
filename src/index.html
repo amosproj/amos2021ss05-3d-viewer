@@ -10,7 +10,9 @@
         <script src="libs/jQuery.min.js"></script>
         <script src="libs/ol.js"></script>
         <script type="module" src="js/main.js"></script>
+
         <div id="pano-viewer">
+
             <div class = "control">
                 <div id="nof"></div>
                 <div id="cf"></div>
@@ -18,7 +20,17 @@
                 <button name="buttonDown">Down</button>
                 <select name="dropdown" id="dropdown-floors"></select>
             </div>
+
             <div id="map" class="map"></div>
+
+            <div class = "control-OL" id="floorOL">
+                <div id="nofOL"></div>
+                <div id="cfOL"></div>
+                <button id="buttonUpOL">UpOL</button>
+                <button id="buttonDownOL">DownOL</button>
+                <select name="dropdown-OL" id="dropdown-floors-OL" ></select>
+            </div>
+            
         </div>
     </body>
 </html>
