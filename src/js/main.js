@@ -20,6 +20,8 @@ function logIt(name, payload, human) {
         console.log(name + " to " + payload);
     } else if (name == "viewed") {
         console.log(name + " " + payload.lonov + " " + payload.latov + " " + payload.fov);
+    } else if (name == "floor") {
+        console.log(name + " " + payload);
     }
 }
 

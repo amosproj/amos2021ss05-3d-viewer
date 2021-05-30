@@ -50,6 +50,8 @@ export class ViewerFloorAPI {
 
         this.currentFloorId = 0.0;
         viewerAPI.viewerImageAPI.currentImageId = this.floors[this.currentFloorId].i[0][0];
+
+        this.createControlMenuButtons();
     }
 
     all(callback) {
@@ -74,55 +76,52 @@ export class ViewerFloorAPI {
                 
                 // show new map
                 this.viewerMapAPI.redraw();
+
+                // notify viewerAPI via event
+                this.viewerAPI.propagateEvent("floor", this.currentFloor.name, true);
                 return;
             }
         });
     }
 
-    createControlMenuButtons(selfRef) {
-        // Get number of Floors
-        let numOfFloors = selfRef.floors.length;
-
+    createControlMenuButtons() {
         // Show number of Floors
-        $("#nof").text("Total Available Floors: "+ numOfFloors+". ");
+        $("#nof").text("Total Available Floors: " + this.floors.length + ". ");
 
         // Show current floor
-        $("#cf").text("Current Floor: "+ selfRef.currentFloor.name+". ");
+        $("#cf").text("Current Floor: " + this.currentFloor.name + ". ");
 
         // push all floor names into an array
         let totalFloorsname = [];
-        selfRef.floors.forEach(function (item) {
+        this.floors.forEach(function (item) {
             totalFloorsname.push(item.name);
         });
 
-        // push totalfloors into an array
-        let totalFloors = [];
-        for (var i = 0; i < selfRef.floors.length; i++) {
-            totalFloors.push(i); 
-        }
-
 
         // Checking if the current floor is on the highest or lowest floor
-        if (totalFloors.length == 1) {
+        if (this.floors.length == 1) {
             $('button[name="buttonDown"]').prop('disabled', true);
             $('button[name="buttonUp"]').prop('disabled', true);
-        } else if (selfRef.currentFloorId == totalFloors[0]) {
+        } else if (this.currentFloorId == 0) {
             $('button[name="buttonDown"]').prop('disabled', true);
-        } else if (selfRef.currentFloorId == totalFloors[totalFloors.length - 1]) {
+        } else if (this.currentFloorId == this.floors.length - 1) {
             $('button[name="buttonUp"]').prop('disabled', true);
         }
 
         // Create Drop down Menus by floor names
-        for (let i = 0; i < totalFloors.length; i++) {
-            $('.control select').append('<option value=' + i + '>' + totalFloorsname[i] + '</option>');
+        for (let i = 0; i < this.floors.length; i++) {
+            $('.control select').append('<option value=' + i + '>' + this.floors[i].name + '</option>');
         }
         
+        // reference needed for scope of $ functions
+        const selfRef = this;
+
         // Change current floor by dropdown menu
         $('.control select').change(function () {
             $("select option:selected").each(function () {
                 // conversion between currentFloorID with selfRef.floors.name
                 let index_in_floor_name = totalFloorsname.indexOf($(this).text());
-                selfRef.currentFloorId = totalFloors[index_in_floor_name];
+                selfRef.currentFloorId = index_in_floor_name;
 
                 $("#cf").text("Current Floor: " + selfRef.currentFloor.name + ". ");
 
@@ -130,67 +129,65 @@ export class ViewerFloorAPI {
                 $('button[name="buttonDown"]').prop('disabled', false);
 
                 // Checking if the current floor is on the highest or lowest floor
-                if (selfRef.currentFloorId == totalFloors[0]) {
+                if (selfRef.currentFloorId == 0) {
                     // lowest floor
                     $('button[name="buttonDown"]').prop('disabled', true);
-                    
-                } else if (selfRef.currentFloorId == totalFloors[totalFloors.length - 1]) {
+                } else if (selfRef.currentFloorId == totalFloorsname.length - 1) {
                     // highest floor
                     $('button[name="buttonUp"]').prop('disabled', true);
-                    
                 }
                 
                 selfRef.set($(this).text());
-                
+
+                document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
+                document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
             });
         });
 
         //Up Button for changing currentfloor
         $('button[name="buttonUp"]').click(function () {
-        
             selfRef.currentFloorId++;
-            $("#cf").text("Current Floor: "+ selfRef.currentFloor.name+". ");
+
+            $("#cf").text("Current Floor: " + selfRef.currentFloor.name + ". ");
 
             // change to higher floor
             if (selfRef.currentFloorId == selfRef.floors.length - 1) {
-
                 // disable the up button if it's already at the highest floor
                 $('button[name="buttonUp"]').prop('disabled', true);  
-
             } else {
-
                 //enable the up button if it's not in the highest floor
                 $('button[name="buttonUp"]').prop('disabled', false);
-
             }
+
             $('.control select').val(selfRef.currentFloorId).change();
 
             selfRef.set($(this).text());
-        
+
+            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
         });
 
         //Down Button for changing currentfloor
         $('button[name="buttonDown"]').click(function () {
-        
             selfRef.currentFloorId--;
-            $("#cf").text("Current Floor: "+ selfRef.currentFloor.name+". ");
+
+            $("#cf").text("Current Floor: " + selfRef.currentFloor.name + ". ");
 
             // change to lower floor
             if (selfRef.currentFloorId < 1 ) {
-
                 // disable the down button if it's already at the lowest floor
                 $('button[name="buttonDown"]').prop('disabled', true);
-
             } else {
-
                 //enable the down button if it's not in the lowest floor
                 $('button[name="buttonDown"]').prop('disabled', false);
-                
             }
+
             $('.control select').val(selfRef.currentFloorId).change();
 
             selfRef.set($(this).text());
 
+            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
         });
     
     }

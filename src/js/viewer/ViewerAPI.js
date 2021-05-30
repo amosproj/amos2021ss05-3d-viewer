@@ -50,8 +50,6 @@ export class ViewerAPI {
 
             container.appendChild(this.renderer.domElement);
             
-            this.viewerFloorAPI.createControlMenuButtons(this.viewerFloorAPI);
-            
             // start animation loop
             this.animate();
         });
