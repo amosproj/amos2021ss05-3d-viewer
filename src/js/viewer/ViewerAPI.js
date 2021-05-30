@@ -6,6 +6,7 @@ import { ViewerPanoAPI } from "./ViewerPanoAPI.js";
 import { ViewerMapAPI } from "./ViewerMapAPI.js"
 import { ViewerState } from "./ViewerState.js";
 import { libraryInfo } from "./LibraryInfo.js";
+import { ViewerVersionAPI } from "./ViewerVersionAPI.js";
 import { distanceWGS84TwoPoints } from "./Globals.js";
 
 
@@ -14,12 +15,14 @@ export class ViewerAPI {
 
     constructor(baseURL) {
         this.libs = libraryInfo();              // : [ViewerLibrary] // List of used third party libraries
+        this.version = new ViewerVersionAPI(    // : ViewerVersionAPI // Version API
+            0.6, // Sprint 6
+            NaN,
+            "three.js 0.128.0 360 pano image viewer"
+        );
         this.jQuery = $;
         this.THREE = THREE;
 
-        this.version;                           // ViewerVersionAPI tba and replaces MAJOR/MINOR
-        this.MAJOR =null; 
-        this.MINOR = null;
 
         this.listeners = [];
         
