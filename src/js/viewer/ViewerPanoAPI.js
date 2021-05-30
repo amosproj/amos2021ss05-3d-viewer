@@ -16,9 +16,13 @@ export class ViewerPanoAPI{
         this.lastViewState;
         this.lastMousePos;
 
+        // Two new event listeneres are called to handle *how far* the user drags
+        this.oPM = (event) => this.onPointerMove(event);
+        this.oPU = () => this.onPointerUp();
+
         document.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
         document.addEventListener('pointerdown', (event) => this.onPointerDown(event));
-        document.addEventListener("dblclick", (event) => this.onDoubleClick(event));
+        document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
     }
@@ -80,11 +84,8 @@ export class ViewerPanoAPI{
     onPointerDown(event) {
         this.lastMousePos = [event.clientX, event.clientY];
     
-        this.lastViewState = this.viewerViewState;
+        this.lastViewState = [this.viewerViewState.lonov, this.viewerViewState.latov];
     
-        // Two new event listeneres are called to handle *how far* the user drags
-        this.oPM = (event) => this.onPointerMove(event);
-        this.oPU = () => this.onPointerUp();
         document.addEventListener('pointermove', this.oPM);
         document.addEventListener('pointerup', this.oPU);
     }
@@ -93,8 +94,8 @@ export class ViewerPanoAPI{
     onPointerMove(event) {
         let scalingFactor = this.camera.fov / MAX_FOV;
     
-        this.viewerViewState.lonov = (this.lastMousePos[0] - event.clientX) * 0.005 * scalingFactor + this.lastViewState.lonov;
-        this.viewerViewState.latov = (event.clientY - this.lastMousePos[1]) * 0.005 * scalingFactor + this.lastViewState.latov;
+        this.viewerViewState.lonov = (this.lastMousePos[0] - event.clientX) * 0.1 * scalingFactor + this.lastViewState[0];
+        this.viewerViewState.latov = (event.clientY - this.lastMousePos[1]) * 0.1 * scalingFactor + this.lastViewState[1];
     
         // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
         this.viewerViewState.latov = Math.max(-85, Math.min(85, this.viewerViewState.latov));
