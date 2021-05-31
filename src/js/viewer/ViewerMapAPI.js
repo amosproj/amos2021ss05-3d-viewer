@@ -26,15 +26,17 @@ export class ViewerMapAPI {
         this.mapScalingFactor = 0.2;
         
         const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
-        this.mapLayer = displayMap(mapPicturePath); 
+        displayMap(mapPicturePath); 
+        /*
+    
         var popup = new ol.Overlay({
             //element: 
             positioning: 'bottom-center',
             stopEvent: false,
             offset: [0, -10],
           });
-          //this.mapLayer.addOvSerlay(popup);
-          
+          this.mapLayer.addOvSerlay(popup);
+        */
         //this.redraw();
         //this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
         //this.scene.add(this.spriteGroup);
@@ -165,7 +167,7 @@ function generateTriangleCanvas(color){
 
 function displayMap(mapURL){
 
-    var extent = [0, 0, 1024, 1024];
+    var extent = [0, 0, 512, 512];
     //  Projection map image coordinates directly to map coordinates in pixels. 
     var projection = new ol.proj.Projection({
     code: 'map-image',
@@ -173,7 +175,7 @@ function displayMap(mapURL){
     extent: extent,
     });
 
-    var map = new ol.control.OverviewMap({
+    var map = new ol.Map({  //new ol.control.OverviewMap({
     layers: [
         new ol.layer.Image({
         source: new ol.source.ImageStatic({
@@ -181,7 +183,7 @@ function displayMap(mapURL){
             url: mapURL,
             projection: projection,
             imageExtent: extent,
-            fill: new ol.style.Fill({color: 'red'})
+            fill: new ol.style.Fill({color: 'white'})
         }),
         }) ],
     target: 'map',
@@ -192,7 +194,7 @@ function displayMap(mapURL){
         maxZoom: 5,
     }),
     });
-    return map;
+
 }
 
 /*
