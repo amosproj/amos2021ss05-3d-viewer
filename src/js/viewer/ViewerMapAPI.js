@@ -26,23 +26,20 @@ export class ViewerMapAPI {
         this.mapScalingFactor = 0.2;
         
         const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
-        displayMap(mapPicturePath); 
-        textureLoader.load(mapPicturePath, (texture) => {
-            const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
-            material.renderOrder = 1;
-            material.depthTest = false;
-            const spriteMap = new THREE.Sprite(material);
-            this.spriteMapScale = [texture.image.width * this.mapScalingFactor, texture.image.height * this.mapScalingFactor, 1];
-            spriteMap.scale.set(this.spriteMapScale[0], this.spriteMapScale[1], 1);
-            spriteMap.center.set(1.0, 0.0); // bottom right
-            spriteMap.position.set(0, 0, 1); // Send Behind
-            //this.scene.add(spriteMap);
-            //this.spriteGroup.add(spriteMap);
-        });
+        this.mapLayer = displayMap(mapPicturePath); 
+        var popup = new Overlay({
+            element: element,
+            positioning: 'bottom-center',
+            stopEvent: false,
+            offset: [0, -10],
+          });
+          map.addOverlay(popup);
+          
         
-        this.redraw();
-        this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
-        this.scene.add(this.spriteGroup);
+        
+        //this.redraw();
+        //this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
+        //this.scene.add(this.spriteGroup);
 
     }
 
@@ -178,22 +175,42 @@ function displayMap(mapURL){
     extent: extent,
     });
 
-    var map = new ol.Map({
+    var map = new ol.control.OverviewMap({
     layers: [
         new ol.layer.Image({
         source: new ol.source.ImageStatic({
-            attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
+            //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
             url: mapURL,
             projection: projection,
             imageExtent: extent,
+            fill: new ol.style.Fill({color: 'red'})
         }),
         }) ],
     target: 'map',
     view: new ol.View({
         projection: projection,
         center: new ol.extent.getCenter(extent),
-        zoom: 2,
-        maxZoom: 8,
+        zoom: 1,
+        maxZoom: 5,
     }),
     });
+    return map;
 }
+
+/*
+var overviewMapControl = new OverviewMap({
+  // see in overviewmap-custom.html to see the custom CSS used
+  className: 'ol-overviewmap ol-custom-overviewmap',
+  layers: [
+    new TileLayer({
+      source: new OSM({
+        'url':
+          'https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png' +
+          '?apikey=Your API key from http://www.thunderforest.com/docs/apikeys/ here',
+      }),
+    }) ],
+  collapseLabel: '\u00BB',
+  label: '\u00AB',
+  collapsed: false,
+});
+*/

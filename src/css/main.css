@@ -31,7 +31,7 @@ body {
 
 .map{
     position: fixed;
-    bottom: 40%;
+    bottom: 10%;
     right: 3%;
     width: 20%;
     height:20%;
@@ -41,7 +41,7 @@ body {
 .control-OL{
     position: fixed;
     bottom: 20%;
-    left: 3%;
+    right: 3%;
     color: #fff;
 }
 
