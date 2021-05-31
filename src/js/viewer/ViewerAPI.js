@@ -23,6 +23,9 @@ export class ViewerAPI {
         this.jQuery = $;
         this.THREE = THREE;
 
+        // globals
+        this.textureLoader = new THREE.TextureLoader().setCrossOrigin('use-credentials');
+        this.baseURL = baseURL;
 
         this.listeners = [];
         
@@ -86,6 +89,7 @@ export class ViewerAPI {
             
             this.viewerPanoAPI.display(bestImg.id);
             this.viewerMapAPI.redraw();
+            return bestImg;
 
         }
     }

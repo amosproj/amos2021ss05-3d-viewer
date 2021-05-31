@@ -1,5 +1,4 @@
 "use strict";
-import { baseURL } from "./viewer/Globals.js"
 import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerState}  from "./viewer/ViewerState.js";
 import { ViewerVersionAPI } from "./viewer/ViewerVersionAPI.js";
@@ -13,7 +12,7 @@ let viewerState = null;
 let viewerAPI, viewerViewState, viewerFloorAPI;
 
 // only call executed in this file
-viewerAPI = new ViewerAPI(baseURL);
+viewerAPI = new ViewerAPI("https://bora.bup-nbg.de/amos2floors/");
 
 function logIt(name, payload, human) {
     if (name == "moved") {

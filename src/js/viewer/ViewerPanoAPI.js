@@ -1,7 +1,7 @@
 "use strict";
 
 import { ViewerViewState } from "./ViewerViewState.js";
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV, getFolderNumber, textureLoader, baseURL, newLocationFromPointAngle } from "./Globals.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV } from "./Globals.js";
 
 export class ViewerPanoAPI{
 
@@ -36,8 +36,13 @@ export class ViewerPanoAPI{
         // invert the geometry on the x-axis so that we look out from the middle of the sphere
         sphere.scale(-1, 1, 1);
 
-        // load the 360-panorama image data (one specific hardcoded for now)
-        const texturePano = textureLoader.load(baseURL + getFolderNumber(this.viewerImageAPI.currentImageId) + '/' + this.viewerImageAPI.currentImageId + 'r3.jpg');
+        // load the 360-panorama image data (highest resolution hardcoded for now)
+        const texturePano = this.viewerAPI.textureLoader.load(
+            this.viewerAPI.baseURL +
+            Math.trunc(this.viewerImageAPI.currentImageId / 100) +
+            '/' +
+            this.viewerImageAPI.currentImageId +
+            'r3.jpg');
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
         
         // put the texture on the spehere and add it to the scene
@@ -151,4 +156,18 @@ export class ViewerPanoAPI{
         this.viewerAPI.propagateEvent("moved", this.viewerImageAPI.currentImage.id, true);
     }
 
+}
+
+// takes in a location (in lot/lat), a direction (as a *angle*[rad, in birds eye view), and a distance (in meters) to move in the direction
+function newLocationFromPointAngle(lon1, lat1, angle, distance) {
+    // angle: +-0 -> west, +pi/2 -> south, +-pi -> east, -pi/2 -> north
+    let lon2, lat2;
+
+    const dx = (distance / 1000) * Math.cos(angle);
+    const dy = (distance / 1000) * Math.sin(angle);
+
+    lon2 = lon1 - (dx / 71.5);
+    lat2 = lat1 - (dy / 111.3);
+
+    return [lon2, lat2];
 }

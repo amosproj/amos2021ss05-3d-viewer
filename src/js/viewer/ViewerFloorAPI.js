@@ -72,7 +72,8 @@ export class ViewerFloorAPI {
                 this.currentFloorId = index;
 
                 // display pano from new floor closest to current one
-                this.viewerAPI.move(oldPos[0], oldPos[1], oldPos[2]); // only checks images in correct floor because FloorId is set before
+                const newImg = this.viewerAPI.move(oldPos[0], oldPos[1], oldPos[2]); // only checks images in correct floor because FloorId is set before
+                this.viewerAPI.propagateEvent("moved", newImg.id, false);
                 
                 // show new map
                 this.viewerMapAPI.redraw();

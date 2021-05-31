@@ -1,5 +1,4 @@
-import { textureLoader, baseURL } from "./Globals.js";
-
+"use strict";
 
 // Map (2D) Viewer API
 
@@ -25,8 +24,8 @@ export class ViewerMapAPI {
         this.spriteGroup = new THREE.Group(); //create an sprite group
         this.mapScalingFactor = 0.2;
         
-        const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
-        textureLoader.load(mapPicturePath, (texture) => {
+        const mapPicturePath = viewerAPI.baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
+        viewerAPI.textureLoader.load(mapPicturePath, (texture) => {
             const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
             material.renderOrder = 1;
             material.depthTest = false;

@@ -15,26 +15,3 @@ export function distanceWGS84TwoPoints(lon1, lat1, lon2, lat2) {
     //const avgLat = (lat1 + lat2) / 2 * 0.01745;
     //dx = 111.3 * Math.cos(THREE.MathUtils.degToRad(avgLat)) * (lon1 - lon2);
 }
-
-// takes in a location (in lot/lat), a direction (as a *angle*[rad, in birds eye view), and a distance (in meters) to move in the direction
-export function newLocationFromPointAngle(lon1, lat1, angle, distance) {
-    // angle: +-0 -> west, +pi/2 -> south, +-pi -> east, -pi/2 -> north
-    let lon2, lat2;
-
-    const dx = (distance / 1000) * Math.cos(angle);
-    const dy = (distance / 1000) * Math.sin(angle);
-
-    lon2 = lon1 - (dx / 71.5);
-    lat2 = lat1 - (dy / 111.3);
-
-    return [lon2, lat2];
-}
-
-export function getFolderNumber(imageNumber) {
-    return Math.trunc(imageNumber / 100);
-}
-
-export const textureLoader = new THREE.TextureLoader().setCrossOrigin('use-credentials');
-
-export const baseURL = "https://bora.bup-nbg.de/amos2floors/";
-//export const baseURL = "../assets/";
