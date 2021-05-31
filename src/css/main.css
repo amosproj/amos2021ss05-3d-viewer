@@ -22,13 +22,6 @@ body {
     cursor: -webkit-grabbing;
 }
 
-.control{
-    position: fixed;
-    bottom: 20%;
-    right: 3%;
-    color: #fff;
-}
-
 .map{
     position: fixed;
     bottom: 5%;
@@ -40,7 +33,7 @@ body {
 
 .control-OL{
     position: fixed;
-    bottom: 20%;
+    bottom: 40%;
     right: 3%;
     color: #fff;
 }

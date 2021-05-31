@@ -4,7 +4,10 @@ import { distanceWGS84TwoPoints } from "./Globals.js";
 
 export class ViewerFloorAPI {
    
-    constructor(data, viewerImageAPI) {
+    constructor(data, viewerAPI) {
+        this.viewerAPI = viewerAPI;
+        this.viewerImageAPI = viewerAPI.viewerImageAPI;
+        this.viewerMapAPI; // Set in MapAPI once created
         // The file «data.json» contains the metadata defining the panorama image locations.
             //"images" Array Images Array
             //"lon0" Number Reference longitude of model (WGS 84)
@@ -20,9 +23,7 @@ export class ViewerFloorAPI {
             const currentFloor = new ViewerFloor(data.floors[key], key);
 
             // add ViewerImages corresponding to this floor
-            viewerImageAPI.images.forEach((currentImage) => {
-
-              
+            viewerAPI.viewerImageAPI.images.forEach((currentImage) => {
                 // check if imageidx in any of the i intervalls
                 currentFloor.i.forEach((interval) => {
                     if (currentImage.id >= interval[0] && currentImage.id <= interval[1]) {
@@ -38,7 +39,7 @@ export class ViewerFloorAPI {
 
                         currentFloor.viewerImages.push(currentImage);
                     }
-                 });
+                });
             });
 
             this.floors.push(currentFloor);            
@@ -48,7 +49,9 @@ export class ViewerFloorAPI {
         this.floors.sort((a, b) => (a.z > b.z) ? 1 : -1);
 
         this.currentFloorId = 0.0;
-        viewerImageAPI.currentImageId = this.floors[this.currentFloorId].i[0][0];
+        viewerAPI.viewerImageAPI.currentImageId = this.floors[this.currentFloorId].i[0][0];
+
+        this.createControlMenuButtonsOL();
     }
 
     all(callback) {
@@ -58,6 +61,164 @@ export class ViewerFloorAPI {
     get currentFloor() {
         return this.floors[this.currentFloorId];
     }
+
+    set(name) {
+        this.floors.forEach((element, index) => {
+            // found the floor
+            if (element.name == name) {
+                const oldPos = this.viewerImageAPI.currentImage.pos;
+                
+                // set new floor 
+                this.currentFloorId = index;
+
+                // display pano from new floor closest to current one
+                const newImg = this.viewerAPI.move(oldPos[0], oldPos[1], oldPos[2]); // only checks images in correct floor because FloorId is set before
+                
+                // show new map
+                this.viewerMapAPI.redraw();
+
+                // notify viewerAPI via event
+                this.viewerAPI.propagateEvent("floor", this.currentFloor.name, true); // changed floor 
+                this.viewerAPI.propagateEvent("moved", newImg.id, false); // moving to different pano is side-effect (not directly done by user)
+                return;
+            }
+        });
+    }
+            
+    createControlMenuButtonsOL() {
+
+        $('button[name="buttonUp"]').hide();
+        $('button[name="buttonDown"]').hide();
+        $('.control select').hide();
+
+        // Show current floor
+        $("#cfOL").text("Current Floor: " + this.currentFloor.name + ". ");
+
+        // push all floor names into an array
+        let totalFloorsname = [];
+        this.floors.forEach(function (item) {
+            totalFloorsname.push(item.name);
+        });
+
+        // get buttonUp and buttonDown for enable/disable
+        let buttonUp = document.getElementById('buttonUpOL');
+        let buttonDown = document.getElementById('buttonDownOL');
+
+        // get droplist
+        var dropdownFloorsOL = document.getElementById("dropdown-floors-OL");
+        
+        // Checking if the current floor is on the highest or lowest floor
+        if (this.floors.length == 1) {
+            buttonDown.disabled = true;
+            buttonUp.disabled = true;
+        } else if (this.currentFloorId == 0) {
+            buttonDown.disabled = true;
+        } else if (this.currentFloorId == this.floors.length - 1) {
+            buttonUp.disabled = true;
+        }
+
+        // Create Drop down Menus by floor names
+        for(let i = 0; i < this.floors.length; i++) {
+            var option = document.createElement('option');
+            option.text = option.value = this.floors[i].name;
+            dropdownFloorsOL.add(option, 0);
+        }
+        
+        // reference needed for scope of $ functions
+        const selfRef = this;
+
+        // Change current floor by dropdown menu
+        dropdownFloorsOL.onchange = function () {
+            // conversion between currentFloorID with selfRef.floors.name
+            let selectValue = dropdownFloorsOL.value;
+            let index_in_floor_name = totalFloorsname.indexOf(selectValue);
+            selfRef.currentFloorId = index_in_floor_name;
+        
+            $("#cfOL").text("Current Floor: " + selfRef.currentFloor.name + ". ");
+
+            buttonUp.disabled = false;
+            buttonDown.disabled = false;
+
+            // Checking if the current floor is on the highest or lowest floor
+            if (selfRef.currentFloorId == 0) {
+                // lowest floor
+                buttonDown.disabled = true;
+                
+            } else if (selfRef.currentFloorId == totalFloorsname.length - 1) {
+                // highest floor
+                buttonUp.disabled = true;
+                
+            }
+            
+            selfRef.set(dropdownFloorsOL.value);
+
+            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
+        };
+
+        //Up Button for changing currentfloor
+        buttonUp.addEventListener('click', function () {
+        
+            selfRef.currentFloorId++;
+
+            $("#cf").text("Current Floor: " + selfRef.currentFloor.name + ". ");
+
+            // change to higher floor
+            if (selfRef.currentFloorId == selfRef.floors.length - 1) {
+
+                // disable the up button if it's already at the highest floor
+                buttonUp.disabled = true;
+                buttonDown.disabled = false;  
+
+            } else {
+
+                //enable the up button if it's not in the highest floor
+                buttonUp.disabled = false;
+                buttonDown.disabled = false; 
+
+            }
+
+            //$('.control select').val(viewerFloorAPI.currentFloorId).change();
+            dropdownFloorsOL.value= totalFloorsname[selfRef.currentFloorId];
+
+            selfRef.set(dropdownFloorsOL.value);
+
+            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
+
+        });
+
+        //Down Button for changing currentfloor
+        buttonDown.addEventListener('click', function () {
+        
+            selfRef.currentFloorId--;
+            $("#cf").text("Current Floor: " + selfRef.currentFloor.name + ". ");
+
+            // change to lower floor
+            if (selfRef.currentFloorId < 1 ) {
+
+                // disable the down button if it's already at the lowest floor
+                buttonUp.disabled = false; 
+                buttonDown.disabled = true;
+
+            } else {
+
+                //enable the down button if it's not in the lowest floor
+                buttonUp.disabled = false; 
+                buttonDown.disabled = false;
+                
+            }
+
+            //$('.control select').val(viewerFloorAPI.currentFloorId).change();
+            dropdownFloorsOL.value= totalFloorsname[selfRef.currentFloorId];
+
+            selfRef.set(dropdownFloorsOL.value);
+
+            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
+        });
+    }
+
 }
 
 class ViewerFloor {

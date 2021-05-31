@@ -1,16 +1,17 @@
-import { textureLoader, baseURL } from "./Globals.js";
+"use strict";
 
-
+import { ViewerAPI } from "./ViewerAPI.js";
 
 // Map (2D) Viewer API
 
 // Specific API for the Map View
 export class ViewerMapAPI {
 
-    constructor(viewerImageAPI, viewerFloorAPI) {
-        // hardcoded to work with assets/ for now
-        this.viewerImageAPI = viewerImageAPI;
-        this.viewerFloorAPI = viewerFloorAPI;
+    constructor(viewerAPI) {
+        this.viewerImageAPI = viewerAPI.viewerImageAPI;
+        this.viewerFloorAPI = viewerAPI.viewerFloorAPI;
+        viewerAPI.viewerFloorAPI.viewerMapAPI = this; // set reference to mapAPI in floorAPI
+
         this.layers;
         this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
         this.camera = new THREE.OrthographicCamera( 
@@ -24,7 +25,10 @@ export class ViewerMapAPI {
 
         this.spriteGroup = new THREE.Group(); //create an sprite group
         this.mapScalingFactor = 0.2;
-        
+
+        // const baseURL = "https://bora.bup-nbg.de/amos2floors/";
+        const baseURL = viewerAPI.baseURL;
+                
         const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
         displayMap(mapPicturePath); 
         /*
@@ -60,6 +64,7 @@ export class ViewerMapAPI {
         
         //* remove comment to draw all points on map
         let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
+
         allImages.forEach(image => {
             this.addPoint("black", image.mapOffset);
         });
@@ -67,7 +72,9 @@ export class ViewerMapAPI {
 
         this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
         //this.addViewingDirection("yellow",  this.viewerImageAPI.currentImage.mapOffset);
+
     }
+
 
     // draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
     addPoint(color, offset) {
@@ -121,10 +128,8 @@ export class ViewerMapAPI {
         this.spriteGroup.add(triangleSprite);
 
     }
-
-
+ 
 }
-
 
 function generateCircularSprite(color) {
     var canvas = document.createElement('canvas');
