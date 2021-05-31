@@ -135,8 +135,7 @@ export class ViewerPanoAPI{
         const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the click is
         const adjustedHorizontalAngle = horizontalAngle - (horizontalOffset * this.viewerViewState.fov / 2); // line from current position towards where the mouse double clicked (2D birds eye view angle)
     
-        const cameraDir = this.camera.getWorldDirection(); // TODO remove this call and use viewstate.latov instead
-        const verticalAngle = Math.abs(THREE.Math.radToDeg(Math.atan2(cameraDir.x,cameraDir.y))); // between [0,180]Deg depending on how far up/down the user looks
+        const verticalAngle = -this.viewerViewState.latov + 90 // between [0,180]Deg depending on how far up/down the user looks
         const verticalOffset = (event.y - halfHeight) / halfHeight; // between [-1,1] depending how up-down the mouse click is on the screen
         const adjustedVerticalAngle = verticalAngle + (verticalOffset * this.viewerViewState.fov / 2);
         const realVerticalOffset = (adjustedVerticalAngle - 90) / 90; // between [-1,1] depending how far up/down user looks and clicks
