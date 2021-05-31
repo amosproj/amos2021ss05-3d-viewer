@@ -27,16 +27,14 @@ export class ViewerMapAPI {
         
         const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
         this.mapLayer = displayMap(mapPicturePath); 
-        var popup = new Overlay({
-            element: element,
+        var popup = new ol.Overlay({
+            //element: 
             positioning: 'bottom-center',
             stopEvent: false,
             offset: [0, -10],
           });
-          map.addOverlay(popup);
+          //this.mapLayer.addOvSerlay(popup);
           
-        
-        
         //this.redraw();
         //this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
         //this.scene.add(this.spriteGroup);
