@@ -111,9 +111,10 @@ export class ViewerPanoAPI{
     
     // this event listener is called when the user *ends* moving the picture
     onPointerUp() {
-        this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
         document.removeEventListener('pointermove', this.oPM);
         document.removeEventListener('pointerup', this.oPU);
+    
+        this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
     }
     
     onDocumentMouseWheel(event) {
@@ -152,6 +153,7 @@ export class ViewerPanoAPI{
         const newPos = newLocationFromPointAngle(currentPos[0], currentPos[1], convertedAngle, distance);
     
         this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
+        
         this.viewerAPI.propagateEvent("moved", this.viewerImageAPI.currentImage.id, true);
     }
 
