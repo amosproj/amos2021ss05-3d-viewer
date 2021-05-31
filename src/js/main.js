@@ -417,9 +417,9 @@ config.web = {};
 
 config.zooming.speed = process.env.loc_para1;
 config.rotation.speed = process.env.loc_para2;
-config.initial.FOV = '80';
+config.initial.FOV = "80";
 config.MAX.fov = "100";
-config.MIN.FOV = 10
+config.MIN.FOV = "10";
 config.web.port = process.env.WEB_PORT || 5500;
 
 module.exports = config;
