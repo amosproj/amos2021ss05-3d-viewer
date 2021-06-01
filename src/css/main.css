@@ -22,13 +22,17 @@ body {
     cursor: -webkit-grabbing;
 }
 
-.map{
+#map{
     position: fixed;
     bottom: 5%;
     right: 3%;
     width: 20%;
     height:20%;
     color: #fff;
+}
+
+.map {
+    background-color: white;
 }
 
 .control-OL{
