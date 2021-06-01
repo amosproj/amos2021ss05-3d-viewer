@@ -7,7 +7,6 @@ import { ViewerMapAPI } from "./ViewerMapAPI.js"
 import { ViewerState } from "./ViewerState.js";
 import { libraryInfo } from "./LibraryInfo.js";
 import { ViewerVersionAPI } from "./ViewerVersionAPI.js";
-import { distanceWGS84TwoPoints } from "./Globals.js";
 
 
 // API provided by the viewer
@@ -73,24 +72,28 @@ export class ViewerAPI {
 
     //Move the view to the nearest (euclidian distance) panorama to the given position. (ignore z value because only called on same floor)
     move(lon, lat, z) {
+        const localPos = this.toLocal([lon, lat, z]);
+
         let minDistance = 1000000000;
         let bestImg;
+        
         this.floor.currentFloor.viewerImages.forEach(element => {
-            const currDistances = distanceWGS84TwoPoints(lon, lat, element.pos[0], element.pos[1]);
+            const currLocalPos = this.toLocal(element.pos);
+            const currDistances = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
             const currDistance = Math.sqrt(currDistances[0] * currDistances[0] + currDistances[1] * currDistances[1]);
+        
             if (currDistance < minDistance) {
                 minDistance = currDistance;
                 bestImg = element;
             }
+        
         });
 
         // avoid duplication
         if (bestImg != this.image.currentImage) {
-            
             this.pano.display(bestImg.id);
             this.map.redraw();
             return bestImg;
-
         }
     }
 
@@ -156,7 +159,7 @@ export class ViewerAPI {
         //const avgLat = (lat1 + lat2) / 2 * 0.01745;
         //dx = 111.3 * Math.cos(THREE.MathUtils.degToRad(avgLat)) * (lon1 - lon2);
         
-        return new this.THREE.Vector3(dx, dy, globalCoords[2] - this.floor.currentFloor.z);
+        return new this.THREE.Vector3(dx * 1000, dy * 1000, globalCoords[2] - this.floor.currentFloor.z);
         // Returns: THREE.Vector3 : Local coordinates
     }
 

@@ -1,7 +1,5 @@
 "use strict";
 
-import { distanceWGS84TwoPoints } from "./Globals.js";
-
 export class ViewerFloorAPI {
    
     constructor(data, viewerAPI) {
@@ -30,8 +28,7 @@ export class ViewerFloorAPI {
                     if (currentImage.id >= interval[0] && currentImage.id <= interval[1]) {
                         currentImage.floor = key;
                         
-                        // dx, dy distance in kilometers
-                        const [dx, dy] = distanceWGS84TwoPoints(data.lon0, data.lat0, currentImage.pos[0], currentImage.pos[1]);
+                        const [dx, dy] = [71.5 * (data.lon0 - currentImage.pos[0]), 111.3 * (data.lat0 - currentImage.pos[1])];
 
                         const offsetX = currentFloor.mapData.x + currentFloor.mapData.density * (dx * 1000);
                         const offsetY = currentFloor.mapData.y - currentFloor.mapData.density * (dy * 1000);
