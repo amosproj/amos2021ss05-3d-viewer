@@ -106,6 +106,7 @@ export class ViewerAPI {
     */
     listen(listener) {
         this.listeners.push(listener);
+        return this;
     }
 
     propagateEvent(name, payload, human) {
