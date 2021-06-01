@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Minimal Outside</title>
+    <style>
+        iframe#amos {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            border: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <iframe id="amos"></iframe>
+    <script>
+        // Callback function to start viewer via viewerAsync
+        window.parent = {
+            callback: function(viewerWindow, viewerAsync) {
+                console.info("initial callback called:", viewerWindow, viewerAsync);
+                viewerAsync("https://bora.bup-nbg.de/amos2floors/", (api) => {
+                    console.info("loaded callback called with API:", api);
+                });
+            }
+        };
+
+        // start src/index.html
+        document.getElementById('amos').setAttribute('src', "./src/index.html?onload=window.parent.callback");
+    </script>
+</body>
+
+</html>
