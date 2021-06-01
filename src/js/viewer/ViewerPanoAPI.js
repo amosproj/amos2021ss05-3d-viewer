@@ -3,7 +3,7 @@
 import { ViewerViewState } from "./ViewerViewState.js";
 import { DEFAULT_FOV, MAX_FOV, MIN_FOV } from "./Globals.js";
 
-export class ViewerPanoAPI{
+export class ViewerPanoAPI {
 
     constructor(viewerAPI) {
         this.scene = new THREE.Scene(); // three.js scene used by the panorama (3D) viewer

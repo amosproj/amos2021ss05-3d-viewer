@@ -16,6 +16,7 @@ export class ViewerFloorAPI {
         
         this.z; // : Number // Z coordinate of current floor(in meters)
         
+        this.origin = [data.lon0, data.lat0]; // used in ViewerAPI:toLocal
         this.floors = [];
 
         // iterate over floors
