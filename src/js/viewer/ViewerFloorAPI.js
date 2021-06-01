@@ -6,7 +6,7 @@ export class ViewerFloorAPI {
    
     constructor(data, viewerAPI) {
         this.viewerAPI = viewerAPI;
-        this.viewerImageAPI = viewerAPI.viewerImageAPI;
+        this.viewerImageAPI = viewerAPI.image;
         this.viewerMapAPI; // Set in MapAPI once created
         // The file «data.json» contains the metadata defining the panorama image locations.
             //"images" Array Images Array
@@ -24,7 +24,7 @@ export class ViewerFloorAPI {
             const currentFloor = new ViewerFloor(data.floors[key], key);
 
             // add ViewerImages corresponding to this floor
-            viewerAPI.viewerImageAPI.images.forEach((currentImage) => {
+            viewerAPI.image.images.forEach((currentImage) => {
                 // check if imageidx in any of the i intervalls
                 currentFloor.i.forEach((interval) => {
                     if (currentImage.id >= interval[0] && currentImage.id <= interval[1]) {
@@ -50,7 +50,7 @@ export class ViewerFloorAPI {
         this.floors.sort((a, b) => (a.z > b.z) ? 1 : -1);
 
         this.currentFloorId = 0.0;
-        viewerAPI.viewerImageAPI.currentImageId = this.floors[this.currentFloorId].i[0][0];
+        viewerAPI.image.currentImageId = this.floors[this.currentFloorId].i[0][0];
 
         this.createControlMenuButtons();
     }
@@ -141,8 +141,8 @@ export class ViewerFloorAPI {
                 
                 selfRef.set($(this).text());
 
-                document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
-                document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
+                document.removeEventListener('pointermove', selfRef.viewerAPI.pano.oPM);
+                document.removeEventListener('pointerup', selfRef.viewerAPI.pano.oPU);
             });
         });
 
@@ -165,8 +165,8 @@ export class ViewerFloorAPI {
 
             selfRef.set($(this).text());
 
-            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
-            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
+            document.removeEventListener('pointermove', selfRef.viewerAPI.pano.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.pano.oPU);
         });
 
         //Down Button for changing currentfloor
@@ -188,8 +188,8 @@ export class ViewerFloorAPI {
 
             selfRef.set($(this).text());
 
-            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
-            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
+            document.removeEventListener('pointermove', selfRef.viewerAPI.pano.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.pano.oPU);
         });
     
     }

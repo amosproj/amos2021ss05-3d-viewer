@@ -8,7 +8,7 @@ export class ViewerPanoAPI {
     constructor(viewerAPI) {
         this.scene = new THREE.Scene(); // three.js scene used by the panorama (3D) viewer
         this.camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
-        this.viewerImageAPI = viewerAPI.viewerImageAPI;
+        this.viewerImageAPI = viewerAPI.image;
         this.viewerAPI = viewerAPI;
         this.sphereRadius = 500;
 
