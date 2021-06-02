@@ -159,7 +159,7 @@ export class ViewerFloorAPI {
         
             selfRef.currentFloorId++;
 
-            $("#cf").text("Current Floor: " + selfRef.currentFloor.name + ". ");
+            $("#cfOL").text("Current Floor: " + selfRef.currentFloor.name + ". ");
 
             // change to higher floor
             if (selfRef.currentFloorId == selfRef.floors.length - 1) {
@@ -190,7 +190,7 @@ export class ViewerFloorAPI {
         buttonDown.addEventListener('click', function () {
         
             selfRef.currentFloorId--;
-            $("#cf").text("Current Floor: " + selfRef.currentFloor.name + ". ");
+            $("#cfOL").text("Current Floor: " + selfRef.currentFloor.name + ". ");
 
             // change to lower floor
             if (selfRef.currentFloorId < 1 ) {

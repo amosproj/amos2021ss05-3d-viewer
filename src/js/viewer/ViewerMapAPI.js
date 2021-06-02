@@ -25,10 +25,16 @@ export class ViewerMapAPI {
         this.mapScalingFactor = 0.2;
 
         // const baseURL = "https://bora.bup-nbg.de/amos2floors/";
-        const baseURL = viewerAPI.baseURL;
-                
-        const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
-        this.map = displayMap(mapPicturePath); 
+        this.baseURL = viewerAPI.baseURL;
+
+        // create Map and Layers
+        this.map;
+        this.initDisplayMap();
+        this.updateDisplayMap(this.viewerFloorAPI.currentFloorId);
+
+        //this.mapPicturePath = this.baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
+        // this.map = displayMap(this.mapPicturePath); 
+
         /*
     
         var popup = new ol.Overlay({
@@ -70,6 +76,9 @@ export class ViewerMapAPI {
 
         this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
         //this.addViewingDirection("yellow",  this.viewerImageAPI.currentImage.mapOffset);
+
+        var floorIndex = this.viewerFloorAPI.currentFloorId;
+        this.updateDisplayMap(floorIndex);
 
     }
 
@@ -126,6 +135,68 @@ export class ViewerMapAPI {
         this.spriteGroup.add(triangleSprite);
 
     }
+
+    initDisplayMap(){
+
+        var extent = [0, 0, 512, 512];
+
+        //  Projection map image coordinates directly to map coordinates in pixels. 
+        var projection = new ol.proj.Projection({
+        code: 'map-image',
+        units: 'pixels',
+        extent: extent,
+        });
+
+        // create map 
+
+        this.map = new ol.Map({  //new ol.control.OverviewMap({
+            target: 'map',
+            view: new ol.View({
+                projection: projection,
+                center: new ol.extent.getCenter(extent),
+                zoom: 1,
+                maxZoom: 5,
+            }),
+            });
+        
+        // create layers for each floors 
+        for (var i =0; i < this.viewerFloorAPI.floors.length; i++){
+            this.map.addLayer((new ol.layer.Image({
+                source: new ol.source.ImageStatic({
+                    //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
+                    url: this.baseURL + this.viewerFloorAPI.floors[i].mapData.name + ".png",
+                    projection: projection,
+                    imageExtent: extent,
+                })
+            })))
+        }
+    }
+
+    updateDisplayMap(floorIndex){
+
+        var extent = [0, 0, 512, 512];
+
+        //  Projection map image coordinates directly to map coordinates in pixels. 
+        var projection = new ol.proj.Projection({
+        code: 'map-image',
+        units: 'pixels',
+        extent: extent,
+        });
+
+        var group = this.map.getLayerGroup();
+        var layers = group.getLayers();
+        
+        // set layer visibility
+        layers.forEach(function (layer, i) {
+            if (i == floorIndex){
+                layer.setVisible(true);
+                layer.set
+            }
+            else{
+                layer.setVisible(false);
+            }
+          });
+    }
  
 }
 
@@ -167,41 +238,6 @@ function generateTriangleCanvas(color){
     context.fill();
     return context; 
 }
-
-function displayMap(mapURL){
-
-    var extent = [0, 0, 512, 512];
-    //  Projection map image coordinates directly to map coordinates in pixels. 
-    var projection = new ol.proj.Projection({
-    code: 'map-image',
-    units: 'pixels',
-    extent: extent,
-    });
-
-    var map = new ol.Map({  //new ol.control.OverviewMap({
-    layers: [
-        new ol.layer.Image({
-        source: new ol.source.ImageStatic({
-            //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
-            url: mapURL,
-            projection: projection,
-            imageExtent: extent,
-            fill: new ol.style.Fill({color: 'white'})
-        }),
-        }) ],
-    target: 'map',
-    view: new ol.View({
-        projection: projection,
-        center: new ol.extent.getCenter(extent),
-        zoom: 1,
-        maxZoom: 5,
-    }),
-    });
-
-    return map
-
-}
-
 /*
 var overviewMapControl = new OverviewMap({
   // see in overviewmap-custom.html to see the custom CSS used
