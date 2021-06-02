@@ -78,27 +78,10 @@ export class ViewerMapAPI {
 
     // draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
     addPoint(color, offset) {
-        const texture = new THREE.Texture(generateCircularSprite(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture,
-            transparent: false,
-            color: 0xffffff // BLACK, 
-        });
-        // Render on Top
-        mat.renderOrder = 3;
-        // Create the point sprite
-        let pointSprite = new THREE.Sprite(mat);
-        pointSprite.center.set(0.0, 0.0);
+        point_canvas = generateCircularSprite(color);
+        position =[-this.mapScalingFactor * offset[0], this.mapScalingFactor * offset[1]]
 
-        // draw it at pixel offset of as agruemnt passed pixel offset
-        pointSprite.position.set(-this.mapScalingFactor * offset[0], this.mapScalingFactor * offset[1], -3);
-
-        //scale the point
-        pointSprite.scale.set(5, 5, 1);
-        this.spriteGroup.add(pointSprite);
-
-        return pointSprite;
+        return position;
     }
     
     // Method
@@ -107,27 +90,6 @@ export class ViewerMapAPI {
         return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
     
-    addViewingDirection(color, position){
-        const texture = new THREE.Texture(generateTriangleCanvas(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture
-        });
-        position 
-        // Create the sprite
-        let triangleSprite = new THREE.Sprite(mat);
-        triangleSprite.center.set(0.0, 0.0);
-
-        // Draw it at The localization point
-        triangleSprite.position.set(-this.mapScalingFactor * position[0], this.mapScalingFactor * position[1], -3);
-
-        //var quartenion = new THREE.Quaternion(this.viewerImageAPI.currentImage.orientation);
-        //triangleSprite.transform.rotation = rotation;
-        //scale the point
-        triangleSprite.scale.set(10, 10, 1);
-        this.spriteGroup.add(triangleSprite);
-
-    }
  
 }
 
@@ -148,31 +110,10 @@ function generateCircularSprite(color) {
 
 }
 
-function generateTriangleCanvas(color){
-    var canvasTri = document.createElement('canvas');
-    var context = canvasTri.getContext('2d');
-
-    //Cretae triangle shape
-    context.beginPath();
-    context.moveTo(200, 100);
-    context.lineTo(300, 300);
-    context.lineTo(100, 300);
-    context.closePath();
-    
-    // outline
-    context.lineWidth = 10;
-    context.strokeStyle = '0xff0000'; //blue
-    context.stroke();
-    
-    // the fill color
-    context.fillStyle = color;
-    context.fill();
-    return context; 
-}
 
 function displayMap(mapURL){
 
-    var extent = [0, 0, 512, 512];
+    var extent = [0, 0, 256, 256];
     //  Projection map image coordinates directly to map coordinates in pixels. 
     var projection = new ol.proj.Projection({
     code: 'map-image',
@@ -180,42 +121,26 @@ function displayMap(mapURL){
     extent: extent,
     });
 
-    var map = new ol.Map({  //new ol.control.OverviewMap({
-    layers: [
-        new ol.layer.Image({
-        source: new ol.source.ImageStatic({
-            //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
-            url: mapURL,
+    var map = new ol.Map({
+        controls: ol.control.defaults({rotate: false}),
+        interactions: ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false}), 
+        layers: [
+            new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
+                url: mapURL,
+                projection: projection,
+                imageExtent: extent,
+
+            }),
+            }) ],
+        target: 'map',
+        view: new ol.View({
             projection: projection,
-            imageExtent: extent,
-            fill: new ol.style.Fill({color: 'white'})
+            center: new ol.extent.getCenter(extent),
+            zoom: 0.8,
+            maxZoom: 4,
         }),
-        }) ],
-    target: 'map',
-    view: new ol.View({
-        projection: projection,
-        center: new ol.extent.getCenter(extent),
-        zoom: 1,
-        maxZoom: 5,
-    }),
-    });
+        });
 
 }
-
-/*
-var overviewMapControl = new OverviewMap({
-  // see in overviewmap-custom.html to see the custom CSS used
-  className: 'ol-overviewmap ol-custom-overviewmap',
-  layers: [
-    new TileLayer({
-      source: new OSM({
-        'url':
-          'https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png' +
-          '?apikey=Your API key from http://www.thunderforest.com/docs/apikeys/ here',
-      }),
-    }) ],
-  collapseLabel: '\u00BB',
-  label: '\u00AB',
-  collapsed: false,
-});
-*/
