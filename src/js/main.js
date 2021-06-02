@@ -1,4 +1,5 @@
 "use strict";
+
 import { ViewerState}  from "./viewer/ViewerState.js";
 import { ViewerVersionAPI } from "./viewer/ViewerVersionAPI.js";
 import { ViewerWindow } from "./viewer/ViewerWindow.js";
@@ -10,6 +11,7 @@ let trackImageID, trackFloorName = 0.0;
 let viewerState = null;
 
 let viewerAPI, viewerViewState, viewerFloorAPI;
+
 
 // only call executed in this file
 new ViewerWindow().viewerAsync("https://bora.bup-nbg.de/amos2floors/", (x) => console.log(x.listen(logIt)));
@@ -38,14 +40,14 @@ function basicSetUp() {
         loc_para1 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[0];
         loc_para2 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[1];
         loc_para3 = viewerFloorAPI.floors[viewerFloorAPI.currentFloorId].viewerImages[viewerFloorAPI.currentFloorId].pos[2];
-    
+
     } else {
         loc_para1 = trackPosLon;
         loc_para2 = trackPosLat;
         loc_para3 = trackPosVert;
         imageId = trackImageID;
         floors_name = trackFloorName;
-    
+
     }
     var latov_rad = viewerViewState.latov * Math.PI / 180.0;
     var lonov_rad = viewerViewState.lonov * Math.PI / 180.0;
@@ -53,10 +55,10 @@ function basicSetUp() {
     var vMajor = viewerAPI.MAJOR;
     var vMinor = viewerAPI.MINOR;
     var view_para = [];
-    viewerState = new ViewerState( [loc_para1,loc_para2,loc_para3],imageId,floors_name,[viewer_fov,latov_rad,lonov_rad] ) ;
+    viewerState = new ViewerState([loc_para1, loc_para2, loc_para3], imageId, floors_name, [viewer_fov, latov_rad, lonov_rad]);
     view_para = viewerState.view;
-    viewerAPI.viewerVersionAPI = new ViewerVersionAPI(vMajor, vMinor,view_para);
-    
+    viewerAPI.viewerVersionAPI = new ViewerVersionAPI(vMajor, vMinor, view_para);
+
 }
 
 function drawArrow(position  , scene ){
@@ -67,11 +69,11 @@ function drawArrow(position  , scene ){
 
 
     //Create the arrow vetor
-    const origin = new THREE.Vector3(0,0,0);
+    const origin = new THREE.Vector3(0, 0, 0);
     const length = 20;
     const hex = 0xff0000; // red color
-    var arrowHelper = new THREE.ArrowHelper( direction, origin, length, hex );
-    scene.add(arrowHelper); 
+    var arrowHelper = new THREE.ArrowHelper(direction, origin, length, hex);
+    scene.add(arrowHelper);
 
 }
 
@@ -84,3 +86,23 @@ function updateArrow(arrowHelper, direction){
     arrowHelper.setDirection(direction.normalize());
     arrowHelper.setLength(direction.length());
 }
+
+//Configuration File for Parameters
+
+var config = {};
+
+config.zooming = {};
+config.rotation = {};
+config.initialFOV = {};
+config.MAX_FOV = {};
+config.MIN_FOV = {};
+config.web = {};
+
+config.zooming.speed = process.env.loc_para1;
+config.rotation.speed = process.env.loc_para2;
+config.initial.FOV = "80";
+config.MAX.fov = "100";
+config.MIN.FOV = "10";
+config.web.port = process.env.WEB_PORT || 5500;
+
+module.exports = config;
