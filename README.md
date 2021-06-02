@@ -50,9 +50,6 @@ The computer science department would like to use this viewer to display its 50 
     textual deliverables, i.e. documents (pdf, doc, etc.), or software deliverables
 
 
--   **/assets**:
-    panaroma image dataset as an example to try the viewer software
-
 -   **/src**:
     stands for source, and is the raw code before minification or concatenation or some other compilation - used to read/edit the code
 
@@ -75,7 +72,7 @@ It includes css(inside PanoViewer div),js,libs and index.html
   includes the general viewer files
 
 *  **/src/libs**:
-  includes jQuery and Three.js Library files
+  includes jQuery, OpenLayers and Three.js Library files
 
 
 ## Folder Structure
@@ -96,6 +93,7 @@ Includes the js files and main.js
 
 - [License | jQuery Foundation](https://jquery.org/license/): JavaScript library for simple HTML DOM manipulation
 
+- [OpenLayers](https://openlayers.org): JavaScript library for displaying a dynamic map and markers on it
 
 
 

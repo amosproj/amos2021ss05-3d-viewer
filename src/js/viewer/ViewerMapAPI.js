@@ -24,7 +24,6 @@ export class ViewerMapAPI {
         this.spriteGroup = new THREE.Group(); //create an sprite group
         this.mapScalingFactor = 0.2;
 
-        // const baseURL = "https://bora.bup-nbg.de/amos2floors/";
         this.baseURL = viewerAPI.baseURL;
 
         // create Map and Layers
@@ -61,26 +60,27 @@ export class ViewerMapAPI {
    
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
+        /*
         this.spriteGroup.clear();
         
-        //* remove comment to draw all points on map
-        let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
-
-        allImages.forEach(image => {
-            this.addPoint("black", image.mapOffset);
-        });
-        //*/
+        // remove comment to draw all points on map
+        // let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
+   
+        // allImages.forEach(image => {
+        //     this.addPoint("black", image.mapOffset);
+        // });
+        //
 
         this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
         //this.addViewingDirection("yellow",  this.viewerImageAPI.currentImage.mapOffset);
-
+        */
         var floorIndex = this.viewerFloorAPI.currentFloorId;
         this.updateDisplayMap(floorIndex);
 
     }
 
 
-    // draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
+    /* draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
     addPoint(color, offset) {
         const texture = new THREE.Texture(generateCircularSprite(color));
         texture.needsUpdate = true;
@@ -103,7 +103,7 @@ export class ViewerMapAPI {
         this.spriteGroup.add(pointSprite);
 
         return pointSprite;
-    }
+    }*/
     
     // Method
     scale() {
@@ -111,7 +111,7 @@ export class ViewerMapAPI {
         return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
     
-    addViewingDirection(color, position){
+    /*addViewingDirection(color, position){
         const texture = new THREE.Texture(generateTriangleCanvas(color));
         texture.needsUpdate = true;
         var mat = new THREE.SpriteMaterial({
@@ -131,7 +131,7 @@ export class ViewerMapAPI {
         triangleSprite.scale.set(10, 10, 1);
         this.spriteGroup.add(triangleSprite);
 
-    }
+    }*/
 
     initDisplayMap(){
 
@@ -188,6 +188,7 @@ export class ViewerMapAPI {
  
 }
 
+/*
 function generateCircularSprite(color) {
     var canvas = document.createElement('canvas');
     canvas.height = 16;
