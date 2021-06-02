@@ -1,7 +1,7 @@
 "use strict";
-import { ViewerAPI } from "./viewer/ViewerAPI.js";
 import { ViewerState}  from "./viewer/ViewerState.js";
 import { ViewerVersionAPI } from "./viewer/ViewerVersionAPI.js";
+import { ViewerWindow } from "./viewer/ViewerWindow.js";
 
 let trackPosLon, trackPosLat, trackPosVert = 0.0;
 
@@ -12,7 +12,8 @@ let viewerState = null;
 let viewerAPI, viewerViewState, viewerFloorAPI;
 
 // only call executed in this file
-viewerAPI = new ViewerAPI("https://bora.bup-nbg.de/amos2floors/");
+new ViewerWindow().viewerAsync("https://bora.bup-nbg.de/amos2floors/", (x) => console.log(x.listen(logIt)));
+//viewerAPI = new ViewerAPI("https://bora.bup-nbg.de/amos2floors/");
 
 function logIt(name, payload, human) {
     if (name == "moved") {
@@ -24,7 +25,6 @@ function logIt(name, payload, human) {
     }
 }
 
-viewerAPI.listen(logIt);
 
 function basicSetUp() {
     var loc_para1;

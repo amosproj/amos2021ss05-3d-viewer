@@ -1,12 +1,10 @@
 "use strict";
 
-import { distanceWGS84TwoPoints } from "./Globals.js";
-
 export class ViewerFloorAPI {
    
     constructor(data, viewerAPI) {
         this.viewerAPI = viewerAPI;
-        this.viewerImageAPI = viewerAPI.viewerImageAPI;
+        this.viewerImageAPI = viewerAPI.image;
         this.viewerMapAPI; // Set in MapAPI once created
         // The file «data.json» contains the metadata defining the panorama image locations.
             //"images" Array Images Array
@@ -16,6 +14,7 @@ export class ViewerFloorAPI {
         
         this.z; // : Number // Z coordinate of current floor(in meters)
         
+        this.origin = [data.lon0, data.lat0]; // used in ViewerAPI:toLocal
         this.floors = [];
 
         // iterate over floors
@@ -23,14 +22,13 @@ export class ViewerFloorAPI {
             const currentFloor = new ViewerFloor(data.floors[key], key);
 
             // add ViewerImages corresponding to this floor
-            viewerAPI.viewerImageAPI.images.forEach((currentImage) => {
+            viewerAPI.image.images.forEach((currentImage) => {
                 // check if imageidx in any of the i intervalls
                 currentFloor.i.forEach((interval) => {
                     if (currentImage.id >= interval[0] && currentImage.id <= interval[1]) {
                         currentImage.floor = key;
                         
-                        // dx, dy distance in kilometers
-                        const [dx, dy] = distanceWGS84TwoPoints(data.lon0, data.lat0, currentImage.pos[0], currentImage.pos[1]);
+                        const [dx, dy] = [71.5 * (data.lon0 - currentImage.pos[0]), 111.3 * (data.lat0 - currentImage.pos[1])];
 
                         const offsetX = currentFloor.mapData.x + currentFloor.mapData.density * (dx * 1000);
                         const offsetY = currentFloor.mapData.y - currentFloor.mapData.density * (dy * 1000);
@@ -49,9 +47,9 @@ export class ViewerFloorAPI {
         this.floors.sort((a, b) => (a.z > b.z) ? 1 : -1);
 
         this.currentFloorId = 0.0;
-        viewerAPI.viewerImageAPI.currentImageId = this.floors[this.currentFloorId].i[0][0];
+        viewerAPI.image.currentImageId = this.floors[this.currentFloorId].i[0][0];
 
-        this.createControlMenuButtonsOL();
+        this.createControlMenuButtons();
     }
 
     all(callback) {

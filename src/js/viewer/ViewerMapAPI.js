@@ -1,16 +1,14 @@
 "use strict";
 
-import { ViewerAPI } from "./ViewerAPI.js";
-
 // Map (2D) Viewer API
 
 // Specific API for the Map View
 export class ViewerMapAPI {
 
     constructor(viewerAPI) {
-        this.viewerImageAPI = viewerAPI.viewerImageAPI;
-        this.viewerFloorAPI = viewerAPI.viewerFloorAPI;
-        viewerAPI.viewerFloorAPI.viewerMapAPI = this; // set reference to mapAPI in floorAPI
+        this.viewerImageAPI = viewerAPI.image;
+        this.viewerFloorAPI = viewerAPI.floor;
+        viewerAPI.floor.viewerMapAPI = this; // set reference to mapAPI in floorAPI
 
         this.layers;
         this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
