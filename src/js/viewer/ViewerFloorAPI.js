@@ -49,7 +49,7 @@ export class ViewerFloorAPI {
         this.currentFloorId = 0.0;
         viewerAPI.image.currentImageId = this.floors[this.currentFloorId].i[0][0];
 
-        this.createControlMenuButtons();
+        this.createControlMenuButtonsOL();
     }
 
     all(callback) {
@@ -150,8 +150,8 @@ export class ViewerFloorAPI {
             
             selfRef.set(dropdownFloorsOL.value);
 
-            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
-            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
+            document.removeEventListener('pointermove', selfRef.viewerAPI.pano.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.pano.oPU);
         };
 
         //Up Button for changing currentfloor
@@ -181,8 +181,8 @@ export class ViewerFloorAPI {
 
             selfRef.set(dropdownFloorsOL.value);
 
-            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
-            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
+            document.removeEventListener('pointermove', selfRef.viewerAPI.pano.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.pano.oPU);
 
         });
 
@@ -212,8 +212,8 @@ export class ViewerFloorAPI {
 
             selfRef.set(dropdownFloorsOL.value);
 
-            document.removeEventListener('pointermove', selfRef.viewerAPI.viewerPanoAPI.oPM);
-            document.removeEventListener('pointerup', selfRef.viewerAPI.viewerPanoAPI.oPU);
+            document.removeEventListener('pointermove', selfRef.viewerAPI.pano.oPM);
+            document.removeEventListener('pointerup', selfRef.viewerAPI.pano.oPU);
         });
     }
 
