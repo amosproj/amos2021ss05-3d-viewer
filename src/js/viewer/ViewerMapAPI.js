@@ -23,24 +23,25 @@ export class ViewerMapAPI {
 
         this.spriteGroup = new THREE.Group(); //create an sprite group
         this.mapScalingFactor = 0.2;
-        
-        const mapPicturePath = viewerAPI.baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
-        viewerAPI.textureLoader.load(mapPicturePath, (texture) => {
-            const material = new THREE.SpriteMaterial({ map: texture, blending: THREE.AdditiveBlending, transparent: true });
-            material.renderOrder = 1;
-            material.depthTest = false;
-            const spriteMap = new THREE.Sprite(material);
-            this.spriteMapScale = [texture.image.width * this.mapScalingFactor, texture.image.height * this.mapScalingFactor, 1];
-            spriteMap.scale.set(this.spriteMapScale[0], this.spriteMapScale[1], 1);
-            spriteMap.center.set(1.0, 0.0); // bottom right
-            spriteMap.position.set(0, 0, 1); // Send Behind
-            //this.scene.add(spriteMap);
-            this.spriteGroup.add(spriteMap);
-        });
-        
-        this.redraw();
-        this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
-        this.scene.add(this.spriteGroup);
+
+        // const baseURL = "https://bora.bup-nbg.de/amos2floors/";
+        const baseURL = viewerAPI.baseURL;
+                
+        const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
+        this.map = displayMap(mapPicturePath); 
+        /*
+    
+        var popup = new ol.Overlay({
+            //element: 
+            positioning: 'bottom-center',
+            stopEvent: false,
+            offset: [0, -10],
+          });
+          this.mapLayer.addOvSerlay(popup);
+        */
+        //this.redraw();
+        //this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
+        //this.scene.add(this.spriteGroup);
 
     }
 
@@ -75,27 +76,10 @@ export class ViewerMapAPI {
 
     // draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
     addPoint(color, offset) {
-        const texture = new THREE.Texture(generateCircularSprite(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture,
-            transparent: false,
-            color: 0xffffff // BLACK, 
-        });
-        // Render on Top
-        mat.renderOrder = 3;
-        // Create the point sprite
-        let pointSprite = new THREE.Sprite(mat);
-        pointSprite.center.set(0.0, 0.0);
+        point_canvas = generateCircularSprite(color);
+        position =[-this.mapScalingFactor * offset[0], this.mapScalingFactor * offset[1]]
 
-        // draw it at pixel offset of as agruemnt passed pixel offset
-        pointSprite.position.set(-this.mapScalingFactor * offset[0], this.mapScalingFactor * offset[1], -3);
-
-        //scale the point
-        pointSprite.scale.set(5, 5, 1);
-        this.spriteGroup.add(pointSprite);
-
-        return pointSprite;
+        return position;
     }
     
     // Method
@@ -104,68 +88,7 @@ export class ViewerMapAPI {
         return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
     
-    addViewingDirection(color, position){
-        const texture = new THREE.Texture(generateTriangleCanvas(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture
-        });
-        position 
-        // Create the sprite
-        let triangleSprite = new THREE.Sprite(mat);
-        triangleSprite.center.set(0.0, 0.0);
-
-        // Draw it at The localization point
-        triangleSprite.position.set(-this.mapScalingFactor * position[0], this.mapScalingFactor * position[1], -3);
-
-        //var quartenion = new THREE.Quaternion(this.viewerImageAPI.currentImage.orientation);
-        //triangleSprite.transform.rotation = rotation;
-        //scale the point
-        triangleSprite.scale.set(10, 10, 1);
-        this.spriteGroup.add(triangleSprite);
-
-    }
-
-
-    addViewingDirection(color, position){
-        const texture = new THREE.Texture(generateTriangleCanvas(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture
-        });
-
-        // Create the sprite
-        let triangleSprite = new THREE.Sprite(mat);
-        triangleSprite.center.set(0.0, 0.0);
-
-        // Draw it at The localization point
-        triangleSprite.position.set(-this.mapScalingFactor * position[0], this.mapScalingFactor * position[1], -3);
-
-        //scale the point
-        triangleSprite.scale.set(10, 10, 1);
-        this.spriteGroup.add(triangleSprite);
-
-    }
-
  
-}
-
-function createTriangle(color)
-{
-    var geometry = new THREE.Geometry();
-    var v1 = new THREE.Vector3(0,0,0);   // Vector3 used to specify position
-    var v2 = new THREE.Vector3(3,0,0);
-    var v3 = new THREE.Vector3(0,3,0);   // 2d = all vertices in the same plane.. z = 0
-
-    // add new geometry based on the specified positions
-    geometry.vertices.push(v1);
-    geometry.vertices.push(v2);
-    geometry.vertices.push(v3);
-    geometry.faces.push(new THREE.Face3(0, 2, 1));
-
-    var redMat = new THREE.MeshBasicMaterial({color: 0xff0000}); //black
-    var triangle = new THREE.Mesh(geometry, redMat);     
-    return triangle;
 }
 
 function generateCircularSprite(color) {
@@ -185,24 +108,39 @@ function generateCircularSprite(color) {
 
 }
 
-function generateTriangleCanvas(color){
-    var canvasTri = document.createElement('canvas');
-    var context = canvasTri.getContext('2d');
 
-    //Cretae triangle shape
-    context.beginPath();
-    context.moveTo(200, 100);
-    context.lineTo(300, 300);
-    context.lineTo(100, 300);
-    context.closePath();
-    
-    // outline
-    context.lineWidth = 10;
-    context.strokeStyle = '0xff0000'; //blue
-    context.stroke();
-    
-    // the fill color
-    context.fillStyle = color;
-    context.fill();
-    return context; 
+function displayMap(mapURL){
+
+    var extent = [0, 0, 256, 256];
+    //  Projection map image coordinates directly to map coordinates in pixels. 
+    var projection = new ol.proj.Projection({
+    code: 'map-image',
+    units: 'pixels',
+    extent: extent,
+    });
+
+    var map = new ol.Map({
+        controls: ol.control.defaults({rotate: false}),
+        interactions: ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false}), 
+        layers: [
+            new ol.layer.Image({
+            source: new ol.source.ImageStatic({
+                //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
+                url: mapURL,
+                projection: projection,
+                imageExtent: extent,
+
+            }),
+            }) ],
+        target: 'map',
+        view: new ol.View({
+            projection: projection,
+            center: new ol.extent.getCenter(extent),
+            zoom: 0.8,
+            maxZoom: 4,
+        }),
+        });
+        
+    return map; 
+
 }
