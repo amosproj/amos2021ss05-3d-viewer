@@ -1,18 +1,18 @@
+"use strict";
+
 export class ViewerState {
 
-    constructor([panoLon, panoLat, panz], imageIdx, name, [fov, lonov, latov]) {
+    constructor([longitude, latitude, z], imageIdx, name, viewerViewState) {
 
-        //this.big =
+        this.big = "pano";                      // : String // Currently displayed scene in the big area: 'pano' (3D) xor 'map' (2D)
     
-        this.floor = name; // : String // Name of floor which contains this image
+        this.floor = name;                      // : String // Name of the current floor
 
-        this.imageNum = imageIdx; // : Number // Image number
+        this.imageNum = imageIdx;               // : Number // Current image number
     
-        this.loc = [panoLon, panoLat, panz]; // : [Number] // WGS 84 coordinates [longitude, latitude, z] of this image
-
-        this.fov = fov; // : Number // Field of view (in degrees)
+        this.loc = [longitude, latitude, z];    // : [Number] // Current WGS 84 coordinates [longitude, latitude, z] of the displayed panorama image
         
-        this.view = [fov, lonov, latov];
+        this.view = viewerViewState;            // : ViewerViewState // Current view
 
     }
 

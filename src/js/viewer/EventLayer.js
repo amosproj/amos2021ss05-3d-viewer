@@ -1,3 +1,4 @@
+"use strict";
 
 // Event position in viewer
 

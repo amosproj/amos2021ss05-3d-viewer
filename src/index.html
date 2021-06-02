@@ -8,16 +8,55 @@
     <body>
         <script src="libs/three.min.js"></script>
         <script src="libs/jQuery.min.js"></script>
-        <script type="module" src="js/main.js"></script>
+        <script src="libs/ol.js"></script>
+        
+        <script type="module">
+            import { ViewerWindow } from "./js/viewer/ViewerWindow.js";
+
+            const getUrlParameter = function getUrlParameter(sParam) {
+                let sPageURL = window.location.search.substring(1),
+                    sURLVariables = sPageURL.split('&'),
+                    sParameterName;
+
+                for (let i = 0; i < sURLVariables.length; i++) {
+                    sParameterName = sURLVariables[i].split('=');
+
+                    if (sParameterName[0].toUpperCase() === sParam.toUpperCase()) {
+                        return typeof sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                    }
+                }
+
+                return false;
+            };
+            
+            const onLoadStr = getUrlParameter("onLoad");
+            const parts = decodeURIComponent(onLoadStr).split('.');
+            
+            let onLoadFunc = window.parent;
+            for (let i = 0; i < parts.length; i++) {
+                try {
+                    onLoadFunc = onLoadFunc[parts[i]];
+                }
+                catch (e) {
+                    onLoadFunc = null;
+                }
+            }
+
+            if ('function' === typeof(onLoadFunc)) {
+                onLoadFunc(window, ViewerWindow.viewerAsync);
+            }
+        </script>
 
         <div id="pano-viewer">
-            <div class = "control">
-                <div id="nof"></div>
-                <div id="cf"></div>
-                <button name="buttonUp">Up</button>
-                <button name="buttonDown">Down</button>
-                <select name="dropdown" id="dropdown-floors"></select>
+            <div id="map" class="map"></div>
+
+            <div class = "control-OL" id="floorOL">
+                <div id="cfOL"></div>
+                <select name="dropdown-OL" id="dropdown-floors-OL" ></select>
+                <button id="buttonUpOL" class="code">Floor Up</button>
+                <button id="buttonDownOL" class="code">Floor Down</button>
             </div>
+            
         </div>
     </body>
 </html>
