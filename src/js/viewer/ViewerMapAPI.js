@@ -30,7 +30,7 @@ export class ViewerMapAPI {
         const baseURL = viewerAPI.baseURL;
                 
         const mapPicturePath = baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
-        displayMap(mapPicturePath); 
+        this.map = displayMap(mapPicturePath); 
         /*
     
         var popup = new ol.Overlay({
@@ -142,5 +142,7 @@ function displayMap(mapURL){
             maxZoom: 4,
         }),
         });
+        
+    return map; 
 
 }
