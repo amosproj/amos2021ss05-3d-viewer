@@ -32,9 +32,6 @@ export class ViewerMapAPI {
         this.initDisplayMap();
         this.updateDisplayMap(this.viewerFloorAPI.currentFloorId);
 
-        //this.mapPicturePath = this.baseURL + this.viewerFloorAPI.currentFloor.mapData.name + ".png";
-        // this.map = displayMap(this.mapPicturePath); 
-
         /*
     
         var popup = new ol.Overlay({
@@ -173,15 +170,6 @@ export class ViewerMapAPI {
     }
 
     updateDisplayMap(floorIndex){
-
-        var extent = [0, 0, 512, 512];
-
-        //  Projection map image coordinates directly to map coordinates in pixels. 
-        var projection = new ol.proj.Projection({
-        code: 'map-image',
-        units: 'pixels',
-        extent: extent,
-        });
 
         var group = this.map.getLayerGroup();
         var layers = group.getLayers();
