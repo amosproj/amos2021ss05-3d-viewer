@@ -69,7 +69,7 @@ export class ViewerAPI {
 
     animate() {
         window.requestAnimationFrame(() => this.animate());
-        this.pano.viewInternal();
+        this.pano.view(this.pano.viewerViewState.lonov, this.pano.viewerViewState.latov, this.pano.viewerViewState.fov);
         this.renderer.clear();
         this.renderer.render(this.pano.scene, this.pano.camera);
         this.renderer.clearDepth();
