@@ -57,38 +57,18 @@
     </script>
 
     <script type="module">
-        import { ViewerContextItem } from "./js/viewer/ViewerContextItem.js";
 
-        var items = {
-            "edit": { name: "Edit", icon: "edit" },
-            "cut": { name: "Cut", icon: "cut" },
-        };
+        import { EventLayer } from "./js/viewer/EventLayer.js";
 
-        let itemEdit = new ViewerContextItem(function (key, options) {
-            var msg = 'clicked: ' + key;
-            (window.console && console.log(msg)) || alert(msg)
-        }, items.edit.icon, null, items.edit.name);
-
-        let itemCut = new ViewerContextItem(function (key, options) {
-            var msg = 'clicked: ' + key;
-            (window.console && console.log(msg)) || alert(msg)
-        }, items.cut.icon, null, items.cut.name);
-
+        let eventLayer = new EventLayer();
 
         $(function () {
             $.contextMenu({
                 selector: '#pano-viewer',
-                callback: itemEdit.callback,
-                items: {
-                    "edit": { name: itemEdit.name, icon: itemEdit.icon },
-                    "cut": { name: itemCut.name, icon: itemCut.icon },
-                },
+                items: eventLayer.vwr_oncontext(null, null),
             });
-
-            $('#pano-viewer').on('click', function (e) {
-                console.log('clicked', this);
-            })
         });
+
     </script>
 
     <div id="pano-viewer">

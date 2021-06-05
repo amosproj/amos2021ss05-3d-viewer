@@ -23,8 +23,23 @@ export class EventLayer {
         //Parameters: 
         //xy EventPosition:  Pointer position
         //location THREE.Vector3 : Local coordinates for pointer position+
-        viewer_contex = new ViewerContextItem();
-        return viewer_contex;
+        var items = {
+            "edit": { name: "Edit", icon: "edit" },
+            "cut": { name: "Cut", icon: "cut" },
+        };
+
+        let callback = function (key, options) {
+            var msg = 'clicked: ' + key;
+            (window.console && console.log(msg)) || alert(msg)
+        };
+
+        let itemEdit = new ViewerContextItem(callback, items.edit.icon, null, items.edit.name);
+
+        let itemCut = new ViewerContextItem(callback, items.cut.icon, null, items.cut.name);
+
+        var listOfItems = { "edit": itemEdit, "cut": itemCut };
+
+        return listOfItems;
     }
 
 }
