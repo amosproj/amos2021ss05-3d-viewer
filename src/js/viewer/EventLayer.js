@@ -1,10 +1,11 @@
 "use strict";
+import { ViewerContextItem } from "./ViewerContextItem.js";
 
 // Event position in viewer
 
 export class EventPosition {
     constructor() {
-    
+
         this.x; //  Number // y coordinate of this image on the floor
 
         this.y; // Number // y coordinate of this image on the floor
@@ -15,10 +16,10 @@ export class EventPosition {
 
 export class EventLayer {
     constructor() {
-        this.viewer_contex; 
+        this.viewer_contex;
     }
-    
-    vwr_oncontext (xy, location){
+
+    vwr_oncontext(xy, location) {
         //Parameters: 
         //xy EventPosition:  Pointer position
         //location THREE.Vector3 : Local coordinates for pointer position+
