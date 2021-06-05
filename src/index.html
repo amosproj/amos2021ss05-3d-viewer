@@ -56,8 +56,8 @@
                $.contextMenu({
                     selector: 'html', //.context-menu-one
                     callback: function(key, options) {
-                    var m = "clicked: " + key;
-                    window.console && console.log(m) || alert(m); 
+                    var msg = "clicked: " + key;
+                    window.console && console.log(msg) || alert(msg); 
                    },//
                     items: {
                     "edit": {name: "Edit", icon: "edit"},
@@ -65,7 +65,7 @@
                     "copy": {name: "Copy", icon: "copy"},
                     "paste": {name: "Paste", icon: "paste"},
                     "delete": {name: "Delete", icon: "delete"},
-                    "sep1": "---------",
+                    "sep1": "---------------------",
                     "quit": {name: "Quit", icon: "quit"}
                   }
                });
