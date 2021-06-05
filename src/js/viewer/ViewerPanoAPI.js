@@ -10,11 +10,13 @@ export class ViewerPanoAPI {
         this.camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
         this.viewerImageAPI = viewerAPI.image;
         this.viewerAPI = viewerAPI;
-        this.sphereRadius = 500;
+        this.sphereRadius = viewerAPI.sphereRadius;
 
         this.viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0);
         this.lastViewState;
         this.lastMousePos;
+
+        this.loadedMeshes = {};
 
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
@@ -31,31 +33,39 @@ export class ViewerPanoAPI {
     display(imageNum) {
         this.viewerImageAPI.currentImageId = imageNum;
 
-        // Create a Sphere for the image texture to be displayed on
-        const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
-        // invert the geometry on the x-axis so that we look out from the middle of the sphere
-        sphere.scale(-1, 1, 1);
+        const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
+        // check if corresponding mesh already loaded
+        if (this.loadedMeshes[imageNum] == null) {
+            // create sphere
+            const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
+            // invert the geometry on the x-axis so that we look out from the middle of the sphere
+            sphere.scale(-1, 1, 1);
 
-        // load the 360-panorama image data (highest resolution hardcoded for now)
-        const texturePano = this.viewerAPI.textureLoader.load(
-            this.viewerAPI.baseURL +
-            Math.trunc(this.viewerImageAPI.currentImageId / 100) +
-            '/' +
-            this.viewerImageAPI.currentImageId +
-            'r3.jpg');
-        texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
-        
-        // put the texture on the spehere and add it to the scene
-        const material = new THREE.MeshBasicMaterial({ map: texturePano });
-        const mesh = new THREE.Mesh(sphere, material);
-    
-        const orientation = this.viewerImageAPI.currentImage.orientation;
-        
-        mesh.applyQuaternion(orientation);
+            // load the 360-panorama image data (highest resolution hardcoded for now)
+            const texturePano = this.viewerAPI.textureLoader.load(
+                this.viewerAPI.baseURL +
+                Math.trunc(imageNum / 100) +
+                '/' +
+                imageNum +
+                'r3.jpg');
+            texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+            
+            // put the texture on the spehere and add it to the scene
+            const material = new THREE.MeshBasicMaterial({ map: texturePano });
+            const mesh = new THREE.Mesh(sphere, material);
+            
+            // adjust for orientation offset
+            const orientation = this.viewerImageAPI.currentImage.orientation;
+            mesh.applyQuaternion(orientation);
+            
+            // put in the correct position in the scene
+            mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
 
-        this.scene.clear();
-        
-        this.scene.add(mesh);
+            this.scene.add(mesh);
+            this.loadedMeshes[imageNum] = mesh;
+        }
+
+        this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
     }
 
     camera() {
@@ -72,7 +82,10 @@ export class ViewerPanoAPI {
         const y = this.sphereRadius * Math.cos(phi);
         const z = this.sphereRadius * Math.sin(phi) * Math.sin(theta);
     
-        this.camera.lookAt(x, y, z);
+        // adjust looking direction for offset of current mesh in scene
+        const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
+
+        this.camera.lookAt(x + localCoord.x, y + localCoord.y, z + localCoord.z);
 
         this.camera.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
 
