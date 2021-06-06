@@ -2,7 +2,7 @@ class ViewerContextItem{
  
     constructor(){
             
-    $(function(){ 
+    //$(function(){ 
         $.contextMenu({
              selector: 'html', //.context-menu-one
              callback: function(key, options) {
@@ -22,9 +22,9 @@ class ViewerContextItem{
 
       $('html').on('click', function(e){
       console.log('clicked', this);
-       })
-    });
+       });
+   // });
 
-}
+  }
 
 }
