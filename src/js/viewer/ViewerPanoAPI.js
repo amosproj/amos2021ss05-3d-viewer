@@ -1,14 +1,14 @@
 "use strict";
 
 import { ViewerViewState } from "./ViewerViewState.js";
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV } from "./Globals.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED } from "./ViewerConfig.js";
 
-export class ViewerPanoAPI{
+export class ViewerPanoAPI {
 
     constructor(viewerAPI) {
         this.scene = new THREE.Scene(); // three.js scene used by the panorama (3D) viewer
         this.camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
-        this.viewerImageAPI = viewerAPI.viewerImageAPI;
+        this.viewerImageAPI = viewerAPI.image;
         this.viewerAPI = viewerAPI;
         this.sphereRadius = 500;
 
@@ -99,8 +99,8 @@ export class ViewerPanoAPI{
     onPointerMove(event) {
         let scalingFactor = this.camera.fov / MAX_FOV;
     
-        this.viewerViewState.lonov = (this.lastMousePos[0] - event.clientX) * 0.1 * scalingFactor + this.lastViewState[0];
-        this.viewerViewState.latov = (event.clientY - this.lastMousePos[1]) * 0.1 * scalingFactor + this.lastViewState[1];
+        this.viewerViewState.lonov = (this.lastMousePos[0] - event.clientX) * PAN_SPEED * scalingFactor + this.lastViewState[0];
+        this.viewerViewState.latov = (event.clientY - this.lastMousePos[1]) * PAN_SPEED * scalingFactor + this.lastViewState[1];
     
         // keep viewerviewstate.latov within bounds because it loops back around at top and bottom
         this.viewerViewState.latov = Math.max(-85, Math.min(85, this.viewerViewState.latov));
@@ -119,7 +119,7 @@ export class ViewerPanoAPI{
     
     onDocumentMouseWheel(event) {
         // the 0.05 constant determines how quick scrolling in and out feels for the user
-        this.viewerViewState.fov = this.camera.fov + event.deltaY * 0.05;
+        this.viewerViewState.fov = this.camera.fov + event.deltaY * ZOOM_SPEED;
     
         this.viewInternal();
     
