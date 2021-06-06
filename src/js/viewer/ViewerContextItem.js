@@ -1,15 +1,13 @@
 class ViewerContextItem{
  
     constructor(){
-            
-    //$(function(){ 
-        $.contextMenu({
-             selector: 'html', //.context-menu-one
+      $.contextMenu({
+             selector: 'html', 
              callback: function(key, options) {
              var msg = "clicked: " + key;
              window.console && console.log(msg) || alert(msg); 
-            },//
-             items: {
+            },
+         items: {
              "edit": {name: "Edit", icon: "edit"},
              "cut": {name: "Cut", icon: "cut"},
              "copy": {name: "Copy", icon: "copy"},
@@ -17,14 +15,12 @@ class ViewerContextItem{
              "delete": {name: "Delete", icon: "delete"},
              "sep1": "-------------------",
              "quit": {name: "Quit", icon: "quit"}
-           }
-        });
+         }
+      });
 
       $('html').on('click', function(e){
-      console.log('clicked', this);
-       });
-   // });
-
+            console.log('clicked', this);
+      });
   }
 
 }
