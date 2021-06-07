@@ -238,11 +238,32 @@ export class ViewerMapAPI {
             style: new ol.style.Style({
             image: new ol.style.Circle({
                 radius: 25,
-                fill: new ol.style.Fill({color: 'red'})
+                fill: new ol.style.Fill({color: 'black'})
             })
             })
         });
-        this.map.addLayer(vectorRedLayer); 
+
+        var iconFeature = new ol.Feature({
+            geometry: new ol.geom.Point([redlon, redlan])
+        });
+        
+        var iconStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+                src: 'http://ol3js.org/en/master/examples/data/icon.png'
+            })
+        });
+        
+        iconFeature.setStyle(iconStyle);
+        
+        var vectorSourceIcon = new ol.source.Vector({
+            features: [iconFeature]
+        });
+        
+        var vectorLayerIcon = new ol.layer.Vector({
+            source: vectorSourceIcon
+        });
+
+        this.map.addLayer(vectorLayerIcon); 
 
         // create map and add layers
         /*
