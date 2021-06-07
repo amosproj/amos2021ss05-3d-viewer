@@ -66,50 +66,42 @@ export class ViewerMapAPI {
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
         
-        // remove prvious last vector layer 
-        this.map.removeLayer(this.lastVectorLayer);
+        // // remove prvious last vector layer 
+        // this.map.removeLayer(this.lastVectorLayer);
 
-        // this.spriteGroup.clear();
-        
+        // // this.spriteGroup.clear();
+
+        var features = [];
+
+        var floorIndex = this.viewerFloorAPI.currentFloorId;
+        this.updateDisplayMap(floorIndex);
+
         // remove comment to draw all points on map
         let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
-   
+        
         allImages.forEach(image => {
-            // this.addPoint("black", image.mapOffset);
 
             // add all black points to feature layer 
             // transform xy to lon lan
-            var lon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * image.mapOffset[0] / 71.5); 
-            var lan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * image.mapOffset[1] / 111.3);
-            console.log( image.mapOffset[1])
-            this.features.push(new ol.Feature({
-                geometry: new ol.geom.Point(
-                    //ol.proj.fromLonLat([
-                [lon, lan])
-                //]))
+            //TODO: adjust the position better. This is a temporary scaling and offset
+            var lon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * image.mapOffset[0])*3; 
+            var lan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * image.mapOffset[1])*3;
+            features.push(new ol.Feature({
+                geometry: new ol.geom.Point([lon+100, lan+1200]),
             })
             )
         });
-        
-        
-        // add current red point to feature layer
-        // this.addPointOL("red", this.viewerImageAPI.currentImage.mapOffset);
-
-        // this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
-        // this.addViewingDirection("yellow",  this.viewerImageAPI.currentImage.mapOffset);
 
         // create the layer for features -> black points
-        const features = this.features;
-        
         var vectorSource = new ol.source.Vector({
-            features
+            features: features
         });
 
         var vectorLayer = new ol.layer.Vector({
             source: vectorSource,
             style: new ol.style.Style({
             image: new ol.style.Circle({
-                radius: 50,
+                radius: 3,
                 fill: new ol.style.Fill({color: 'black'})
             })
             })
@@ -117,11 +109,41 @@ export class ViewerMapAPI {
 
         this.map.addLayer(vectorLayer);
 
-        this.lastFloorID = this.viewerFloorAPI.currentFloorId;
-        this.lastVectorLayer = vectorLayer;
+
+        //adding red points
+        //TODO : adjust red point lon and lan to real one, now using temporary coordinate for testing
+
+        // var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0])*3; 
+        // var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1])*2;
         
-        var floorIndex = this.viewerFloorAPI.currentFloorId;
-        this.updateDisplayMap(floorIndex);
+        var redlon = 700;
+        var redlan = 400; 
+
+        var iconFeature = new ol.Feature({
+            geometry: new ol.geom.Point([redlon, redlan]),
+        });
+
+        var vectorSourceRed = new ol.source.Vector({
+            features: [iconFeature]
+        });
+
+        var vectorLayerRed = new ol.layer.Vector({
+            source: vectorSourceRed,
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 3,
+                    fill: new ol.style.Fill({color: 'red'})
+                })
+                })
+        });
+
+        this.map.addLayer(vectorLayerRed);
+
+        // this.lastFloorID = this.viewerFloorAPI.currentFloorId;
+        // this.lastVectorLayer = vectorLayer;
+        
+        
+
 
     }
 
@@ -180,117 +202,93 @@ export class ViewerMapAPI {
 
     test_current_position(){
 
-        const features = [];
-        const featureRed= [];
+        // const features = [];
+        // const featureRed= [];
 
-        let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
+        // let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
         
-        // adding black points
-        allImages.forEach(image => {
+        // // adding black points
+        // allImages.forEach(image => {
 
-            // add all black points to feature layer 
-            // transform xy to lon lan
-            var lon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * image.mapOffset[0] / 71.5); 
-            var lan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * image.mapOffset[1] / 111.3);
-            features.push(new ol.Feature({
-                geometry: new ol.geom.Point(ol.proj.fromLonLat([
-                lon, lan
-                ]))
-            })
-            )
-            // console.log(lon,lan)
-        });
+        //     // add all black points to feature layer 
+        //     // transform xy to lon lan
+        //     var lon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * image.mapOffset[0] / 71.5); 
+        //     var lan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * image.mapOffset[1] / 111.3);
+        //     features.push(new ol.Feature({
+        //         geometry: new ol.geom.Point(ol.proj.fromLonLat([
+        //         lon, lan
+        //         ]))
+        //     })
+        //     )
+        //     // console.log(lon,lan)
+        // });
 
-        //adding red points
-        var redlon = this.viewerImageAPI.currentImage.mapOffset[0]; //this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0] / 71.5); 
-        var redlan = this.viewerImageAPI.currentImage.mapOffset[1]; //this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1] / 111.3);
+        // //adding red points
+        // var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0] / 71.5); 
+        // var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1] / 111.3);
         
-        featureRed.push(new ol.Feature({
-            geometry: new ol.geom.Point(//ol.proj.fromLonLat([
-            redlon, redlan
-            //])
-            )
-        }))
-
-        // console.log("red point")
-        console.log(this.viewerImageAPI.currentImage.mapOffset)
         
-        // create the source and layer for balck points
-        const vectorSource = new ol.source.Vector({
-            features
-        });
-        const vectorLayer = new ol.layer.Vector({
-            source: vectorSource,
-            style: new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 25,
-                fill: new ol.style.Fill({color: 'black'})
-            })
-            })
-        });
 
-        // create the source and layer for red point
-        const vectorSourceRed = new ol.source.Vector({
-            featureRed
-        });
-        const vectorRedLayer = new ol.layer.Vector({
-            source: vectorSourceRed,
-            style: new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 25,
-                fill: new ol.style.Fill({color: 'black'})
-            })
-            })
-        });
+        // // console.log("red point")
+        // console.log(redlon,redlan)
+        
+        // // create the source and layer for balck points
+        // const vectorSource = new ol.source.Vector({
+        //     features
+        // });
+        // const vectorLayer = new ol.layer.Vector({
+        //     source: vectorSource,
+        //     style: new ol.style.Style({
+        //     image: new ol.style.Circle({
+        //         radius: 2,
+        //         fill: new ol.style.Fill({color: 'black'})
+        //     })
+        //     })
+        // });
 
-        var iconFeature = new ol.Feature({
-            geometry: new ol.geom.Point([redlon, redlan])
-        });
-        
-        var iconStyle = new ol.style.Style({
-            image: new ol.style.Icon({
-                src: 'http://ol3js.org/en/master/examples/data/icon.png'
-            })
-        });
-        
-        iconFeature.setStyle(iconStyle);
-        
-        var vectorSourceIcon = new ol.source.Vector({
-            features: [iconFeature]
-        });
-        
-        var vectorLayerIcon = new ol.layer.Vector({
-            source: vectorSourceIcon
-        });
+        // featureRed.push(new ol.Feature({
+        //     geometry: new ol.geom.Point(ol.proj.fromLonLat([
+        //     redlon, redlan
+        //     ]))
+        // }))
+        // // create the source and layer for red point
+        // const vectorSourceRed = new ol.source.Vector({
+        //     featureRed
+        // });
+        // const vectorRedLayer = new ol.layer.Vector({
+        //     source: vectorSourceRed,
+        //     style: new ol.style.Style({
+        //     image: new ol.style.Circle({
+        //         radius: 3,
+        //         fill: new ol.style.Fill({color: 'red'})
+        //     })
+        //     })
+        // });
 
-        this.map.addLayer(vectorLayerIcon); 
-
-        // create map and add layers
-        /*
-        const map = new ol.Map({
-            target: 'map',
-            layers: [
-            new ol.layer.Tile({
-                source: new ol.source.OSM()
-            }),
-            vectorLayer,
-            vectorRedLayer
-            ],
-            view: new ol.View({
-            center: ol.proj.fromLonLat([0, 0]),
-            zoom: 2
-            }),
-            controls: ol.control.defaults().extend([
-                new ol.control.FullScreen(),
-                new ol.control.MousePosition({
-                    coordinateFormat: ol.coordinate.createStringXY(4),
-                    projection: 'EPSG:4326', // wgs 48
-                    className: 'custom-mouse-position-testmap',
-                    target: document.getElementById('mouse-position-testmap')
-                })
-              ])
-        });
-    */
+        // // create map and add layers
+        // const map = new ol.Map({
+        //     target: 'map',
+        //     layers: [
+        //     new ol.layer.Tile({
+        //         source: new ol.source.OSM()
+        //     }),
+        //     vectorLayer,
+        //     vectorRedLayer
+        //     ],
+        //     view: new ol.View({
+        //     center: ol.proj.fromLonLat([0, 0]),
+        //     zoom: 2
+        //     }),
+        //     controls: ol.control.defaults().extend([
+        //         new ol.control.FullScreen(),
+        //         new ol.control.MousePosition({
+        //             coordinateFormat: ol.coordinate.createStringXY(4),
+        //             projection: 'EPSG:4326', // wgs 48
+        //             className: 'custom-mouse-position-testmap',
+        //             target: document.getElementById('mouse-position-testmap')
+        //         })
+        //       ])
+        // });
     }
 
 
@@ -398,15 +396,15 @@ export class ViewerMapAPI {
           ])
         */
 
-        var extent = [0, 0, 512, 512];
+        var extent =  [0, 0, 1024, 968];
 
         //  Projection map image coordinates directly to map coordinates in pixels. 
         var projection = new ol.proj.Projection({
-        code: 'map-image',
+        code: 'xkcd-image',
         units: 'pixels',
         extent: extent,
         });
-
+    
         // create map 
         this.map = new ol.Map({  //new ol.control.OverviewMap({
             target: 'map',
@@ -420,13 +418,7 @@ export class ViewerMapAPI {
             controls: ol.control.defaults({
                 rotate: false // hide rotation button
             }).extend([
-                new ol.control.FullScreen(), // create fullScreen button
-                new ol.control.MousePosition({ // create the function of showing current mouse position
-                    coordinateFormat: ol.coordinate.createStringXY(4),
-                    projection: 'EPSG:4326', // wgs 48
-                    className: 'custom-mouse-position',
-                    target: document.getElementById('mouse-position')
-                })
+                new ol.control.FullScreen() // create fullScreen button
               ])
             });
         
@@ -456,10 +448,7 @@ export class ViewerMapAPI {
             else{
                 layer.setVisible(false);
             }
-            //if (i == layers.length){ // showing black and red points 
-            //layer.setVisible(true);
-            //  }
-          });
+            });
     }
 
 }
