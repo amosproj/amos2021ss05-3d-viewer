@@ -210,12 +210,13 @@ export class ViewerMapAPI {
         }))
 
         // console.log("red point")
-        console.log(redlon,redlan)
+        //console.log(redlon,redlan)
         
         // create the source and layer for balck points
         const vectorSource = new ol.source.Vector({
             features
         });
+
         const vectorLayer = new ol.layer.Vector({
             source: vectorSource,
             style: new ol.style.Style({
@@ -239,17 +240,18 @@ export class ViewerMapAPI {
             })
             })
         });
-
+        /*
         // create map and add layers
-        const map = new ol.Map({
+        this map = new ol.Map({
             target: 'map',
             layers: [
             new ol.layer.Tile({
-                source: new ol.source.OSM()
-            }),
+                source:  new ol.source.ImageStatic({
+                    attributions: '',
+                    url: this.mapURL
+            }),}),
             vectorLayer,
-            vectorRedLayer
-            ],
+            vectorRedLayer    ],
             view: new ol.View({
             center: ol.proj.fromLonLat([0, 0]),
             zoom: 2
@@ -264,7 +266,7 @@ export class ViewerMapAPI {
                 })
               ])
         });
-
+        */
     }
 
     initDisplayMap(){
@@ -383,24 +385,37 @@ export class ViewerMapAPI {
         // create map 
         this.map = new ol.Map({  //new ol.control.OverviewMap({
             target: 'map',
+            layers: [
+                new ol.layer.Image({
+                    source: new ol.source.ImageStatic({
+                        //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
+                        url: this.baseURL + this.viewerFloorAPI.floors[0].mapData.name + ".png",
+                        projection: projection,
+                        imageExtent: extent,
+                    })
+                })
+            ],
             view: new ol.View({
                 projection: projection,
                 center: new ol.extent.getCenter(extent),
-                zoom: 1,
+                zoom: 0.5,
                 maxZoom: 5,
             }),
             // controls: controls,
             controls: ol.control.defaults({
                 rotate: false // hide rotation button
             }).extend([
-                new ol.control.FullScreen(), // create fullScreen button
+                new ol.control.FullScreen() // create fullScreen button
+               /*,
                 new ol.control.MousePosition({ // create the function of showing current mouse position
                     coordinateFormat: ol.coordinate.createStringXY(4),
                     projection: 'EPSG:4326', // wgs 48
                     className: 'custom-mouse-position',
                     target: document.getElementById('mouse-position')
                 })
+                  */
               ])
+            
             });
         
         // create image layers for each floors 
@@ -420,7 +435,7 @@ export class ViewerMapAPI {
 
         var group = this.map.getLayerGroup();
         var layers = group.getLayers();
-
+        this.mapURL = this.baseURL + this.viewerFloorAPI.floors[floorIndex].mapData.name + ".png",
         // set layer visibility
         layers.forEach(function (layer, i) {
             if (i == floorIndex){
