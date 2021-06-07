@@ -79,13 +79,13 @@ export class ViewerMapAPI {
             element: point_canvas, 
             positioning: 'center',
             stopEvent: false,
-            offset: [offset],
+            offset: [position],
           });
 
         // point.setPosition(offset);
         //this.map.addOverlay(point);
         var circleFeature = new ol.Feature({
-            geometry: new ol.geom.Circle([offset], 50),
+            geometry: new ol.geom.Circle([position], 20),
         });
         
         circleFeature.setStyle(

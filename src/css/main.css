@@ -24,8 +24,8 @@ body {
 
 #map{
     position: fixed;
-    bottom: 2%;
-    right: 3%;
+    bottom: 1%;
+    right: 2%;
     width: 20%;
     height:20%;
     color: #fff;
@@ -37,7 +37,7 @@ body {
 
 .control-OL{
     position: fixed;
-    bottom:21%;
-    right: 3%;
+    bottom:2%;
+    right: 2%;
     color: #fff;
 }

@@ -54,13 +54,13 @@ export class ViewerMapAPI {
 
     // Method: Add an event layer to the map (2D) view.
     addLayer(layer) {
-        this.scene.add(layer);
+        this.map.addLayer(layer);
     }
 
     // Method: remove an event layer to the map (2D) view.
     removeLayer(layer) {
         // Layer: EventLayer
-        this.scene.remove(layer);
+        this.map.addLayer(layer);
     }
 
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
@@ -84,10 +84,12 @@ export class ViewerMapAPI {
             // add all black points to feature layer 
             // transform xy to lon lan
             //TODO: adjust the position better. This is a temporary scaling and offset
-            var lon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * image.mapOffset[0])*3; 
-            var lan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * image.mapOffset[1])*3;
+            console.log(image); 
+            var lon = -image.mapOffset[0]; 
+            var lan = - image.mapOffset[1] ; // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
+            //console.log([this.viewerAPI.floor.origin[0], lon]); 
             features.push(new ol.Feature({
-                geometry: new ol.geom.Point([lon+100, lan+1200]),
+                geometry: new ol.geom.Point([lon, lan]),
             })
             )
         });
@@ -116,8 +118,8 @@ export class ViewerMapAPI {
         // var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0])*3; 
         // var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1])*2;
         
-        var redlon = 700;
-        var redlan = 400; 
+        var redlon = this.viewerImageAPI.currentImage.mapOffset[0];
+        var redlan = this.viewerImageAPI.currentImage.mapOffset[1]; 
 
         var iconFeature = new ol.Feature({
             geometry: new ol.geom.Point([redlon, redlan]),
@@ -139,66 +141,13 @@ export class ViewerMapAPI {
 
         this.map.addLayer(vectorLayerRed);
 
-        // this.lastFloorID = this.viewerFloorAPI.currentFloorId;
-        // this.lastVectorLayer = vectorLayer;
-        
-        
-
-
     }
-
-    /* draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
-    addPoint(color, offset) {
-        const texture = new THREE.Texture(generateCircularSprite(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture,
-            transparent: false,
-            color: 0xffffff // BLACK, 
-        });
-        // Render on Top
-        mat.renderOrder = 3;
-        // Create the point sprite
-        let pointSprite = new THREE.Sprite(mat);
-        pointSprite.center.set(0.0, 0.0);
-
-        // draw it at pixel offset of as agruemnt passed pixel offset
-        pointSprite.position.set(-this.mapScalingFactor * offset[0], this.mapScalingFactor * offset[1], -3);
-
-        //scale the point
-        pointSprite.scale.set(5, 5, 1);
-        this.spriteGroup.add(pointSprite);
-
-        return pointSprite;
-    }*/
     
     // Method
     scale() {
         //Get the scale used by the three.js scene overlayed over the map (2D) view.
         return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
-    
-    /*addViewingDirection(color, position){
-        const texture = new THREE.Texture(generateTriangleCanvas(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture
-        });
-        position 
-        // Create the sprite
-        let triangleSprite = new THREE.Sprite(mat);
-        triangleSprite.center.set(0.0, 0.0);
-
-        // Draw it at The localization point
-        triangleSprite.position.set(-this.mapScalingFactor * position[0], this.mapScalingFactor * position[1], -3);
-
-        //var quartenion = new THREE.Quaternion(this.viewerImageAPI.currentImage.orientation);
-        //triangleSprite.transform.rotation = rotation;
-        //scale the point
-        triangleSprite.scale.set(10, 10, 1);
-        this.spriteGroup.add(triangleSprite);
-
-    }*/
 
     test_current_position(){
 
