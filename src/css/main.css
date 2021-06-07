@@ -24,7 +24,7 @@ body {
 
 #map{
     position: fixed;
-    bottom: 20%;
+    bottom: 2%;
     right: 3%;
     width: 20%;
     height:20%;
@@ -40,26 +40,4 @@ body {
     bottom:21%;
     right: 3%;
     color: #fff;
-}
-
-.mouse-position-wrapper{
-    width:180px; 
-    height:29px; 
-    color:black; 
-    background-color: white;
-    position:absolute; 
-    right:30%; 
-    bottom:20%; 
-    z-index:999;
-  }
-
-.mouse-position-wrapper-testmap{
-    width:180px; 
-    height:29px; 
-    color:black; 
-    background-color: white;
-    position:absolute; 
-    right:30%; 
-    bottom:1%; 
-    z-index:999;
 }

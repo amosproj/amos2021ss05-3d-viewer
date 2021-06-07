@@ -241,6 +241,7 @@ export class ViewerMapAPI {
         });
 
         // create map and add layers
+        /*
         const map = new ol.Map({
             target: 'map',
             layers: [
@@ -264,8 +265,9 @@ export class ViewerMapAPI {
                 })
               ])
         });
-
+    */
     }
+
 
     initDisplayMap(){
 
