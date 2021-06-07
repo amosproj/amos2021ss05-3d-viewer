@@ -59,15 +59,28 @@
     <script type="module">
 
         import { EventLayer } from "./js/viewer/EventLayer.js";
+        import { EventPosition } from "./js/viewer/EventPosition.js";
 
         let eventLayer = new EventLayer();
 
+        let xy;
+
         //Creating context menu by eventLayer object
-        $(function () {
-            $.contextMenu({
-                selector: '#pano-viewer',
-                items: eventLayer.vwr_oncontext(null, null),
-            });
+        $('#pano-viewer').mousedown(function (event) {
+
+            //if right mouse is clicked:
+            if (event.which == 3) {
+
+                //get the current pointer position:
+                xy = new EventPosition(event);
+                //console.log("xy: " + xy.x + " " + xy.y);
+
+                //Set up the context menu:
+                $.contextMenu({
+                    selector: '#pano-viewer',
+                    items: eventLayer.vwr_oncontext(xy, null),
+                });
+            }
         });
 
     </script>
