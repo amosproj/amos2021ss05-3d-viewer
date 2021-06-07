@@ -81,10 +81,12 @@ export class ViewerMapAPI {
             // transform xy to lon lan
             var lon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * image.mapOffset[0] / 71.5); 
             var lan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * image.mapOffset[1] / 111.3);
+            console.log( image.mapOffset[1])
             this.features.push(new ol.Feature({
-                geometry: new ol.geom.Point(ol.proj.fromLonLat([
-                lon, lan
-                ]))
+                geometry: new ol.geom.Point(
+                    //ol.proj.fromLonLat([
+                [lon, lan])
+                //]))
             })
             )
         });
@@ -107,7 +109,7 @@ export class ViewerMapAPI {
             source: vectorSource,
             style: new ol.style.Style({
             image: new ol.style.Circle({
-                radius: 3,
+                radius: 50,
                 fill: new ol.style.Fill({color: 'black'})
             })
             })
@@ -200,17 +202,18 @@ export class ViewerMapAPI {
         });
 
         //adding red points
-        var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0] / 71.5); 
-        var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1] / 111.3);
+        var redlon = this.viewerImageAPI.currentImage.mapOffset[0]; //this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0] / 71.5); 
+        var redlan = this.viewerImageAPI.currentImage.mapOffset[1]; //this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1] / 111.3);
         
         featureRed.push(new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.fromLonLat([
+            geometry: new ol.geom.Point(//ol.proj.fromLonLat([
             redlon, redlan
-            ]))
+            //])
+            )
         }))
 
         // console.log("red point")
-        console.log(redlon,redlan)
+        console.log(this.viewerImageAPI.currentImage.mapOffset)
         
         // create the source and layer for balck points
         const vectorSource = new ol.source.Vector({
@@ -220,7 +223,7 @@ export class ViewerMapAPI {
             source: vectorSource,
             style: new ol.style.Style({
             image: new ol.style.Circle({
-                radius: 2,
+                radius: 25,
                 fill: new ol.style.Fill({color: 'black'})
             })
             })
@@ -234,11 +237,12 @@ export class ViewerMapAPI {
             source: vectorSourceRed,
             style: new ol.style.Style({
             image: new ol.style.Circle({
-                radius: 3,
+                radius: 25,
                 fill: new ol.style.Fill({color: 'red'})
             })
             })
         });
+        this.map.addLayer(vectorRedLayer); 
 
         // create map and add layers
         /*
@@ -431,9 +435,9 @@ export class ViewerMapAPI {
             else{
                 layer.setVisible(false);
             }
-            if (i == layers.length){ // showing black and red points
-                layer.setVisible(true);
-            }
+            //if (i == layers.length){ // showing black and red points 
+            //layer.setVisible(true);
+            //  }
           });
     }
 
