@@ -210,7 +210,7 @@ export class ViewerMapAPI {
         }))
 
         // console.log("red point")
-        // console.log(redlon,redlan)
+        console.log(redlon,redlan)
         
         // create the source and layer for balck points
         const vectorSource = new ol.source.Vector({
