@@ -23,12 +23,7 @@ export class ViewerAPI {
         this.THREE = THREE;
 
         // globals
-        this.textureLoader = new THREE.TextureLoader()
-            .setCrossOrigin('use-credentials')
-            .setWithCredentials(true)
-            .setRequestHeader({
-                "Set-Cookie" : "SameSite=None; Secure"
-            });
+        this.textureLoader = new THREE.TextureLoader().setCrossOrigin('use-credentials');
         this.baseURL = baseURL;
         this.sphereRadius = 10;
 

@@ -16,7 +16,7 @@ export class ViewerPanoAPI {
         this.lastViewState;
         this.lastMousePos;
 
-        this.loadedMeshes = {};
+        this.loadedMesh = null;
 
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
@@ -33,38 +33,39 @@ export class ViewerPanoAPI {
     display(imageNum) {
         this.viewerImageAPI.currentImageId = imageNum;
 
+        // create sphere
+        const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
+        // invert the geometry on the x-axis so that we look out from the middle of the sphere
+        sphere.scale(-1, 1, 1);
+
+        // load the 360-panorama image data (highest resolution hardcoded for now)
+        const texturePano = this.viewerAPI.textureLoader.load(
+            this.viewerAPI.baseURL +
+            Math.trunc(imageNum / 100) +
+            '/' +
+            imageNum +
+            'r3.jpg');
+        texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+        
+        // put the texture on the spehere and add it to the scene
+        const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
+        
+        // adjust for orientation offset
+        mesh.applyQuaternion(this.viewerImageAPI.currentImage.orientation);
+        
+        // put in the correct position in the scene
         const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
-        // check if corresponding mesh already loaded
-        if (this.loadedMeshes[imageNum] == null) {
-            // create sphere
-            const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
-            // invert the geometry on the x-axis so that we look out from the middle of the sphere
-            sphere.scale(-1, 1, 1);
+        mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
 
-            // load the 360-panorama image data (highest resolution hardcoded for now)
-            const texturePano = this.viewerAPI.textureLoader.load(
-                this.viewerAPI.baseURL +
-                Math.trunc(imageNum / 100) +
-                '/' +
-                imageNum +
-                'r3.jpg');
-            texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
-            
-            // put the texture on the spehere and add it to the scene
-            const material = new THREE.MeshBasicMaterial({ map: texturePano });
-            const mesh = new THREE.Mesh(sphere, material);
-            
-            // adjust for orientation offset
-            const orientation = this.viewerImageAPI.currentImage.orientation;
-            mesh.applyQuaternion(orientation);
-            
-            // put in the correct position in the scene
-            mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
-
-            this.scene.add(mesh);
-            this.loadedMeshes[imageNum] = mesh;
+        // check if other panorama was previously already loaded
+        if (this.loadedMesh != null) {
+            this.scene.remove(this.loadedMesh);
         }
 
+        this.scene.add(mesh);
+        this.loadedMesh = mesh;
+        
+        // put camera inside sphere mesh
         this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
     }
 
