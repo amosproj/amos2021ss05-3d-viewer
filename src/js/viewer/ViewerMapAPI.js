@@ -35,21 +35,6 @@ export class ViewerMapAPI {
         this.lastVectorLayer;
         this.lastFloorID;
         this.viewerAPI = viewerAPI;
-        this.test_current_position();
-        /*
-    
-        var popup = new ol.Overlay({
-            //element: 
-            positioning: 'bottom-center',
-            stopEvent: false,
-            offset: [0, -10],
-          });
-          this.mapLayer.addOvSerlay(popup);
-        */
-        //this.redraw();
-        //this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
-        //this.scene.add(this.spriteGroup);
-
     }
 
     // Method: Add an event layer to the map (2D) view.
@@ -60,7 +45,7 @@ export class ViewerMapAPI {
     // Method: remove an event layer to the map (2D) view.
     removeLayer(layer) {
         // Layer: EventLayer
-        this.map.addLayer(layer);
+        this.map.removeLayer(layer);
     }
 
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
@@ -84,9 +69,9 @@ export class ViewerMapAPI {
             // add all black points to feature layer 
             // transform xy to lon lan
             //TODO: adjust the position better. This is a temporary scaling and offset
-            console.log(image); 
-            var lon = -image.mapOffset[0]; 
-            var lan = - image.mapOffset[1] ; // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
+  
+            var lon = this.viewerAPI.floor.origin[0] + image.mapOffset[0]; 
+            var lan = this.viewerAPI.floor.origin[1] + image.mapOffset[1] ; // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
             //console.log([this.viewerAPI.floor.origin[0], lon]); 
             features.push(new ol.Feature({
                 geometry: new ol.geom.Point([lon, lan]),
@@ -149,203 +134,11 @@ export class ViewerMapAPI {
         return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
 
-    test_current_position(){
-
-        // const features = [];
-        // const featureRed= [];
-
-        // let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
-        
-        // // adding black points
-        // allImages.forEach(image => {
-
-        //     // add all black points to feature layer 
-        //     // transform xy to lon lan
-        //     var lon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * image.mapOffset[0] / 71.5); 
-        //     var lan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * image.mapOffset[1] / 111.3);
-        //     features.push(new ol.Feature({
-        //         geometry: new ol.geom.Point(ol.proj.fromLonLat([
-        //         lon, lan
-        //         ]))
-        //     })
-        //     )
-        //     // console.log(lon,lan)
-        // });
-
-        // //adding red points
-        // var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0] / 71.5); 
-        // var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1] / 111.3);
-        
-        
-
-        // // console.log("red point")
-        // console.log(redlon,redlan)
-        
-        // // create the source and layer for balck points
-        // const vectorSource = new ol.source.Vector({
-        //     features
-        // });
-        // const vectorLayer = new ol.layer.Vector({
-        //     source: vectorSource,
-        //     style: new ol.style.Style({
-        //     image: new ol.style.Circle({
-        //         radius: 2,
-        //         fill: new ol.style.Fill({color: 'black'})
-        //     })
-        //     })
-        // });
-
-        // featureRed.push(new ol.Feature({
-        //     geometry: new ol.geom.Point(ol.proj.fromLonLat([
-        //     redlon, redlan
-        //     ]))
-        // }))
-        // // create the source and layer for red point
-        // const vectorSourceRed = new ol.source.Vector({
-        //     featureRed
-        // });
-        // const vectorRedLayer = new ol.layer.Vector({
-        //     source: vectorSourceRed,
-        //     style: new ol.style.Style({
-        //     image: new ol.style.Circle({
-        //         radius: 3,
-        //         fill: new ol.style.Fill({color: 'red'})
-        //     })
-        //     })
-        // });
-
-        // // create map and add layers
-        // const map = new ol.Map({
-        //     target: 'map',
-        //     layers: [
-        //     new ol.layer.Tile({
-        //         source: new ol.source.OSM()
-        //     }),
-        //     vectorLayer,
-        //     vectorRedLayer
-        //     ],
-        //     view: new ol.View({
-        //     center: ol.proj.fromLonLat([0, 0]),
-        //     zoom: 2
-        //     }),
-        //     controls: ol.control.defaults().extend([
-        //         new ol.control.FullScreen(),
-        //         new ol.control.MousePosition({
-        //             coordinateFormat: ol.coordinate.createStringXY(4),
-        //             projection: 'EPSG:4326', // wgs 48
-        //             className: 'custom-mouse-position-testmap',
-        //             target: document.getElementById('mouse-position-testmap')
-        //         })
-        //       ])
-        // });
-    }
-
 
     initDisplayMap(){
 
-        // test create button 1
-
-        // buttonUp = document.createElement('buttonUp');
-        // var handleButtonUp = function (e) {}
-        // buttonUp.addEventListener('click', handleButtonUp, false);
-
-        // creat elements
-        // var element = document.createElement("div")
-        // element.className = 'control';
-        // element.id = 'floor';
-        // document.getElementById('pano-viewer').appendChild(element);
-        // element.appendChild(buttonUp);
-
-        // var myControl = new ol.control.Control({
-        //     className: 'myControl',
-        //     element: element,
-        // });
-
-        // test create button 2
-
-        /* CSS:
-        #custom_anchor:before {
-            content:"Cycle";
-            left : 10%;
-            bottom: 20%;
-            z-index: -50;
-        }
-        */
-        
-        // var myControl = new ol.control.Control({
-        //     className: 'myControl',
-        //     element: document.getElementById('floorOL'),
-        // });
-
-        // // online -  create buttons example 1
-        // var button = document.createElement('button');
-        // button.innerHTML = '<i class="fa fa-home"></i>';
-
-        // var handleRotateNorth = function(e) {
-        //     map.getView().setRotation(180);
-        // };
-
-        // button.addEventListener('click', handleRotateNorth, false);
-
-        // var element = document.createElement('div');
-        // element.className = 'rotate-north-ol-control';
-        // element.appendChild(button);
-
-        // // online - create button example 2
-        // var anchor_element = document.createElement('a');
-        // anchor_element.href = '#custom_href';
-        // anchor_element.className = 'custom_anchor';
-    
-        // var this_ = this;
-        // var handleCustomControl = function (e) {
-        //     myControl.customFunction(e);
-        // };
-    
-        // anchor_element.addEventListener('click', handleCustomControl, false);
-        // anchor_element.addEventListener('touchstart', handleCustomControl, false);
-    
-        // var custom_element = document.createElement('div');
-        // custom_element.className = 'myCustomControl ol-unselectable';
-        // document.getElementById('pano-viewer').appendChild(custom_element);
-        // custom_element.appendChild(anchor_element);
-    
-        // var myControl = new ol.control.Control({
-        //     className: 'myControl',
-        //     element: custom_element,
-        //     target: document.getElementById("myCustomControl")
-        // });
-
-        // current version of test create button
-        /*
-        var button = function() {
-            var this_ = this;
-
-            ol.control.Control.call(this, {
-                element: document.getElementById('floorOL'),
-              });
-            };
-    
-        var ol_ext_inherits = function(child,parent) {
-            child.prototype = Object.create(parent.prototype);
-            child.prototype.constructor = child;
-            };
-        ol.inherits(button, ol.control.Control);
-
-        // create contorls for map 
-        var controls = ol.control.defaults({
-            rotate: false // hide rotation button
-        //})
-        }).extend([
-            new button
-            // myControl
-
-            // new ol.control.Control({
-            //   element:element
-            // })
-          ])
-        */
-
-        var extent =  [0, 0, 1024, 968];
+        let  currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData; 
+        var extent = [0, 0, currentMapData.width, currentMapData.height];
 
         //  Projection map image coordinates directly to map coordinates in pixels. 
         var projection = new ol.proj.Projection({
@@ -361,7 +154,7 @@ export class ViewerMapAPI {
                 projection: projection,
                 center: new ol.extent.getCenter(extent),
                 zoom: 1,
-                maxZoom: 5,
+                maxZoom: 4,
             }),
             // controls: controls,
             controls: ol.control.defaults({
@@ -371,14 +164,16 @@ export class ViewerMapAPI {
               ])
             });
         
+        
         // create image layers for each floors 
         for (var i =0; i < this.viewerFloorAPI.floors.length; i++){
+            let mapData = this.viewerFloorAPI.floors[i].mapData
             this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
                     //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
-                    url: this.baseURL + this.viewerFloorAPI.floors[i].mapData.name + ".png",
+                    url: this.baseURL +  mapData.name + ".png",
                     projection: projection,
-                    imageExtent: extent,
+                    imageExtent:  [0, 0, mapData.width, mapData.height],
                 })
             }))
         }
