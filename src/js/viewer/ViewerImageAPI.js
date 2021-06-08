@@ -22,9 +22,9 @@ export class ViewerImageAPI {
         // Get all panorama images.
         // Parameters: Function called with all images ([ViewerImage]): Array of panorama images
         callback(this.images);
-    }
+}
 
-    changed() {
+        changed() {
         //  Signal changed image data (e.g. hidden flag) to the viewer.
     }
 
