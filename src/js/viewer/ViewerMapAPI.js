@@ -100,36 +100,18 @@ export class ViewerMapAPI {
             var features = [];
 
             // remove comment to draw all points on map
-            let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
+            let allFloorImages = this.viewerFloorAPI.currentFloor.viewerImages;
             
-            allImages.forEach(image => {
+            allFloorImages.forEach(image => {
 
-<<<<<<< HEAD
         // var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0])*3; 
         // var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1])*2;
-        
-        console.log(this.viewerAPI.floor.origin)
-        console.log(this.viewerImageAPI.currentImage.mapOffset)
         var redlon = this.viewerImageAPI.currentImage.mapOffset[0]; 
         var redlan = this.viewerImageAPI.currentImage.mapOffset[1]; 
 
         var iconFeature = new ol.Feature({
             geometry: new ol.geom.Point([redlon, redlan]),
         });
-=======
-                // add all black points to feature layer 
-                // transform xy to lon lan
-                //TODO: adjust the position better. This is a temporary scaling and offset
-    
-                var lon = this.viewerAPI.floor.origin[0] + image.mapOffset[0]; 
-                var lan = this.viewerAPI.floor.origin[1] + image.mapOffset[1] ; // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
-                //console.log([this.viewerAPI.floor.origin[0], lon]); 
-                features.push(new ol.Feature({
-                    geometry: new ol.geom.Point([lon, lan]),
-                })
-                )
-            });
->>>>>>> e793286e08145427bee2dd8d60e75c4ce602f041
 
             // create the layer for features -> black points
             var vectorSource = new ol.source.Vector({
