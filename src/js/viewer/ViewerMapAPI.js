@@ -33,7 +33,7 @@ export class ViewerMapAPI {
         this.updateDisplayMap(this.viewerFloorAPI.currentFloorId);
         this.features = [];
         this.lastVectorLayer;
-        this.lastFloorID;
+        this.lastFloorID = 0;
         this.viewerAPI = viewerAPI;
     }
 
@@ -51,81 +51,95 @@ export class ViewerMapAPI {
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
         
-        // // remove prvious last vector layer 
-        // this.map.removeLayer(this.lastVectorLayer);
+        console.log(this.viewerFloorAPI.currentFloorId)
+        console.log(this.map)
 
-        // // this.spriteGroup.clear();
+        // for avoid duplicating
+        if (this.viewerFloorAPI.currentFloorId != this.lastFloorID){
 
-        var features = [];
+            console.log("not duplicate")
+            console.log(this.map)
+            // // remove prvious vector layers 
+            this.map.removeLayer(this.lastVectorLayerRed);
+            this.map.removeLayer(this.lastVectorLayer);
 
-        var floorIndex = this.viewerFloorAPI.currentFloorId;
-        this.updateDisplayMap(floorIndex);
+            
+            // show layer map
 
-        // remove comment to draw all points on map
-        let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
-        
-        allImages.forEach(image => {
+            var floorIndex = this.viewerFloorAPI.currentFloorId;
+            this.updateDisplayMap(floorIndex);
 
-            // add all black points to feature layer 
-            // transform xy to lon lan
-            //TODO: adjust the position better. This is a temporary scaling and offset
-  
-            var lon = this.viewerAPI.floor.origin[0] + image.mapOffset[0]; 
-            var lan = this.viewerAPI.floor.origin[1] + image.mapOffset[1] ; // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
-            //console.log([this.viewerAPI.floor.origin[0], lon]); 
-            features.push(new ol.Feature({
-                geometry: new ol.geom.Point([lon, lan]),
-            })
-            )
-        });
+            var features = [];
 
-        // create the layer for features -> black points
-        var vectorSource = new ol.source.Vector({
-            features: features
-        });
+            // remove comment to draw all points on map
+            let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
+            
+            allImages.forEach(image => {
 
-        var vectorLayer = new ol.layer.Vector({
-            source: vectorSource,
-            style: new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 3,
-                fill: new ol.style.Fill({color: 'black'})
-            })
-            })
-        });
+                // add all black points to feature layer 
+                // transform xy to lon lan
+                //TODO: adjust the position better. This is a temporary scaling and offset
+    
+                var lon = this.viewerAPI.floor.origin[0] + image.mapOffset[0]; 
+                var lan = this.viewerAPI.floor.origin[1] + image.mapOffset[1] ; // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
+                //console.log([this.viewerAPI.floor.origin[0], lon]); 
+                features.push(new ol.Feature({
+                    geometry: new ol.geom.Point([lon, lan]),
+                })
+                )
+            });
 
-        this.map.addLayer(vectorLayer);
+            // create the layer for features -> black points
+            var vectorSource = new ol.source.Vector({
+                features: features
+            });
 
-
-        //adding red points
-        //TODO : adjust red point lon and lan to real one, now using temporary coordinate for testing
-
-        // var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0])*3; 
-        // var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1])*2;
-        
-        var redlon = this.viewerImageAPI.currentImage.mapOffset[0];
-        var redlan = this.viewerImageAPI.currentImage.mapOffset[1]; 
-
-        var iconFeature = new ol.Feature({
-            geometry: new ol.geom.Point([redlon, redlan]),
-        });
-
-        var vectorSourceRed = new ol.source.Vector({
-            features: [iconFeature]
-        });
-
-        var vectorLayerRed = new ol.layer.Vector({
-            source: vectorSourceRed,
-            style: new ol.style.Style({
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                style: new ol.style.Style({
                 image: new ol.style.Circle({
                     radius: 3,
-                    fill: new ol.style.Fill({color: 'red'})
+                    fill: new ol.style.Fill({color: 'black'})
                 })
                 })
-        });
+            });
 
-        this.map.addLayer(vectorLayerRed);
+            this.map.addLayer(vectorLayer);
 
+
+            //adding red points
+
+            // var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0])*3; 
+            // var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1])*2;
+            
+            var redlon = this.viewerImageAPI.currentImage.mapOffset[0];
+            var redlan = this.viewerImageAPI.currentImage.mapOffset[1]; 
+
+            var redFeature = new ol.Feature({
+                geometry: new ol.geom.Point([redlon, redlan]),
+            });
+
+            var vectorSourceRed = new ol.source.Vector({
+                features: [redFeature]
+            });
+
+            var vectorLayerRed = new ol.layer.Vector({
+                source: vectorSourceRed,
+                style: new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 3,
+                        fill: new ol.style.Fill({color: 'red'})
+                    })
+                    })
+            });
+
+            this.map.addLayer(vectorLayerRed);
+
+            // save last vector layers for deleting 
+            this.lastFloorID = this.viewerFloorAPI.currentFloorId;
+            this.lastVectorLayer = vectorLayer;
+            this.lastVectorLayerRed = vectorLayerRed;
+        }
     }
     
     // Method
