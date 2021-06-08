@@ -20,10 +20,7 @@ export class ViewerMapAPI {
             1,                          // frustum near plane
             10);                        // frustum far plane
         this.camera.position.z = 2;     // need to be in [near + 1, far + 1] to be displayed
-
-        this.spriteGroup = new THREE.Group(); //create an sprite group
         this.mapScalingFactor = 0.2;
-
         this.baseURL = viewerAPI.baseURL;
 
         // create Map and Layers
@@ -63,20 +60,19 @@ export class ViewerMapAPI {
 
         // remove comment to draw all points on map
         let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
-        
         allImages.forEach(image => {
-
             // add all black points to feature layer 
             // transform xy to lon lan
             //TODO: adjust the position better. This is a temporary scaling and offset
-  
-            var lon = this.viewerAPI.floor.origin[0] + image.mapOffset[0]; 
-            var lan = this.viewerAPI.floor.origin[1] + image.mapOffset[1] ; // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
-            //console.log([this.viewerAPI.floor.origin[0], lon]); 
+            
+            var lon = (image.mapOffset[0]-this.viewerFloorAPI.floors[floorIndex].mapData.x); 
+            var lan = (image.mapOffset[1]- this.viewerFloorAPI.floors[floorIndex].mapData.y); // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
+            //console.log(" Coordinates", [ this.viewerFloorAPI.floors[floorIndex].mapData.x,  lon ]); 
             features.push(new ol.Feature({
                 geometry: new ol.geom.Point([lon, lan]),
             })
             )
+
         });
 
         // create the layer for features -> black points
@@ -103,7 +99,9 @@ export class ViewerMapAPI {
         // var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0])*3; 
         // var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1])*2;
         
-        var redlon = this.viewerImageAPI.currentImage.mapOffset[0];
+        console.log(this.viewerAPI.floor.origin)
+        console.log(this.viewerImageAPI.currentImage.mapOffset)
+        var redlon = this.viewerImageAPI.currentImage.mapOffset[0]; 
         var redlan = this.viewerImageAPI.currentImage.mapOffset[1]; 
 
         var iconFeature = new ol.Feature({
@@ -142,7 +140,7 @@ export class ViewerMapAPI {
 
         //  Projection map image coordinates directly to map coordinates in pixels. 
         var projection = new ol.proj.Projection({
-        code: 'xkcd-image',
+        code: 'image',
         units: 'pixels',
         extent: extent,
         });
@@ -167,13 +165,18 @@ export class ViewerMapAPI {
         
         // create image layers for each floors 
         for (var i =0; i < this.viewerFloorAPI.floors.length; i++){
-            let mapData = this.viewerFloorAPI.floors[i].mapData
+            let mapData = this.viewerFloorAPI.floors[i].mapData; 
+            let e = [0, 0, mapData.width, mapData.height]; 
             this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
                     //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
                     url: this.baseURL +  mapData.name + ".png",
-                    projection: projection,
-                    imageExtent:  [0, 0, mapData.width, mapData.height],
+                    projection: new ol.proj.Projection({
+                        code: 'image',
+                        units: 'pixels',
+                        extent: e,
+                        }),
+                    imageExtent:e  ,
                 })
             }))
         }
