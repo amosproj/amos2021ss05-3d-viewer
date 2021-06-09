@@ -168,15 +168,15 @@ export class ViewerPanoAPI {
         if (event.which == 3) {
 
             //get the current pointer position:
-            this.xy = new EventPosition(event);
+            const xy = new EventPosition(event);
 
             //get the viewing direction:
-            this.location = this.camera.getWorldDirection();
+            const location = this.camera.getWorldDirection();
 
             //Set up the context menu:
             $.contextMenu({
                 selector: '#pano-viewer',
-                items: this.eventLayer.vwr_oncontext(this.xy, this.location),
+                items: this.eventLayer.vwr_oncontext(xy, location),
             });
         }
     }

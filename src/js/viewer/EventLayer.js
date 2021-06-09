@@ -26,9 +26,7 @@ export class EventLayer {
         let itemCut = new ViewerContextItem(callback, "cut", null, "Cut");
 
         //Creating list of item objects.
-        let listOfItems = { "edit": itemEdit, "cut": itemCut };
-
-        return listOfItems;
+        return [itemEdit, itemCut];
     }
 
 }
