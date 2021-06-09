@@ -63,7 +63,7 @@ export class ViewerAPI {
 
     animate() {
         window.requestAnimationFrame(() => this.animate());
-        this.pano.viewInternal();
+        this.pano.view(this.pano.viewerViewState.lonov, this.pano.viewerViewState.latov, this.pano.viewerViewState.fov);
         this.renderer.clear();
         this.renderer.render(this.pano.scene, this.pano.camera);
         this.renderer.clearDepth();
@@ -79,14 +79,13 @@ export class ViewerAPI {
         
         this.floor.currentFloor.viewerImages.forEach(element => {
             const currLocalPos = this.toLocal(element.pos);
-            const currDistances = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
-            const currDistance = Math.sqrt(currDistances[0] * currDistances[0] + currDistances[1] * currDistances[1]);
+            const [dx, dz] = [localPos.x - currLocalPos.x, localPos.z - currLocalPos.z];
+            const currDistance = Math.sqrt(dx * dx + dz * dz);
         
             if (currDistance < minDistance) {
                 minDistance = currDistance;
                 bestImg = element;
             }
-        
         });
 
         // avoid duplication
@@ -142,25 +141,25 @@ export class ViewerAPI {
         // localCoords : THREE.Vector3 // Local coordinates used by the viewer
         const globalX = this.floor.origin[0] - (localCoords.x / 71.5);
         const globalY = this.floor.origin[1] - (localCoords.y / 111.3);
-        const globalZ = this.floor.currentFloor.z + localCoords.z;
+        const globalZ = localCoords.z - this.floor.currentFloor.z;
 
-        return [globalX, globalY, globalZ];
+        // the three js scene sees the y axis as the up-down axis so we have to swap with z
+        return [globalX, globalZ, globalY];
         // Returns: [Number] : WGS 84 coordinates [longitude, latitude, z] (z value is floorZ + panoZ, where localCoords is just the panoZ)
     }
 
     // Convert WGS 84 coordinates (globalCoords : [longitude, latitude, z]) to the local metric three.js coordinates used by the viewer.
-    // z value should be the panoZ + floorZ or image
+    // z value should be the panoZ + floorZ of image
     toLocal(globalCoords) {
         // Distance calculation math taken from here https://www.mkompf.com/gps/distcalc.html
+        // The more accurate calculation breaks the pixel offset on the pre-created maps
         const dx = 71.5 * (this.floor.origin[0] - globalCoords[0]);
         const dy = 111.3 * (this.floor.origin[1] - globalCoords[1]);
-            
-        // The more accurate calculation breaks the pixel offset on the precreated maps
-        //const avgLat = (lat1 + lat2) / 2 * 0.01745;
-        //dx = 111.3 * Math.cos(THREE.MathUtils.degToRad(avgLat)) * (lon1 - lon2);
         
-        return new this.THREE.Vector3(dx * 1000, dy * 1000, globalCoords[2] - this.floor.currentFloor.z);
-        // Returns: THREE.Vector3 : Local coordinates
+        return new this.THREE.Vector3(
+            dx * 1000,
+            globalCoords[2] + this.floor.currentFloor.z,
+            dy * 1000);
     }
 
     // TODO: swap() and big(wanted)
