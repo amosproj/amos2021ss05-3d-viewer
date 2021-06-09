@@ -33,24 +33,6 @@ export class ViewerPanoAPI {
         this.display(this.viewerImageAPI.currentImageId);
     }
 
-    onRightClick(event) {
-        //if right mouse is clicked:
-        if (event.which == 3) {
-
-            //get the current pointer position:
-            this.xy = new EventPosition(event);
-
-            //get the viewing direction:
-            this.location = this.camera.getWorldDirection();
-
-            //Set up the context menu:
-            $.contextMenu({
-                selector: '#pano-viewer',
-                items: this.eventLayer.vwr_oncontext(this.xy, this.location),
-            });
-        }
-    }
-
     // displays the panorama with idx *ImageNum* in the model
     display(imageNum) {
         this.viewerImageAPI.currentImageId = imageNum;
@@ -179,6 +161,24 @@ export class ViewerPanoAPI {
         this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
 
         this.viewerAPI.propagateEvent("moved", this.viewerImageAPI.currentImage.id, true);
+    }
+
+    onRightClick(event) {
+        //if right mouse is clicked:
+        if (event.which == 3) {
+
+            //get the current pointer position:
+            this.xy = new EventPosition(event);
+
+            //get the viewing direction:
+            this.location = this.camera.getWorldDirection();
+
+            //Set up the context menu:
+            $.contextMenu({
+                selector: '#pano-viewer',
+                items: this.eventLayer.vwr_oncontext(this.xy, this.location),
+            });
+        }
     }
 
 }
