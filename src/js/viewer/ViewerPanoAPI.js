@@ -25,11 +25,6 @@ export class ViewerPanoAPI {
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
 
-
-
-        //console.log(this.eventLayer);
-
-
         document.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
         document.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
@@ -45,12 +40,12 @@ export class ViewerPanoAPI {
             //get the current pointer position:
             this.xy = new EventPosition(event);
 
-            console.log(this.camera);
+            this.location = this.camera.getWorldDirection();
 
             //Set up the context menu:
             $.contextMenu({
                 selector: '#pano-viewer',
-                items: this.eventLayer.vwr_oncontext(this.xy, null),
+                items: this.eventLayer.vwr_oncontext(this.xy, this.location),
             });
         }
     }

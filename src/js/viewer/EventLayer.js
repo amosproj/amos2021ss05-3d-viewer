@@ -7,12 +7,15 @@ export class EventLayer {
     }
 
     vwr_oncontext(xy, location) {
-        console.log("xy: ", xy);
         //Parameters: 
         //xy EventPosition:  Pointer position
         //location THREE.Vector3 : Local coordinates for pointer position+
 
         //Creating callback function for context menu item.
+
+        console.log("xy: ", xy);
+        console.log("Viewing Direction: ", location);
+
         let callback = function (key, options) {
             var msg = 'clicked: ' + key;
             (window.console && console.log(msg)) || alert(msg);
