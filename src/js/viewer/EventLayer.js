@@ -11,11 +11,11 @@ export class EventLayer {
         //xy EventPosition:  Pointer position
         //location THREE.Vector3 : Local coordinates for pointer position+
 
-        //Creating callback function for context menu item.
-
+        //Showing pointer location and viewing direction in the terminal:
         console.log("xy: ", xy);
         console.log("Viewing Direction: ", location);
 
+        //Creating callback function for context menu item:
         let callback = function (key, options) {
             var msg = 'clicked: ' + key;
             (window.console && console.log(msg)) || alert(msg);

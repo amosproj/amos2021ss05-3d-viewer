@@ -28,7 +28,7 @@ export class ViewerPanoAPI {
         document.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
         document.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
-        $(document).mousedown((event) => this.onRightClick(event));
+        $('#pano-viewer').mousedown((event) => this.onRightClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
     }
@@ -40,6 +40,7 @@ export class ViewerPanoAPI {
             //get the current pointer position:
             this.xy = new EventPosition(event);
 
+            //get the viewing direction:
             this.location = this.camera.getWorldDirection();
 
             //Set up the context menu:
