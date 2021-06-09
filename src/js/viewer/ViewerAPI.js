@@ -25,7 +25,6 @@ export class ViewerAPI {
         // globals
         this.textureLoader = new THREE.TextureLoader().setCrossOrigin('use-credentials');
         this.baseURL = baseURL;
-        this.sphereRadius = 10;
 
         this.listeners = [];
         
@@ -80,8 +79,8 @@ export class ViewerAPI {
         
         this.floor.currentFloor.viewerImages.forEach(element => {
             const currLocalPos = this.toLocal(element.pos);
-            const [dx, dy] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
-            const currDistance = Math.sqrt(dx * dx + dy * dy);
+            const [dx, dz] = [localPos.x - currLocalPos.x, localPos.z - currLocalPos.z];
+            const currDistance = Math.sqrt(dx * dx + dz * dz);
         
             if (currDistance < minDistance) {
                 minDistance = currDistance;
@@ -144,7 +143,8 @@ export class ViewerAPI {
         const globalY = this.floor.origin[1] - (localCoords.y / 111.3);
         const globalZ = localCoords.z - this.floor.currentFloor.z;
 
-        return [globalX, globalY, globalZ];
+        // the three js scene sees the y axis as the up-down axis so we have to swap with z
+        return [globalX, globalZ, globalY];
         // Returns: [Number] : WGS 84 coordinates [longitude, latitude, z] (z value is floorZ + panoZ, where localCoords is just the panoZ)
     }
 
@@ -158,8 +158,8 @@ export class ViewerAPI {
         
         return new this.THREE.Vector3(
             dx * 1000,
-            dy * 1000,
-            globalCoords[2] + this.floor.currentFloor.z);
+            globalCoords[2] + this.floor.currentFloor.z,
+            dy * 1000);
     }
 
     // TODO: swap() and big(wanted)

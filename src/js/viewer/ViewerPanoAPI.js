@@ -10,7 +10,7 @@ export class ViewerPanoAPI {
         this.camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
         this.viewerImageAPI = viewerAPI.image;
         this.viewerAPI = viewerAPI;
-        this.sphereRadius = viewerAPI.sphereRadius;
+        this.sphereRadius = 10;
 
         this.viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0);
         this.lastViewState;
@@ -27,6 +27,15 @@ export class ViewerPanoAPI {
         document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
+
+        // visual test
+        const otherMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 6, 4), new THREE.MeshBasicMaterial());
+        
+        // put in the correct position in the scene
+        const position = viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
+        otherMesh.position.set(position.x, position.y - 5, position.z);
+
+        this.scene.add(otherMesh);
     }
 
     // displays the panorama with idx *ImageNum* in the model
@@ -67,6 +76,7 @@ export class ViewerPanoAPI {
         
         // put camera inside sphere mesh
         this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+        console.log(localCoord);
     }
 
     camera() {
