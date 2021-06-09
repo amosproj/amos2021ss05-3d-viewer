@@ -18,6 +18,9 @@ export class ViewerPanoAPI {
         this.lastViewState;
         this.lastMousePos;
 
+        //initialize the eventLayer
+        this.eventLayer = new EventLayer();
+
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
@@ -30,28 +33,26 @@ export class ViewerPanoAPI {
         document.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
         document.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
-
-        //Creating context menu by eventLayer object
-        $(document).mousedown(function (event) {
-
-            //if right mouse is clicked:
-            if (event.which == 3) {
-
-                //get the current pointer position:
-                this.xy = new EventPosition(event);
-
-                //initialize the eventLayer
-                this.eventLayer = new EventLayer();
-
-                //Set up the context menu:
-                $.contextMenu({
-                    selector: '#pano-viewer',
-                    items: this.eventLayer.vwr_oncontext(this.xy, null),
-                });
-            }
-        });
+        $(document).mousedown((event) => this.onRightClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
+    }
+
+    onRightClick(event) {
+        //if right mouse is clicked:
+        if (event.which == 3) {
+
+            //get the current pointer position:
+            this.xy = new EventPosition(event);
+
+            console.log(this.camera);
+
+            //Set up the context menu:
+            $.contextMenu({
+                selector: '#pano-viewer',
+                items: this.eventLayer.vwr_oncontext(this.xy, null),
+            });
+        }
     }
 
     // displays the panorama with idx *ImageNum* in the model
