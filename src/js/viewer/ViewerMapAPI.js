@@ -52,8 +52,6 @@ export class ViewerMapAPI {
         // for avoid duplicating
         if (this.viewerFloorAPI.currentFloorId != this.lastFloorID){
 
-            console.log("not duplicate")
-            console.log(this.map)
             // // remove prvious vector layers 
             this.map.removeLayer(this.lastVectorLayerRed);
             this.map.removeLayer(this.lastVectorLayer);
@@ -63,14 +61,17 @@ export class ViewerMapAPI {
 
         // remove comment to draw all points on map
         let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
-        let floorIndex = this.viewerFloorAPI.currentFloorId; 
+        let floorIndex = this.viewerFloorAPI.currentFloorId;
+
+
         allImages.forEach(image => {
             // add all black points to feature layer 
             // transform xy to lon lan
             //TODO: adjust the position better. This is a temporary scaling and offset
             
+            console.log("Position in WGS84: ", image.pos)
             var lon = (image.mapOffset[0]+this.viewerFloorAPI.floors[floorIndex].mapData.x); 
-            var lan = (image.mapOffset[1]+ this.viewerFloorAPI.floors[floorIndex].mapData.y); // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
+            var lan = (image.mapOffset[1]- this.viewerFloorAPI.floors[floorIndex].mapData.y); // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
             //console.log(" Coordinates", [ this.viewerFloorAPI.floors[floorIndex].mapData.x,  lon ]); 
             features.push(new ol.Feature({
                 geometry: new ol.geom.Point([lon, lan]),
@@ -95,48 +96,6 @@ export class ViewerMapAPI {
         });
 
         this.map.addLayer(vectorLayer);
-
-            var features = [];
-
-            // remove comment to draw all points on map
-            let allFloorImages = this.viewerFloorAPI.currentFloor.viewerImages;
-            var redlon = this.viewerImageAPI.currentImage.mapOffset[0]; 
-            var redlan = this.viewerImageAPI.currentImage.mapOffset[1]; 
-
-            allFloorImages.forEach(image => {
-            // var redlon = this.viewerAPI.floor.origin[0] - (-this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[0])*3; 
-            // var redlan = this.viewerAPI.floor.origin[1] - (this.mapScalingFactor * this.viewerImageAPI.currentImage.mapOffset[1])*2;
- 
-                // add all black points to feature layer 
-                // transform xy to lon lan
-                //TODO: adjust the position better. This is a temporary scaling and offset
-    
-                var lon = this.viewerAPI.floor.origin[0] + image.mapOffset[0]; 
-                var lan = this.viewerAPI.floor.origin[1] + image.mapOffset[1] ; // this.viewerAPI.floor.origin[1] - image.mapOffset[1];
-                //console.log([this.viewerAPI.floor.origin[0], lon]); 
-                features.push(new ol.Feature({
-                    geometry: new ol.geom.Point([lon, lan]),
-                })
-                )
-            });
-
-            // create the layer for features -> black points
-            var vectorSource = new ol.source.Vector({
-                features: features
-            });
-
-            var vectorLayer = new ol.layer.Vector({
-                source: vectorSource,
-                style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 3,
-                    fill: new ol.style.Fill({color: 'black'})
-                })
-                })
-            });
-
-            this.map.addLayer(vectorLayer);
-
 
             //adding red points
 
@@ -163,8 +122,24 @@ export class ViewerMapAPI {
                     })
                     })
             });
-
+ 
             this.map.addLayer(vectorLayerRed);
+            let rotationLonov = 0; // TODO: Change to get LONOV in radians
+            var orientationRedStyle = new ol.style.Style({
+                image: new ol.style.RegularShape({
+                  fill: new ol.style.Fill({color: 'red'}), //new Fill({  color: 'rgba(255, 0, 0, 0.2)'     }),
+                  stroke: new ol.style.Stroke({color: 'black', width: 2}),
+                  points: 3,
+                  radius: 10,
+                  rotation: rotationLonov, 
+                  angle: 0
+                })
+              }),
+            
+
+            //vectorLayerRed.setStyle(style);
+            // Example to  
+            //orientationRedStyle.setRotation(Math.PI / 180 * heading);
 
             // save last vector layers for deleting 
             this.lastFloorID = this.viewerFloorAPI.currentFloorId;
@@ -191,7 +166,9 @@ export class ViewerMapAPI {
         units: 'pixels',
         extent: extent,
         });
-    
+
+        // [X, Y] coordinate corresponding to "lon0" in floor map image (in pixels)
+        let centerMap = [currentMapData.x, currentMapData.y]; 
         // create map 
         this.map = new ol.Map({  //new ol.control.OverviewMap({
             target: 'map',
@@ -208,23 +185,31 @@ export class ViewerMapAPI {
                 new ol.control.FullScreen() // create fullScreen button
               ])
             });
-        
-        
+
         // create image layers for each floors 
         for (var i =0; i < this.viewerFloorAPI.floors.length; i++){
             let mapData = this.viewerFloorAPI.floors[i].mapData; 
             let e = [0, 0, mapData.width, mapData.height]; 
+            let projImage = new ol.proj.Projection({
+                code: 'image',
+                units: 'pixels',
+                extent: e,
+                }); 
             this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
                     //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
                     url: this.baseURL +  mapData.name + ".png",
+                    projection: projImage, 
+                    /*
                     projection: new ol.proj.Projection({
                         code: 'image',
                         units: 'pixels',
                         extent: e,
                         }),
-                    imageExtent:e  ,
+                    */
+                        imageExtent:e,
                 })
+
             }))
         }
     }
