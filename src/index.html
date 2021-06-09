@@ -5,18 +5,16 @@
     <meta charset="UTF-8" />
     <title>360 Pano Image Viewer</title>
     <link rel="stylesheet" href="css/main.css" />
-</head>
 
-<body>
     <script src="libs/three.min.js"></script>
     <script src="libs/jQuery.min.js"></script>
     <script src="libs/ol.js"></script>
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script>
 
-    <script type="module">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css" />
+    <script src="libs/contextMenu.min.js"></script>
+
+    <!-- Initializing the Viewer with the onload function in the URL -->
+    <script type="module" defer>
         import { ViewerWindow } from './js/viewer/ViewerWindow.js'
 
         const getUrlParameter = function getUrlParameter(sParam) {
@@ -56,10 +54,12 @@
         }
     </script>
 
+</head>
 
-    <div id="pano-viewer">
-        <div id="map" class="map"></div>
+<body>
+    <div id="pano-viewer"></div>
 
+    <div id="map" class="map">
         <div class="control-OL" id="floorOL">
             <div id="cfOL"></div>
             <select name="dropdown-OL" id="dropdown-floors-OL"></select>
