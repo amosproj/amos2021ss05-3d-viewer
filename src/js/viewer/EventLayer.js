@@ -1,29 +1,32 @@
 "use strict";
-
-// Event position in viewer
-
-export class EventPosition {
-    constructor() {
-    
-        this.x; //  Number // y coordinate of this image on the floor
-
-        this.y; // Number // y coordinate of this image on the floor
-    }
-
-}
-
+import { ViewerContextItem } from "./ViewerContextItem.js";
 
 export class EventLayer {
     constructor() {
-        this.viewer_contex; 
+        this.viewer_contex;
     }
-    
-    vwr_oncontext (xy, location){
+
+    vwr_oncontext(xy, location) {
         //Parameters: 
         //xy EventPosition:  Pointer position
         //location THREE.Vector3 : Local coordinates for pointer position+
-        viewer_contex = new ViewerContextItem();
-        return viewer_contex;
+
+        //Showing pointer location and viewing direction in the terminal:
+        console.log("xy: ", xy);
+        console.log("Viewing Direction: ", location);
+
+        //Creating callback function for context menu item:
+        let callback = function (key, options) {
+            var msg = 'clicked: ' + key;
+            (window.console && console.log(msg)) || alert(msg);
+        };
+
+        //Creating item objects
+        let itemEdit = new ViewerContextItem(callback, "edit", null, "Edit");
+        let itemCut = new ViewerContextItem(callback, "cut", null, "Cut");
+
+        //Creating list of item objects.
+        return [itemEdit, itemCut];
     }
 
 }

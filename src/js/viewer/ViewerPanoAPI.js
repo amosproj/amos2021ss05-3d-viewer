@@ -2,6 +2,8 @@
 
 import { ViewerViewState } from "./ViewerViewState.js";
 import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED } from "./ViewerConfig.js";
+import { EventLayer } from "./EventLayer.js";
+import { EventPosition } from "./EventPosition.js";
 
 export class ViewerPanoAPI {
 
@@ -16,6 +18,10 @@ export class ViewerPanoAPI {
         this.lastViewState;
         this.lastMousePos;
 
+        //initialize the eventLayer
+        this.eventLayer = new EventLayer();
+
+        // property needed for display method
         this.loadedMesh = null;
 
         // Two new event listeneres are called to handle *how far* the user drags
@@ -25,6 +31,7 @@ export class ViewerPanoAPI {
         document.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
         document.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+        $('#pano-viewer').mousedown((event) => this.onRightClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
     }
@@ -46,7 +53,7 @@ export class ViewerPanoAPI {
             imageNum +
             'r3.jpg');
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
-        
+
         // put the texture on the spehere and add it to the scene
         const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
         
@@ -77,7 +84,7 @@ export class ViewerPanoAPI {
     view(lonov, latov, fov) {
         let phi = THREE.MathUtils.degToRad(90 - latov);
         let theta = THREE.MathUtils.degToRad(lonov);
-    
+
         const x = this.sphereRadius * Math.sin(phi) * Math.cos(theta);
         const y = this.sphereRadius * Math.cos(phi);
         const z = this.sphereRadius * Math.sin(phi) * Math.sin(theta);
@@ -92,17 +99,17 @@ export class ViewerPanoAPI {
         this.camera.updateProjectionMatrix();
     }
 
-    
+
     // ----- Event handling functions for panning, zooming and moving -----
     onPointerDown(event) {
         this.lastMousePos = [event.clientX, event.clientY];
-    
+
         this.lastViewState = [this.viewerViewState.lonov, this.viewerViewState.latov];
-    
+
         document.addEventListener('pointermove', this.oPM);
         document.addEventListener('pointerup', this.oPU);
     }
-    
+
     // handles continues update of the distance mouse moved
     onPointerMove(event) {
         let scalingFactor = this.camera.fov / MAX_FOV;
@@ -110,22 +117,21 @@ export class ViewerPanoAPI {
         this.viewerViewState.setLonov((this.lastMousePos[0] - event.clientX) * PAN_SPEED * scalingFactor + this.lastViewState[0]);
         this.viewerViewState.setLatov((event.clientY - this.lastMousePos[1]) * PAN_SPEED * scalingFactor + this.lastViewState[1]);
     }
-    
+
     // this event listener is called when the user *ends* moving the picture
     onPointerUp() {
         document.removeEventListener('pointermove', this.oPM);
         document.removeEventListener('pointerup', this.oPU);
-    
+
         this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
     }
-    
+
     onDocumentMouseWheel(event) {
         this.viewerViewState.fov = this.camera.fov + event.deltaY * ZOOM_SPEED;
     
         this.view(this.viewerViewState.lonov, this.viewerViewState.latov, this.viewerViewState.fov);
-    
         this.camera.updateProjectionMatrix();
-        
+
         this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
     }
 
@@ -149,10 +155,27 @@ export class ViewerPanoAPI {
         const currentPos = this.viewerImageAPI.currentImage.pos;
         
         const newPos = newLocationFromPointAngle(currentPos[0], currentPos[1], THREE.Math.degToRad(convertedAngle), distance);
-    
         this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
-        
+
         this.viewerAPI.propagateEvent("moved", this.viewerImageAPI.currentImage.id, true);
+    }
+
+    onRightClick(event) {
+        //if right mouse is clicked:
+        if (event.which == 3) {
+
+            //get the current pointer position:
+            const xy = new EventPosition(event);
+
+            //get the viewing direction:
+            const location = this.camera.getWorldDirection();
+
+            //Set up the context menu:
+            $.contextMenu({
+                selector: '#pano-viewer',
+                items: this.eventLayer.vwr_oncontext(xy, location),
+            });
+        }
     }
 
 }
