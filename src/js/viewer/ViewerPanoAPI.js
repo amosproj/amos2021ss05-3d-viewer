@@ -21,8 +21,9 @@ export class ViewerPanoAPI {
         //initialize the eventLayer
         this.eventLayer = new EventLayer();
 
-        // property needed for display method
+        // properties needed for display and depthAtPointer method
         this.loadedMesh = null;
+        this.depthCanvas = document.createElement("canvas");
 
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
@@ -53,6 +54,18 @@ export class ViewerPanoAPI {
             imageNum +
             'r3.jpg');
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+
+        // also load depth-map for panorama
+        const image = new Image();
+
+        //image.crossOrigin = "use-credentials";
+        image.src = this.viewerAPI.baseURL +
+                    Math.trunc(this.viewerImageAPI.currentImage.id / 100) + '/' +
+                    this.viewerImageAPI.currentImage.id + 'd.png';
+        
+        image.addEventListener('load', () => {
+            this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
+        }, false);
 
         // put the texture on the spehere and add it to the scene
         const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
@@ -182,24 +195,34 @@ export class ViewerPanoAPI {
         }
     }
 
-    // returns: the depth information of the panorama at the current curser position (event.x, event.y)
+    // returns: the depth information (in meter) of the panorama at the current curser position (event.x, event.y)
     depthAtPointer(event) {
-        // open depth map corresponding to current panorama
-        const canvas = document.createElement("canvas");
-        const image = new Image();
+        // find correct pixel position on equilateral projected depth map
+        const halfWidth = window.innerWidth / 2;
+        const halfHeight = window.innerHeight / 2;
 
-        image.addEventListener('load', function() {
-            canvas.getContext("2d").drawImage(this, 0, 0);
-        }, false);
-
-        image.src = this.viewerAPI.baseURL +
-            Math.trunc(this.viewerImageAPI.currentImage.id / 100) + '/' +
-            this.viewerImageAPI.currentImage.id + 'd.png';
+        // horizontal (lonov) : image left -> 0, image right -> 360
+        // vertical (latov) : image top -> 85, image bottom -> -85
+        const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the mouse click is on the screen
+        const verticalOffset = (halfHeight - event.y) / halfHeight; // scaled between [-1,1] depending how up-down the mouse click is on the screen
         
-        const imgData = canvas.getContext("2d").getImageData(0, 0, image.width, image.height);
-        console.log(imgData);
-
+        const adjustedLonov = ((this.viewerViewState.lonov + (horizontalOffset * this.viewerViewState.fov / 2)) + 360) % 360;
+        const adjustedLatov = Math.max(-85, Math.min(85, this.viewerViewState.latov + (verticalOffset * this.viewerViewState.fov / 2)));
         
+        // pixel offsets in depth map at current curser position
+        const offsetX = Math.trunc((adjustedLonov / 360) * this.depthCanvas.width);
+        const offsetY = Math.trunc((adjustedLatov + 90) / 180 * this.depthCanvas.height);
+        
+        // convert pixel value to depth information
+        const imgData = this.depthCanvas.getContext("2d").getImageData(offsetX, offsetY, 1, 1); // get just one pixel (1 x 1)
+        const [red, green, blue, alph] = imgData.data;
+
+        // LSB red -> green -> blue MSB (ignore alpha)
+        const distanceMM = red | (green << 8) | (blue << 16);
+        console.log(distanceMM);
+
+        // convert from millimeter to meter
+        return distanceMM / 1000;
     }
 
 }
