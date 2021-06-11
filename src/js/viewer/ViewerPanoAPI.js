@@ -89,6 +89,8 @@ export class ViewerPanoAPI {
         const y = this.sphereRadius * Math.cos(phi);
         const z = this.sphereRadius * Math.sin(phi) * Math.sin(theta);
     
+        this.normalizedViewingDirection = new THREE.Vector3(x, y, z);
+
         // adjust looking direction for offset of current mesh in scene
         const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
 
@@ -108,6 +110,8 @@ export class ViewerPanoAPI {
 
         document.addEventListener('pointermove', this.oPM);
         document.addEventListener('pointerup', this.oPU);
+
+        this.depthAtPointer(event);
     }
 
     // handles continues update of the distance mouse moved
@@ -176,6 +180,26 @@ export class ViewerPanoAPI {
                 items: this.eventLayer.vwr_oncontext(xy, location),
             });
         }
+    }
+
+    // returns: the depth information of the panorama at the current curser position (event.x, event.y)
+    depthAtPointer(event) {
+        // open depth map corresponding to current panorama
+        const canvas = document.createElement("canvas");
+        const image = new Image();
+
+        image.addEventListener('load', function() {
+            canvas.getContext("2d").drawImage(this, 0, 0);
+        }, false);
+
+        image.src = this.viewerAPI.baseURL +
+            Math.trunc(this.viewerImageAPI.currentImage.id / 100) + '/' +
+            this.viewerImageAPI.currentImage.id + 'd.png';
+        
+        const imgData = canvas.getContext("2d").getImageData(0, 0, image.width, image.height);
+        console.log(imgData);
+
+        
     }
 
 }
