@@ -246,7 +246,7 @@ function newLocationFromPointAngle(lon1, lat1, angle, distance) {
 
 function averagePixelValues(data) {
     const pixels = data.length / 4;
-    const [red, green, blue, alpha] = [0, 0, 0, 0]; // sum of all pixel values
+    let [red, green, blue, alpha] = [0, 0, 0, 0]; // sum of all pixel values
 
     for (let i = 0; i < data.length; i = i + 4) {
         red = red + data[i];
