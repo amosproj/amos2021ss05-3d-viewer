@@ -95,19 +95,12 @@ export class ViewerPanoAPI {
 
     // Set the panorama view characteristics.
     view(lonov, latov, fov) {
-        let phi = THREE.MathUtils.degToRad(90 - latov);
-        let theta = THREE.MathUtils.degToRad(lonov);
-
-        const x = this.sphereRadius * Math.sin(phi) * Math.cos(theta);
-        const y = this.sphereRadius * Math.cos(phi);
-        const z = this.sphereRadius * Math.sin(phi) * Math.sin(theta);
-    
-        this.normalizedViewingDirection = new THREE.Vector3(x, y, z);
+        const normalizedViewingDirection = lonLatToLocal(lonov, latov);
 
         // adjust looking direction for offset of current mesh in scene
         const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
 
-        this.camera.lookAt(x + localCoord.x, y + localCoord.y, z + localCoord.z);
+        this.camera.lookAt(localCoord.add(normalizedViewingDirection));
 
         this.camera.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
 
@@ -124,7 +117,6 @@ export class ViewerPanoAPI {
         document.addEventListener('pointermove', this.oPM);
         document.addEventListener('pointerup', this.oPU);
 
-        this.depthAtPointer(event);
     }
 
     // handles continues update of the distance mouse moved
@@ -153,15 +145,7 @@ export class ViewerPanoAPI {
     }
 
     onDoubleClick(event) {
-        const halfWidth = window.innerWidth / 2;
-        const halfHeight = window.innerHeight / 2;
-
-        const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the mouse click is on the screen
-        const verticalOffset = (event.y - halfHeight) / halfHeight; // scaled between [-1,1] depending how up-down the mouse click is on the screen
-        
-        const adjustedLonov = ((this.viewerViewState.lonov + (horizontalOffset * this.viewerViewState.fov)) + 360) % 360;
-        const adjustedLatov = Math.max(-85, Math.min(85, this.viewerViewState.latov - (verticalOffset * this.viewerViewState.fov / 2)));
-                
+        const [adjustedLonov, adjustedLatov] = this.getAdjustedViewstate(event);
         const MEDIAN_WALKING_DISTANCE = 5; // in meter
         // distance to be walked along adjustedHorizontalAngle from current location
         const distance = MEDIAN_WALKING_DISTANCE + ((adjustedLatov / 85) * MEDIAN_WALKING_DISTANCE);
@@ -197,18 +181,8 @@ export class ViewerPanoAPI {
 
     // returns: the depth information (in meter) of the panorama at the current curser position (event.x, event.y)
     depthAtPointer(event) {
-        // find correct pixel position on equilateral projected depth map
-        const halfWidth = window.innerWidth / 2;
-        const halfHeight = window.innerHeight / 2;
+        const [adjustedLonov, adjustedLatov] = this.getAdjustedViewstate(event);
 
-        // horizontal (lonov) : image left -> 0, image right -> 360
-        // vertical (latov) : image top -> 85, image bottom -> -85
-        const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the mouse click is on the screen
-        const verticalOffset = (halfHeight - event.y) / halfHeight; // scaled between [-1,1] depending how up-down the mouse click is on the screen
-        
-        const adjustedLonov = ((this.viewerViewState.lonov + (horizontalOffset * this.viewerViewState.fov / 2)) + 360) % 360;
-        const adjustedLatov = Math.max(-85, Math.min(85, this.viewerViewState.latov + (verticalOffset * this.viewerViewState.fov / 2)));
-        
         // pixel offsets in depth map at current curser position
         const pixelX = Math.trunc((adjustedLonov / 360) * this.depthCanvas.width);
         const pixelY = Math.trunc((adjustedLatov + 90) / 180 * this.depthCanvas.height);
@@ -222,10 +196,43 @@ export class ViewerPanoAPI {
 
         // LSB red -> green -> blue MSB (ignore alpha)
         const distanceMM = red | (green << 8) | (blue << 16);
-        console.log(distanceMM);
 
         // convert from millimeter to meter
         return distanceMM / 1000;
+    }
+
+    // returns the current location of the cursor in the three js scene (Vector3)
+    getCursorLocation(event) {
+        // param: event.x event.y current cursor position on screen
+        const [adjustedLonov, adjustedLatov] = this.getAdjustedViewstate(event);
+        const normalizedLocalViewingDir = lonLatToLocal(adjustedLonov, adjustedLatov);
+        
+        // adjust looking direction for offset of current mesh in scene
+        const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
+
+        // get distance und extend viewing direction vector by distance
+        const dist = this.depthAtPointer(event);
+
+        localCoord.addScaledVector(normalizedLocalViewingDir, dist)
+
+        return localCoord;
+    }
+
+    // returns [lonov, latov] at the current cursor position
+    getAdjustedViewstate(event) {
+        // find correct pixel position on equilateral projected depth map
+        const halfWidth = window.innerWidth / 2;
+        const halfHeight = window.innerHeight / 2;
+
+        // horizontal (lonov) : image left -> 0, image right -> 360
+        // vertical (latov) : image top -> 85, image bottom -> -85
+        const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the mouse click is on the screen
+        const verticalOffset = (halfHeight - event.y) / halfHeight; // scaled between [-1,1] depending how up-down the mouse click is on the screen
+        
+        const adjustedLonov = ((this.viewerViewState.lonov + (horizontalOffset * this.viewerViewState.fov / 2)) + 360) % 360;
+        const adjustedLatov = Math.max(-85, Math.min(85, this.viewerViewState.latov + (verticalOffset * this.viewerViewState.fov / 2)));
+        
+        return [adjustedLonov, adjustedLatov];
     }
 
 }
@@ -262,4 +269,16 @@ function averagePixelValues(data) {
     alpha = alpha / pixels;
 
     return [red, green, blue, alpha];
+}
+
+// returns a normalized Vector3 pointing in the direction specified by lonov latov
+function lonLatToLocal(lonov, latov) {
+    const phi = THREE.MathUtils.degToRad(90 - latov);
+    const theta = THREE.MathUtils.degToRad(lonov);
+    
+    const x = Math.sin(phi) * Math.cos(theta);
+    const y = Math.cos(phi);
+    const z = Math.sin(phi) * Math.sin(theta);
+
+    return new THREE.Vector3(x, y, z);
 }
