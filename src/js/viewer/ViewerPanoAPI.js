@@ -116,7 +116,8 @@ export class ViewerPanoAPI {
 
         document.addEventListener('pointermove', this.oPM);
         document.addEventListener('pointerup', this.oPU);
-
+        
+        this.visualTest(event);
     }
 
     // handles continues update of the distance mouse moved
@@ -183,9 +184,15 @@ export class ViewerPanoAPI {
     depthAtPointer(event) {
         const [adjustedLonov, adjustedLatov] = this.getAdjustedViewstate(event);
 
+        // because depth map is not rotated by quaternion like panorama mesh, the quaternion adjustment need to happen first
+        const localPos = lonLatToLocal(adjustedLonov, adjustedLatov);
+        const adjustedQuaternion = localPos.applyQuaternion(this.viewerImageAPI.currentImage.orientation);
+        const [realLonov, realLatov] = localToLonLat(adjustedQuaternion);
+        console.log("lonov",adjustedLonov, realLonov);
+        console.log("latov",adjustedLatov, realLatov);
         // pixel offsets in depth map at current curser position
-        const pixelX = Math.trunc((adjustedLonov / 360) * this.depthCanvas.width);
-        const pixelY = Math.trunc((adjustedLatov + 90) / 180 * this.depthCanvas.height);
+        const pixelX = Math.trunc((realLonov / 360) * this.depthCanvas.width);
+        const pixelY = Math.trunc((realLatov + 90) / 180 * this.depthCanvas.height);
         
         const offsetX = (pixelX >= 2) ? pixelX - 2 : 0;
         const offsetY = (pixelY >= 2) ? pixelY - 2 : 0;
@@ -235,6 +242,22 @@ export class ViewerPanoAPI {
         return [adjustedLonov, adjustedLatov];
     }
 
+    visualTest(event) {
+        // visual test, spawn in white sphere at cursor position in scene
+        const direction = this.getCursorLocation(event);
+        const sphere = new THREE.SphereGeometry(1 / this.depthAtPointer(event), 10, 10);
+        const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial());
+        mesh.position.set(direction.x, direction.y, direction.z);
+        
+        if (this.testMesh != null) {
+            this.scene.remove(this.testMesh);
+        }
+
+        this.scene.add(mesh);
+        
+        this.testMesh = mesh;
+    }
+
 }
 
 // takes in a location (in lot/lat), a direction (as a *angle*[rad, in birds eye view), and a distance (in meters) to move in the direction
@@ -281,4 +304,15 @@ function lonLatToLocal(lonov, latov) {
     const z = Math.sin(phi) * Math.sin(theta);
 
     return new THREE.Vector3(x, y, z);
+}
+
+// inverse operation to above
+function localToLonLat(vec) {
+    const phi = Math.acos(vec.y);
+    const theta = Math.atan2(vec.z, vec.x);
+
+    let latov = THREE.MathUtils.radToDeg(phi);
+    const lonov = (THREE.MathUtils.radToDeg(theta) + 360) % 360;
+
+    return [lonov, 90 - latov];
 }
