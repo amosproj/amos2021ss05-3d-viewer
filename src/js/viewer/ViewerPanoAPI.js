@@ -210,12 +210,15 @@ export class ViewerPanoAPI {
         const adjustedLatov = Math.max(-85, Math.min(85, this.viewerViewState.latov + (verticalOffset * this.viewerViewState.fov / 2)));
         
         // pixel offsets in depth map at current curser position
-        const offsetX = Math.trunc((adjustedLonov / 360) * this.depthCanvas.width);
-        const offsetY = Math.trunc((adjustedLatov + 90) / 180 * this.depthCanvas.height);
+        const pixelX = Math.trunc((adjustedLonov / 360) * this.depthCanvas.width);
+        const pixelY = Math.trunc((adjustedLatov + 90) / 180 * this.depthCanvas.height);
         
-        // convert pixel value to depth information
-        const imgData = this.depthCanvas.getContext("2d").getImageData(offsetX, offsetY, 1, 1); // get just one pixel (1 x 1)
-        const [red, green, blue, alph] = imgData.data;
+        const offsetX = (pixelX >= 2) ? pixelX - 2 : 0;
+        const offsetY = (pixelY >= 2) ? pixelY - 2 : 0;
+
+        // convert pixel value to depth information (use 5x5 pixels around cursor)
+        const imgData = this.depthCanvas.getContext("2d").getImageData(offsetX, offsetY, 5, 5);
+        const [red, green, blue, alpha] = averagePixelValues(imgData.data);
 
         // LSB red -> green -> blue MSB (ignore alpha)
         const distanceMM = red | (green << 8) | (blue << 16);
@@ -239,4 +242,24 @@ function newLocationFromPointAngle(lon1, lat1, angle, distance) {
     lat2 = lat1 - (dy / 111.3);
 
     return [lon2, lat2];
+}
+
+function averagePixelValues(data) {
+    const pixels = data.length / 4;
+    const [red, green, blue, alpha] = [0, 0, 0, 0]; // sum of all pixel values
+
+    for (let i = 0; i < data.length; i = i + 4) {
+        red = red + data[i];
+        green = green + data[i + 1];
+        blue = blue + data[i + 2];
+        alpha = alpha + data[i + 3];
+    }
+
+    // get average by dividing
+    red = red / pixels;
+    green = green / pixels;
+    blue = blue / pixels;
+    alpha = alpha / pixels;
+
+    return [red, green, blue, alpha];
 }
