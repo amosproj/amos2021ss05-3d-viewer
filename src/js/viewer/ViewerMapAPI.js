@@ -215,8 +215,9 @@ export class ViewerMapAPI {
         // show current floor black points
         var currentVectorLayer = this.vectorLayer[floorIndex]
         this.map.addLayer(currentVectorLayer);
-    
-            //adding red points, using this. for show_direction
+        console.log("VIEWER STRUCURE", this.viewerImageAPI.currentImage);
+        //adding red points, using this. for show_direction
+        this.viewerAPI.pos 
         this.redlon = 87000 * (this.viewerImageAPI.currentImage.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
         this.redlan = 111000 * (this.viewerImageAPI.currentImage.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
 
@@ -257,39 +258,46 @@ export class ViewerMapAPI {
         var lonov = this.viewerViewState.lonov;
 
         // temporary using 170 degree for correcting the starting zero degree of 2D map
-        var direction = (- lonov - 170)* (Math.PI / 180);
-        if (this.init != true) {
-            // remove prvious vector layers 
-            this.removeLayer(this.lastVectorLayerRed);
-            this.removeLayer(this.lastLayerDirection);
-            this.map.removeLayer(this.viewingDirectionLayer); 
-        }
+        var direction = -(lonov +180 )* (Math.PI / 180);
 
-    
-        // remove previoous direction layers
-        this.map.removeLayer(this.lastLayerDirection);
+        // remove prvious vector layers 
+        this.removeLayer(this.lastVectorLayerRed);
+        this.removeLayer(this.lastLayerDirection);
+        this.map.removeLayer(this.viewingDirectionLayer); 
 
         // get direction triangle vertex
-        var FOV = this.viewerViewState.fov/2 * (Math.PI / 180)
-        //var angle = direction + FOV; 
-
+        var FOV = this.viewerViewState.fov/2 * (Math.PI / 180); 
         var RADIUS = this.viewerViewState.fov / MAX_FOV *5;
 
+        //var angle = direction + FOV; 
         var pointsFOV = [ [this.redlon, this.redlan],
                           [this.redlon + RADIUS*Math.cos((direction + FOV) ), this.redlan + RADIUS*Math.sin((direction + FOV))],  //left  vertex point 
                           [this.redlon + RADIUS*Math.cos((direction - FOV) ), this.redlan + RADIUS*Math.sin((direction - FOV))],  //right vertex point 
                         ];
                         
         var triangleFeats = [];
-
         for(var i = 0; i < pointsFOV.length; i++){
             let point = new ol.geom.Point(pointsFOV[i]);
             triangleFeats.push(new ol.Feature({ geometry: point}));
         }
 
-        //close the triangle
-        //pointsFOV.push(pointsFOV[0]);
 
+        // Draw Triangle Vertex
+        var vectorLayerTriangleVertex = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                            features: triangleFeats}),
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 1,
+                    fill: new ol.style.Fill({ color: 'red' })
+                })
+            })
+        });
+
+        this.lastLayerDirection = vectorLayerTriangleVertex;
+        this.addLayer( this.lastLayerDirection);
+
+    // Draw Triangle Polygon
         let styleTriangle =  new ol.style.Style({
             stroke: new ol.style.Stroke({
               color: 'rgba(255, 0, 0, 0.4)',
@@ -301,11 +309,9 @@ export class ViewerMapAPI {
           }); 
 
         var polygonDirectionFeature = new ol.Feature({
-            geometry: new ol.geom.Polygon([pointsFOV])//.transform('EPSG:4326','EPSG:4326'),  
+            geometry: new ol.geom.Polygon([pointsFOV])
             } );
 
-
-        // Draw Triangle Polygon
         var vectorLayerTrianglePolygon = new ol.layer.Vector({
             source: new ol.source.Vector({ features: [polygonDirectionFeature], 
                                             projection: this.map.getView().projection}),
@@ -315,20 +321,6 @@ export class ViewerMapAPI {
         this.viewingDirectionLayer = vectorLayerTrianglePolygon; 
         this.addLayer(this.viewingDirectionLayer);
    
-        // Draw Triangle Vertex
-        var vectorLayerTriangleVertex = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                            features: triangleFeats}),
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 2,
-                    fill: new ol.style.Fill({ color: 'red' })
-                })
-            })
-        });
-
-        this.lastLayerDirection = vectorLayerTriangleVertex;
-        this.addLayer( this.lastLayerDirection);
     }
 
 }
