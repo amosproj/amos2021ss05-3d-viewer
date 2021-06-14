@@ -25,7 +25,11 @@ body {
 #map{
     position: fixed;
     bottom: 1%;
+<<<<<<< Updated upstream
     right: 2%;
+=======
+    right: 3%;
+>>>>>>> Stashed changes
     width: 20%;
     height:20%;
     color: #fff;
@@ -40,4 +44,10 @@ body {
     bottom:2%;
     right: 2%;
     color: #fff;
+<<<<<<< Updated upstream
 }
+=======
+}
+
+
+>>>>>>> Stashed changes

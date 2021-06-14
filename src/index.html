@@ -1,70 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>360 Pano Image Viewer</title>
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css" />
+
+    <script src="libs/three.min.js"></script>
+    <script src="libs/jQuery.min.js"></script>
+    <script src="libs/ol.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css" />
+    <script src="libs/contextMenu.min.js"></script>
+
+    <!-- Initializing the Viewer with the onload function in the URL -->
+    <script type="module" defer>
+        import { ViewerWindow } from './js/viewer/ViewerWindow.js'
+
+        const getUrlParameter = function getUrlParameter(sParam) {
+            let sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName
+
+            for (let i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=')
+
+                if (
+                    sParameterName[0].toUpperCase() === sParam.toUpperCase()
+                ) {
+                    return typeof sParameterName[1] === undefined
+                        ? true
+                        : decodeURIComponent(sParameterName[1])
+                }
+            }
+
+            return false
+        }
+
+        const onLoadStr = getUrlParameter('onLoad')
+        const parts = decodeURIComponent(onLoadStr).split('.')
+
+        let onLoadFunc = window.parent
+        for (let i = 0; i < parts.length; i++) {
+            try {
+                onLoadFunc = onLoadFunc[parts[i]]
+            } catch (e) {
+                onLoadFunc = null
+            }
+        }
+
+        if ('function' === typeof onLoadFunc) {
+            onLoadFunc(window, ViewerWindow.viewerAsync)
+        }
+    </script>
+
 </head>
-    <body>
-        <script src="libs/three.min.js"></script>
-        <script src="libs/jQuery.min.js"></script>
-        <script src="libs/ol.js"></script>
-        
-        <script type="module">
-            import { ViewerWindow } from "./js/viewer/ViewerWindow.js";
 
-            const getUrlParameter = function getUrlParameter(sParam) {
-                let sPageURL = window.location.search.substring(1),
-                    sURLVariables = sPageURL.split('&'),
-                    sParameterName;
+<body>
+    <div id="pano-viewer"></div>
 
-                for (let i = 0; i < sURLVariables.length; i++) {
-                    sParameterName = sURLVariables[i].split('=');
-
-                    if (sParameterName[0].toUpperCase() === sParam.toUpperCase()) {
-                        return typeof sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
-                    }
-                }
-
-                return false;
-            };
-            
-            const onLoadStr = getUrlParameter("onLoad");
-            const parts = decodeURIComponent(onLoadStr).split('.');
-            
-            let onLoadFunc = window.parent;
-            for (let i = 0; i < parts.length; i++) {
-                try {
-                    onLoadFunc = onLoadFunc[parts[i]];
-                }
-                catch (e) {
-                    onLoadFunc = null;
-                }
-            }
-
-            if ('function' === typeof(onLoadFunc)) {
-                onLoadFunc(window, ViewerWindow.viewerAsync);
-            }
-        </script>
-
-        <div id="pano-viewer">
-            <div id="map" class="map"></div>
-
-            <div class = "control-OL" id="floorOL">
-                <div id="cfOL"></div>
-                <select name="dropdown-OL" id="dropdown-floors-OL" ></select>
-                <button id="buttonUpOL" class="code">Floor Up</button>
-                <button id="buttonDownOL" class="code">Floor Down</button>
-            </div>
-
-            <div  id="mouse-position" class="mouse-position-wrapper">
-                <div class="custom-mouse-position"></div>
-            </div>
-
-            <div  id="mouse-position-testmap" class="mouse-position-wrapper-testmap">
-                <div class="custom-mouse-position-testmap"></div>
-            </div>
-            
+    <div id="map" class="map">
+        <div class="control-OL" id="floorOL">
+            <div id="cfOL"></div>
+            <select name="dropdown-OL" id="dropdown-floors-OL"></select>
+            <button id="buttonUpOL" class="code">Floor Up</button>
+            <button id="buttonDownOL" class="code">Floor Down</button>
         </div>
-    </body>
+    </div>
+</body>
+
 </html>
