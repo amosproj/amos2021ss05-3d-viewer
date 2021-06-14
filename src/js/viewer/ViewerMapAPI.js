@@ -1,5 +1,6 @@
 "use strict";
 
+import {  MAX_FOV, MIN_FOV } from "./ViewerConfig.js";
 // Map (2D) Viewer API
 
 // Specific API for the Map View
@@ -42,7 +43,7 @@ export class ViewerMapAPI {
 
         // direction
         this.lastvectorLayerdes = [];
-        this.lastvectorLayerLeftRight = [];
+        this.lastLayerDirection = [];
 
         this.redraw();
         this.init = false;
@@ -68,47 +69,40 @@ export class ViewerMapAPI {
         return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
 
-
     initDisplayMap() {
 
         let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
 
         // create map 
-        this.map = new ol.Map({  //new ol.control.OverviewMap({
+        this.map = new ol.Map({ 
             target: 'map',
             view: new ol.View({
                 projection: new ol.proj.Projection({
                     extent: extent
                 }),
-                center: new ol.extent.getCenter(extent),
+                center: new ol.extent.getCenter(extent), // TODO: update center to current position
                 zoom: 1,
                 maxZoom: 4,
             }),
-            // controls: controls,
             controls: ol.control.defaults({
-                rotate: false // hide rotation button
+                // Hide Map rotation button
+                rotate: false                   
             }).extend([
-                new ol.control.FullScreen(), // create fullScreen button
-                new ol.control.ZoomSlider(),
-                // new ol.control.MousePosition({
-                //     coordinateFormat: ol.coordinate.createStringXY(4),
-                //     projection: new ol.proj.Projection({ 
-                //         extent: extent
-                //      }),
-                //     className: 'custom-mouse-position-testmap',
-                //     target: document.getElementById('mouse-position-testmap')
-                // })
+                // create fullScreen button
+                new ol.control.FullScreen(),    
+                //new ol.control.ZoomSlider(),
             ]),
-            interactions: ol.interaction.defaults({mouseWheelZoom:false}),
+            //Disable Zoom Control on MAP
+            interactions: ol.interaction.defaults({mouseWheelZoom:false}),         
         });
-        //Disable Zoom Control
 
-        // COMPUTE MAPMEATADATA
-        // converting map pixel to lon, lan
+
+        // TODO CLEAN MAP MEATADATA
+        
         // calculate map origin in lon,lan
         var current_MapData0 = this.viewerFloorAPI.floors[0].mapData;
-
+        // converting map pixel to lon, lan
         var mapdata_X_in_meter0 = (current_MapData0.x / current_MapData0.density);
         var mapdata_X_in_lon0 = mapdata_X_in_meter0 / 87000; // temporary a degree of longitude, one degree east or west at lan -37.80299558787142 degree => 87000m
         var mapdata_origin_lon0 = this.viewerFloorAPI.origin[0] - mapdata_X_in_lon0;
@@ -135,6 +129,7 @@ export class ViewerMapAPI {
         this.mapdata_center_lon1 = mapdata_origin_lon1 + (1 / 2) * (current_MapData1.width / current_MapData1.density);
         this.mapdata_center_lan1 = mapdata_origin_lan1 + (1 / 2) * (current_MapData1.height / current_MapData1.density);
 
+
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
             let mapData = this.viewerFloorAPI.floors[i].mapData
@@ -142,7 +137,7 @@ export class ViewerMapAPI {
                 source: new ol.source.ImageStatic({
                     //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
                     url: this.baseURL + mapData.name + ".png",
-                    imageExtent: extent,
+                    imageExtent: [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
                 })
             }))
         }
@@ -152,29 +147,14 @@ export class ViewerMapAPI {
         // create vector layers for each floors
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
             let allImages = this.viewerFloorAPI.floors[i].viewerImages;
-            //console.log("allImages: " + allImages);
             var currentMapdata = this.viewerFloorAPI.floors[i].mapData;
 
-            //Modification of the Map data for the 4th floor
-            if (i === 1) {
-                currentMapdata.x = currentMapdata.x - 200;
-                currentMapdata.y = currentMapdata.y - 70;
-                currentMapdata.density = currentMapdata.density;
-            }
             var features = [];
-
+            // TODO retrieve information from stored data 
             allImages.forEach(image => {
-                //if its in the 4th floor,add some offset:
-                if (i === 1) {
-                    var lon = 67000 * (image.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
-                    var lan = 107000 * (image.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
-                }
-                else {
-                    // add all black points to feature layer 
-                    var lon = 87000 * (image.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
-                    var lan = 111000 * (image.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
-
-                }
+                // Get Longitude and latitude from each point
+                var lon = 87000 * (image.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
+                var lan = 111000 * (image.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
 
                 var current_feature = new ol.Feature({
                     geometry: new ol.geom.Point([lon, lan]),
@@ -191,7 +171,7 @@ export class ViewerMapAPI {
                 source: vectorSource,
                 style: new ol.style.Style({
                     image: new ol.style.Circle({
-                        radius: 2,
+                        radius: 1,
                         fill: new ol.style.Fill({ color: 'black' })
                     })
                 })
@@ -217,13 +197,14 @@ export class ViewerMapAPI {
 
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
-        console.log("call redraw")
+
 
         if (this.init != true) {
-            // // remove prvious vector layers 
-            //this.map.removeLayer(this.lastVectorLayerRed);
+            // remove prvious vector layers 
+            this.map.removeLayer(this.lastVectorLayerRed);
             this.map.removeLayer(this.lastVectorLayer);
         }
+
 
         // show layer map
         this.updateDisplayMap(this.viewerFloorAPI.currentFloorId);
@@ -234,20 +215,10 @@ export class ViewerMapAPI {
         // show current floor black points
         var currentVectorLayer = this.vectorLayer[floorIndex]
         this.map.addLayer(currentVectorLayer);
-
-        if (floorIndex === 1) {
-
-            //add some offset if it is on 4th floor:
-            this.redlon = 67000 * (this.viewerImageAPI.currentImage.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
-            this.redlan = 107000 * (this.viewerImageAPI.currentImage.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
-
-        }
-        else {
+    
             //adding red points, using this. for show_direction
-            this.redlon = 87000 * (this.viewerImageAPI.currentImage.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
-            this.redlan = 111000 * (this.viewerImageAPI.currentImage.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
-
-        }
+        this.redlon = 87000 * (this.viewerImageAPI.currentImage.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
+        this.redlan = 111000 * (this.viewerImageAPI.currentImage.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
 
         var redFeature = new ol.Feature({
             geometry: new ol.geom.Point([this.redlon, this.redlan]),
@@ -282,93 +253,97 @@ export class ViewerMapAPI {
 
     show_direction() {
 
-        // get direction ( degree= 
+        // get viewing longitude direction (in degrees)
         var lonov = this.viewerViewState.lonov;
 
         // temporary using 170 degree for correcting the starting zero degree of 2D map
-        var correct_direction = 170; // degree 
-        var direction = - lonov - correct_direction;
-
+        var direction = (- lonov - 170)* (Math.PI / 180);
         if (this.init != true) {
-            //this.map.removeLayer(this.lastvectorLayerdes);
-            this.map.removeLayer(this.lastvectorLayerLeftRight);
+            // // remove prvious vector layers 
+            this.map.removeLayer(this.lastVectorLayerRed);
+            this.map.removeLayer(this.lastLayerDirection);
         }
 
-        // x coordinate of destination point : add cos(to radians)
-        var redlondes = this.redlon + Math.cos(direction * (Math.PI / 180))
-        // y coordinate of destination point : add sin(to radians)
-        var redlandes = this.redlan + Math.sin(direction * (Math.PI / 180))
+    
+        // remove previoous direction layers
+        this.map.removeLayer(this.lastLayerDirection);
 
-        // draw a point of current direction destination
-        var desFeature = new ol.Feature({
-            geometry: new ol.geom.Point([redlondes, redlandes]),
-        });
+        // get direction triangle vertex
+        var FOV = this.viewerViewState.fov/2 * (Math.PI / 180)
+        //var angle = direction + FOV; 
 
+        var RADIUS = this.viewerViewState.fov / MAX_FOV *5;
+        console.log(RADIUS);
 
-        /* MIDDLE point Direction
-        var vectorSourcedes = new ol.source.Vector({
-            features: [desFeature]
-        });
+        var pointsFOV = [ [this.redlon, this.redlan],
+                          [this.redlon + RADIUS*Math.cos((direction + FOV) ), this.redlan + RADIUS*Math.sin((direction + FOV))],  //left  vertex point 
+                          [this.redlon + RADIUS*Math.cos((direction - FOV) ), this.redlan + RADIUS*Math.sin((direction - FOV))],  //right vertex point 
+                        ];
+                        
+        var triangleFeats = [];
 
-        var vectorLayerdes = new ol.layer.Vector({
-            source: vectorSourcedes,
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 1,
-                    fill: new ol.style.Fill({ color: 'orange' })
-                })
-            })
-        });
+        for(var i = 0; i < pointsFOV.length; i++){
+            let point = new ol.geom.Point(pointsFOV[i]);
+            pointsFOV[i] = point;
+            triangleFeats.push(new ol.Feature({ geometry: point}));
+        }
+        //close the triangle
+        pointsFOV.push(pointsFOV[0]);
+        console.log("TRIANGLE POINS: ",triangleFeats);
+        //let linearTriangle = new ol.geom.LinearRing({coordinates : pointsFOV, layout: 'XY'} );
+        //Declare a new array
 
-        this.map.addLayer(vectorLayerdes);*/
-
-        // draw triangle        var FOV = this.viewerViewState.fov/2; 
-        var FOV = this.viewerViewState.fov/2; 
-        var pointsFOV = [];
-        //pointsFOV.push()
-        var left_redlondes = this.redlon + Math.cos((direction + FOV) * (Math.PI / 180))
-        var left_redlandes = this.redlan + Math.sin((direction + FOV) * (Math.PI / 180))
-        var right_redlondes = this.redlon + Math.cos((direction - FOV) * (Math.PI / 180))
-        var right_redlandes = this.redlan + Math.sin((direction - FOV) * (Math.PI / 180))
-
+        var coordinatesPolygon = new Array();
+        console.log(triangleFeats[0].getGeometry().getCoordinates()); 
+        //coordinatesPolygon.push(triangleFeats.getGeometry().getCoordinates());
         
-        var triangleFeatures =  new ol.Feature({
-                geometry: new ol.geom.LineString([ new ol.geom.Point([this.redlon, this.redlan]), new ol.geom.Point([left_redlondes, left_redlandes]) ]),
-                style : new ol.style.Style({   stroke : new ol.style.Stroke({color : "red", width: 3 }) }),
-        });
+        //Cycle traversal transfers longitude and latitude to the projection coordinate system of "EPSG:4326"
+        for (var i = 0; i < triangleFeats.length; i++) {
+               var pointTransform = ol.proj.fromLonLat(triangleFeats[i].getGeometry().getCoordinates());
+               //var pointTransform = pointsFOV[i].getCoordinates();
+               coordinatesPolygon.push(triangleFeats[0].getGeometry().getCoordinates());
+            }
+          
+        
+        console.log("TRIANGLE COORDS: ", coordinatesPolygon);
+        let styleTriangle =  new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: 'red',
+              width: 3
+            }),
+            fill: new ol.style.Fill({
+              color: 'rgba(255, 0, 0, 0.5)'
+            })
+          }); 
+
+        var triangleFeatures = new ol.Feature({
+            geometry: new ol.geom.Polygon([coordinatesPolygon]), 
+            style : styleTriangle,
+        }); 
         
         var vectorTriangleDirection = new ol.layer.Vector({ 
-            features: [triangleFeatures],
+            features:  triangleFeatures,
+            //style: styleTriangle,
         });
 
         this.map.addLayer(vectorTriangleDirection);
-        
-        var leftFeature = new ol.Feature({
-            geometry: new ol.geom.Point([left_redlondes, left_redlandes]),
-        });
+   
 
-        var rightFeature = new ol.Feature({
-            geometry: new ol.geom.Point([right_redlondes, right_redlandes]),
-        });
-
-        var vectorSourceLeftRight = new ol.source.Vector({
-            features: [leftFeature, rightFeature]
-        });
-
-        var vectorLayerLeftRight = new ol.layer.Vector({
-            source: vectorSourceLeftRight,
+        // Draw Triangle Vertex
+        var vectorLayerTriangleVertex = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                            features: triangleFeats}),
             style: new ol.style.Style({
                 image: new ol.style.Circle({
                     radius: 2,
-                    fill: new ol.style.Fill({ color: 'orange' })
+                    fill: new ol.style.Fill({ color: 'red' })
                 })
             })
         });
 
-        this.map.addLayer(vectorLayerLeftRight);
-
-        //this.lastvectorLayerdes = vectorLayerdes;
-        this.lastvectorLayerLeftRight = vectorLayerLeftRight;
+        this.lastLayerDirection = vectorLayerTriangleVertex;
+        this.map.addLayer( this.lastLayerDirection);
     }
 
 }
+
