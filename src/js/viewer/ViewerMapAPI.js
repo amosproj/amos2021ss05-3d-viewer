@@ -260,8 +260,9 @@ export class ViewerMapAPI {
         var direction = (- lonov - 170)* (Math.PI / 180);
         if (this.init != true) {
             // // remove prvious vector layers 
-            this.map.removeLayer(this.lastVectorLayerRed);
-            this.map.removeLayer(this.lastLayerDirection);
+            this.removeLayer(this.lastVectorLayerRed);
+            this.removeLayer(this.lastLayerDirection);
+            this.removeLayer(this.viewingDirevyionLayer); 
         }
 
     
@@ -273,7 +274,7 @@ export class ViewerMapAPI {
         //var angle = direction + FOV; 
 
         var RADIUS = this.viewerViewState.fov / MAX_FOV *5;
-        console.log(RADIUS);
+
 
         var pointsFOV = [ [this.redlon, this.redlan],
                           [this.redlon + RADIUS*Math.cos((direction + FOV) ), this.redlan + RADIUS*Math.sin((direction + FOV))],  //left  vertex point 
@@ -284,49 +285,60 @@ export class ViewerMapAPI {
 
         for(var i = 0; i < pointsFOV.length; i++){
             let point = new ol.geom.Point(pointsFOV[i]);
-            pointsFOV[i] = point;
             triangleFeats.push(new ol.Feature({ geometry: point}));
         }
-        //close the triangle
-        pointsFOV.push(pointsFOV[0]);
-        console.log("TRIANGLE POINS: ",triangleFeats);
-        //let linearTriangle = new ol.geom.LinearRing({coordinates : pointsFOV, layout: 'XY'} );
-        //Declare a new array
 
-        var coordinatesPolygon = new Array();
-        console.log(triangleFeats[0].getGeometry().getCoordinates()); 
-        //coordinatesPolygon.push(triangleFeats.getGeometry().getCoordinates());
-        
-        //Cycle traversal transfers longitude and latitude to the projection coordinate system of "EPSG:4326"
-        for (var i = 0; i < triangleFeats.length; i++) {
-               var pointTransform = ol.proj.fromLonLat(triangleFeats[i].getGeometry().getCoordinates());
-               //var pointTransform = pointsFOV[i].getCoordinates();
-               coordinatesPolygon.push(triangleFeats[0].getGeometry().getCoordinates());
-            }
-          
-        
-        console.log("TRIANGLE COORDS: ", coordinatesPolygon);
+        //close the triangle
+        //pointsFOV.push(pointsFOV[0]);
+
+        let coordinates = [[this.redlon, this.redlan],
+                            [this.redlon + RADIUS*Math.cos((direction + FOV) ), this.redlan + RADIUS*Math.sin((direction + FOV))],  //left  vertex point 
+                            [this.redlon + RADIUS*Math.cos((direction - FOV) ), this.redlan + RADIUS*Math.sin((direction - FOV))],  //right vertex point 
+                            ];
+
         let styleTriangle =  new ol.style.Style({
             stroke: new ol.style.Stroke({
-              color: 'red',
-              width: 3
+              color: 'rgba(255, 0, 0, 0.4)',
+              width: 2
             }),
             fill: new ol.style.Fill({
-              color: 'rgba(255, 0, 0, 0.5)'
+              color: 'rgba(255, 0, 0, 0.2)'
             })
           }); 
 
-        var triangleFeatures = new ol.Feature({
-            geometry: new ol.geom.Polygon([coordinatesPolygon]), 
-            style : styleTriangle,
-        }); 
-        
-        var vectorTriangleDirection = new ol.layer.Vector({ 
-            features:  triangleFeatures,
-            //style: styleTriangle,
-        });
+        var polygonDirectionFeature = new ol.Feature({
+            geometry: new ol.geom.Polygon([pointsFOV])//.transform('EPSG:4326','EPSG:4326'),  
+            } );
 
-        this.map.addLayer(vectorTriangleDirection);
+
+
+        // Draw Triangle Vertex
+        var vectorLayerTriangleVertex = new ol.layer.Vector({
+            source: new ol.source.Vector({ features: [polygonDirectionFeature], 
+                                            projection: this.map.getView().projection}),
+            style: styleTriangle, 
+        });
+        this.viewingDirevyionLayer = vectorLayerTriangleVertex; 
+        this.map.addLayer(vectorLayerTriangleVertex);
+        /* Draw Triangle Vertex
+        vectorTriangleDirection = new ol.layer.Vector({
+            source: new ol.source.Vector({ features:
+                 new ol.Feature({ geometry: new ol.geom.Point(pointsFOV[0])}) }),
+            style:  new ol.style.Style({
+                image: new ol.style.RegularShape({
+                  fill: fill,
+                  stroke: stroke,
+                  points: 3,
+                  radius: 10,
+                  rotation:direction,
+                  angle: FOV,
+                })
+            })
+    
+        });
+      */
+
+
    
 
         // Draw Triangle Vertex
@@ -341,6 +353,7 @@ export class ViewerMapAPI {
             })
         });
 
+        
         this.lastLayerDirection = vectorLayerTriangleVertex;
         this.map.addLayer( this.lastLayerDirection);
     }
