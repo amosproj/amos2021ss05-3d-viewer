@@ -136,6 +136,7 @@ export class ViewerPanoAPI {
         this.camera.updateProjectionMatrix();
 
         this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
+        this.initMap(this.viewerAPI.map).show_direction();
     }
 
     onDoubleClick(event) {
