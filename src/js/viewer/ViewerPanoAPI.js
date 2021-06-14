@@ -169,8 +169,8 @@ export class ViewerPanoAPI {
             //get the current pointer position:
             const xy = new EventPosition(event);
 
-            //get the viewing direction:
-            const location = this.camera.getWorldDirection();
+            //get the position of pointer in scene:
+            const location = this.getCursorLocation(event);
 
             //Set up the context menu:
             $.contextMenu({
@@ -180,7 +180,7 @@ export class ViewerPanoAPI {
         }
     }
 
-    // returns: the depth information (in meter) of the panorama at the current curser position (event.x, event.y)
+    // returns: the depth information (in meter) of the panorama at the current curser position (event.clientX, event.clientY)
     depthAtPointer(event) {
         const [adjustedLonov, adjustedLatov] = this.getAdjustedViewstate(event);
 
@@ -188,8 +188,7 @@ export class ViewerPanoAPI {
         const localPos = lonLatToLocal(adjustedLonov, adjustedLatov);
         const adjustedQuaternion = localPos.applyQuaternion(this.viewerImageAPI.currentImage.orientation);
         const [realLonov, realLatov] = localToLonLat(adjustedQuaternion);
-        console.log("lonov",adjustedLonov, realLonov);
-        console.log("latov",adjustedLatov, realLatov);
+
         // pixel offsets in depth map at current curser position
         const pixelX = Math.trunc((realLonov / 360) * this.depthCanvas.width);
         const pixelY = Math.trunc((realLatov + 90) / 180 * this.depthCanvas.height);
@@ -233,8 +232,8 @@ export class ViewerPanoAPI {
 
         // horizontal (lonov) : image left -> 0, image right -> 360
         // vertical (latov) : image top -> 85, image bottom -> -85
-        const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the mouse click is on the screen
-        const verticalOffset = (halfHeight - event.y) / halfHeight; // scaled between [-1,1] depending how up-down the mouse click is on the screen
+        const horizontalOffset = (event.clientX - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the mouse click is on the screen
+        const verticalOffset = (halfHeight - event.clientY) / halfHeight; // scaled between [-1,1] depending how up-down the mouse click is on the screen
         
         const adjustedLonov = ((this.viewerViewState.lonov + (horizontalOffset * this.viewerViewState.fov / 2)) + 360) % 360;
         const adjustedLatov = Math.max(-85, Math.min(85, this.viewerViewState.latov + (verticalOffset * this.viewerViewState.fov / 2)));
