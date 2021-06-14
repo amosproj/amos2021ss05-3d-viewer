@@ -259,10 +259,10 @@ export class ViewerMapAPI {
         // temporary using 170 degree for correcting the starting zero degree of 2D map
         var direction = (- lonov - 170)* (Math.PI / 180);
         if (this.init != true) {
-            // // remove prvious vector layers 
+            // remove prvious vector layers 
             this.removeLayer(this.lastVectorLayerRed);
             this.removeLayer(this.lastLayerDirection);
-            this.removeLayer(this.viewingDirevyionLayer); 
+            this.map.removeLayer(this.viewingDirectionLayer); 
         }
 
     
