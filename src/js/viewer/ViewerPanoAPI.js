@@ -196,8 +196,14 @@ export class ViewerPanoAPI {
         const offsetX = (pixelX >= 2) ? pixelX - 2 : 0;
         const offsetY = (pixelY >= 2) ? pixelY - 2 : 0;
 
-        // convert pixel value to depth information (use 5x5 pixels around cursor)
-        const imgData = this.depthCanvas.getContext("2d").getImageData(offsetX, offsetY, 5, 5);
+        // convert pixel value to depth information 
+        const use5pixelAvg = false;
+        let imgData;
+        if (use5pixelAvg) {
+            imgData = this.depthCanvas.getContext("2d").getImageData(offsetX, offsetY, 5, 5);
+        } else {
+            imgData = this.depthCanvas.getContext("2d").getImageData(pixelX, pixelY, 1, 1);
+        }
         const [red, green, blue, alpha] = averagePixelValues(imgData.data);
 
         // LSB red -> green -> blue MSB (ignore alpha)
@@ -260,7 +266,7 @@ export class ViewerPanoAPI {
 }
 
 // takes in a location (in lot/lat), a direction (as a *angle*[rad, in birds eye view), and a distance (in meters) to move in the direction
-function newLocationFromPointAngle(lon1, lat1, angle, distance) {
+const newLocationFromPointAngle = (lon1, lat1, angle, distance) => {
     // angle: +-0 -> west, +pi/2 -> south, +-pi -> east, -pi/2 -> north
     let lon2, lat2;
 
@@ -273,7 +279,7 @@ function newLocationFromPointAngle(lon1, lat1, angle, distance) {
     return [lon2, lat2];
 }
 
-function averagePixelValues(data) {
+const averagePixelValues = (data) => {
     const pixels = data.length / 4;
     let [red, green, blue, alpha] = [0, 0, 0, 0]; // sum of all pixel values
 
@@ -294,7 +300,7 @@ function averagePixelValues(data) {
 }
 
 // returns a normalized Vector3 pointing in the direction specified by lonov latov
-function lonLatToLocal(lonov, latov) {
+const lonLatToLocal = (lonov, latov) => {
     const phi = THREE.MathUtils.degToRad(90 - latov);
     const theta = THREE.MathUtils.degToRad(lonov);
     
@@ -306,7 +312,7 @@ function lonLatToLocal(lonov, latov) {
 }
 
 // inverse operation to above
-function localToLonLat(vec) {
+const localToLonLat = (vec) => {
     const phi = Math.acos(vec.y);
     const theta = Math.atan2(vec.z, vec.x);
 
