@@ -275,7 +275,6 @@ export class ViewerMapAPI {
 
         var RADIUS = this.viewerViewState.fov / MAX_FOV *5;
 
-
         var pointsFOV = [ [this.redlon, this.redlan],
                           [this.redlon + RADIUS*Math.cos((direction + FOV) ), this.redlan + RADIUS*Math.sin((direction + FOV))],  //left  vertex point 
                           [this.redlon + RADIUS*Math.cos((direction - FOV) ), this.redlan + RADIUS*Math.sin((direction - FOV))],  //right vertex point 
@@ -290,11 +289,6 @@ export class ViewerMapAPI {
 
         //close the triangle
         //pointsFOV.push(pointsFOV[0]);
-
-        let coordinates = [[this.redlon, this.redlan],
-                            [this.redlon + RADIUS*Math.cos((direction + FOV) ), this.redlan + RADIUS*Math.sin((direction + FOV))],  //left  vertex point 
-                            [this.redlon + RADIUS*Math.cos((direction - FOV) ), this.redlan + RADIUS*Math.sin((direction - FOV))],  //right vertex point 
-                            ];
 
         let styleTriangle =  new ol.style.Style({
             stroke: new ol.style.Stroke({
@@ -311,36 +305,16 @@ export class ViewerMapAPI {
             } );
 
 
-
-        // Draw Triangle Vertex
-        var vectorLayerTriangleVertex = new ol.layer.Vector({
+        // Draw Triangle Polygon
+        var vectorLayerTrianglePolygon = new ol.layer.Vector({
             source: new ol.source.Vector({ features: [polygonDirectionFeature], 
                                             projection: this.map.getView().projection}),
             style: styleTriangle, 
         });
-        this.viewingDirevyionLayer = vectorLayerTriangleVertex; 
-        this.map.addLayer(vectorLayerTriangleVertex);
-        /* Draw Triangle Vertex
-        vectorTriangleDirection = new ol.layer.Vector({
-            source: new ol.source.Vector({ features:
-                 new ol.Feature({ geometry: new ol.geom.Point(pointsFOV[0])}) }),
-            style:  new ol.style.Style({
-                image: new ol.style.RegularShape({
-                  fill: fill,
-                  stroke: stroke,
-                  points: 3,
-                  radius: 10,
-                  rotation:direction,
-                  angle: FOV,
-                })
-            })
-    
-        });
-      */
 
-
+        this.viewingDirectionLayer = vectorLayerTrianglePolygon; 
+        this.addLayer(this.viewingDirectionLayer);
    
-
         // Draw Triangle Vertex
         var vectorLayerTriangleVertex = new ol.layer.Vector({
             source: new ol.source.Vector({
@@ -353,9 +327,8 @@ export class ViewerMapAPI {
             })
         });
 
-        
         this.lastLayerDirection = vectorLayerTriangleVertex;
-        this.map.addLayer( this.lastLayerDirection);
+        this.addLayer( this.lastLayerDirection);
     }
 
 }
