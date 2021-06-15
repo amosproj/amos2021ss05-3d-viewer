@@ -1,6 +1,6 @@
 "use strict";
 
-import { MAX_FOV, MIN_FOV } from "./ViewerConfig.js";
+import { MAX_FOV } from "./ViewerConfig.js";
 // Map (2D) Viewer API
 
 // Specific API for the Map View
