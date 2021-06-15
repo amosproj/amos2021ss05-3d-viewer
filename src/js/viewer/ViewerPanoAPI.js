@@ -28,9 +28,9 @@ export class ViewerPanoAPI {
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
 
-        document.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
-        document.addEventListener('pointerdown', (event) => this.onPointerDown(event));
-        document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+        this.panoViewer.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
+        this.panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
+        this.panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
         $('#pano-viewer').mousedown((event) => this.onRightClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
