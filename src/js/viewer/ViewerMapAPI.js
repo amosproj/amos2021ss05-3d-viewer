@@ -1,6 +1,6 @@
 "use strict";
 
-import {  MAX_FOV, MIN_FOV } from "./ViewerConfig.js";
+import { MAX_FOV, MIN_FOV } from "./ViewerConfig.js";
 // Map (2D) Viewer API
 
 // Specific API for the Map View
@@ -38,18 +38,11 @@ export class ViewerMapAPI {
 
         // avoid duplicating
         this.lastVectorLayer;
-        this.lastFloorID = 0;
-        this.viewerAPI = viewerAPI;
 
         // direction
-        this.lastvectorLayerdes = [];
         this.lastLayerDirection = [];
 
         this.redraw();
-        this.init = false;
-
-
-
     }
 
     // Method: Add an event layer to the map (2D) view.
@@ -75,7 +68,7 @@ export class ViewerMapAPI {
         var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
 
         // create map 
-        this.map = new ol.Map({ 
+        this.map = new ol.Map({
             target: 'map',
             view: new ol.View({
                 projection: new ol.proj.Projection({
@@ -87,48 +80,15 @@ export class ViewerMapAPI {
             }),
             controls: ol.control.defaults({
                 // Hide Map rotation button
-                rotate: false                   
+                rotate: false
             }).extend([
                 // create fullScreen button
-                new ol.control.FullScreen(),    
+                new ol.control.FullScreen(),
                 //new ol.control.ZoomSlider(),
             ]),
             //Disable Zoom Control on MAP
-            interactions: ol.interaction.defaults({mouseWheelZoom:false}),         
+            interactions: ol.interaction.defaults({ mouseWheelZoom: false }),
         });
-
-
-        // TODO CLEAN MAP MEATADATA
-        
-        // calculate map origin in lon,lan
-        var current_MapData0 = this.viewerFloorAPI.floors[0].mapData;
-        // converting map pixel to lon, lan
-        var mapdata_X_in_meter0 = (current_MapData0.x / current_MapData0.density);
-        var mapdata_X_in_lon0 = mapdata_X_in_meter0 / 87000; // temporary a degree of longitude, one degree east or west at lan -37.80299558787142 degree => 87000m
-        var mapdata_origin_lon0 = this.viewerFloorAPI.origin[0] - mapdata_X_in_lon0;
-
-        var mapdata_Y_in_meter0 = (current_MapData0.y / current_MapData0.density);
-        var mapdata_Y_in_lan0 = mapdata_Y_in_meter0 / 111000; // temporary a degree of latitude, one degree north or south, is about the same distance anywhere, about 111000m
-        var mapdata_origin_lan0 = this.viewerFloorAPI.origin[1] - mapdata_Y_in_lan0;
-
-        // calculate map center in lon,lan
-        this.mapdata_center_lon0 = mapdata_origin_lon0 + (1 / 2) * (current_MapData0.width / current_MapData0.density);
-        this.mapdata_center_lan0 = mapdata_origin_lan0 + (1 / 2) * (current_MapData0.height / current_MapData0.density);
-
-        var current_MapData1 = this.viewerFloorAPI.floors[1].mapData;
-
-        var mapdata_X_in_meter1 = (current_MapData1.x / current_MapData1.density);
-        var mapdata_X_in_lon1 = mapdata_X_in_meter1 / 87000; // temporary a degree of longitude, one degree east or west at lan -37.80299558787142 degree => 87000m
-        var mapdata_origin_lon1 = this.viewerFloorAPI.origin[0] - mapdata_X_in_lon1;
-
-        var mapdata_Y_in_meter1 = (current_MapData1.y / current_MapData1.density);
-        var mapdata_Y_in_lan1 = mapdata_Y_in_meter1 / 111000; // temporary a degree of latitude, one degree north or south, is about the same distance anywhere, about 111000m
-        var mapdata_origin_lan1 = this.viewerFloorAPI.origin[1] - mapdata_Y_in_lan1;
-
-        // calculate map center in lon,lan
-        this.mapdata_center_lon1 = mapdata_origin_lon1 + (1 / 2) * (current_MapData1.width / current_MapData1.density);
-        this.mapdata_center_lan1 = mapdata_origin_lan1 + (1 / 2) * (current_MapData1.height / current_MapData1.density);
-
 
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
@@ -217,7 +177,6 @@ export class ViewerMapAPI {
         this.map.addLayer(currentVectorLayer);
         console.log("VIEWER STRUCURE", this.viewerImageAPI.currentImage);
         //adding red points, using this. for show_direction
-        this.viewerAPI.pos 
         this.redlon = 87000 * (this.viewerImageAPI.currentImage.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
         this.redlan = 111000 * (this.viewerImageAPI.currentImage.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
 
@@ -243,7 +202,6 @@ export class ViewerMapAPI {
 
 
         // save last vector layers for deleting next time
-        this.lastFloorID = this.viewerFloorAPI.currentFloorId;
         this.lastVectorLayer = currentVectorLayer;
         this.lastVectorLayerRed = vectorLayerRed;
 
@@ -258,34 +216,35 @@ export class ViewerMapAPI {
         var lonov = this.viewerViewState.lonov;
 
         // temporary using 170 degree for correcting the starting zero degree of 2D map
-        var direction = -(lonov +180 )* (Math.PI / 180)  %360;
+        var direction = -(lonov + 180) * (Math.PI / 180) % 360;
 
         // remove prvious vector layers 
         this.removeLayer(this.lastVectorLayerRed);
         this.removeLayer(this.lastLayerDirection);
-        this.map.removeLayer(this.viewingDirectionLayer); 
+        this.map.removeLayer(this.viewingDirectionLayer);
 
         // get direction triangle vertex
-        var FOV = this.viewerViewState.fov/2 * (Math.PI / 180); 
-        var RADIUS = this.viewerViewState.fov / MAX_FOV *5;
+        var FOV = this.viewerViewState.fov / 2 * (Math.PI / 180);
+        var RADIUS = this.viewerViewState.fov / MAX_FOV * 5;
 
         //var angle = direction + FOV; 
-        var pointsFOV = [ [this.redlon, this.redlan],
-                          [this.redlon + RADIUS*Math.cos((direction + FOV) ), this.redlan + RADIUS*Math.sin((direction + FOV))],  //left  vertex point 
-                          [this.redlon + RADIUS*Math.cos((direction - FOV) ), this.redlan + RADIUS*Math.sin((direction - FOV))],  //right vertex point 
-                        ];
-                        
+        var pointsFOV = [[this.redlon, this.redlan],
+        [this.redlon + RADIUS * Math.cos((direction + FOV)), this.redlan + RADIUS * Math.sin((direction + FOV))],  //left  vertex point 
+        [this.redlon + RADIUS * Math.cos((direction - FOV)), this.redlan + RADIUS * Math.sin((direction - FOV))],  //right vertex point 
+        ];
+
         var triangleFeats = [];
-        for(var i = 0; i < pointsFOV.length; i++){
+        for (var i = 0; i < pointsFOV.length; i++) {
             let point = new ol.geom.Point(pointsFOV[i]);
-            triangleFeats.push(new ol.Feature({ geometry: point}));
+            triangleFeats.push(new ol.Feature({ geometry: point }));
         }
 
 
         // Draw Triangle Vertex
         var vectorLayerTriangleVertex = new ol.layer.Vector({
             source: new ol.source.Vector({
-                            features: triangleFeats}),
+                features: triangleFeats
+            }),
             style: new ol.style.Style({
                 image: new ol.style.Circle({
                     radius: 1,
@@ -295,32 +254,34 @@ export class ViewerMapAPI {
         });
 
         this.lastLayerDirection = vectorLayerTriangleVertex;
-        this.addLayer( this.lastLayerDirection);
+        this.addLayer(this.lastLayerDirection);
 
-    // Draw Triangle Polygon
-        let styleTriangle =  new ol.style.Style({
+        // Draw Triangle Polygon
+        let styleTriangle = new ol.style.Style({
             stroke: new ol.style.Stroke({
-              color: 'rgba(255, 0, 0, 0.4)',
-              width: 2
+                color: 'rgba(255, 0, 0, 0.4)',
+                width: 2
             }),
             fill: new ol.style.Fill({
-              color: 'rgba(255, 0, 0, 0.2)'
+                color: 'rgba(255, 0, 0, 0.2)'
             })
-          }); 
+        });
 
         var polygonDirectionFeature = new ol.Feature({
             geometry: new ol.geom.Polygon([pointsFOV])
-            } );
-
-        var vectorLayerTrianglePolygon = new ol.layer.Vector({
-            source: new ol.source.Vector({ features: [polygonDirectionFeature], 
-                                            projection: this.map.getView().projection}),
-            style: styleTriangle, 
         });
 
-        this.viewingDirectionLayer = vectorLayerTrianglePolygon; 
+        var vectorLayerTrianglePolygon = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [polygonDirectionFeature],
+                projection: this.map.getView().projection
+            }),
+            style: styleTriangle,
+        });
+
+        this.viewingDirectionLayer = vectorLayerTrianglePolygon;
         this.addLayer(this.viewingDirectionLayer);
-   
+
     }
 
 }
