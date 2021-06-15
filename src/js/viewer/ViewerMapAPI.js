@@ -77,7 +77,6 @@ export class ViewerMapAPI {
             }).extend([
                 // create fullScreen button
                 new ol.control.FullScreen(),
-                //new ol.control.ZoomSlider(),
             ]),
             //Disable Zoom Control on MAP
             interactions: ol.interaction.defaults({ mouseWheelZoom: false }),
