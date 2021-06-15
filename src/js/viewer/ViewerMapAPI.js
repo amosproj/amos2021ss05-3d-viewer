@@ -14,7 +14,6 @@ export class ViewerMapAPI {
 
         viewerAPI.floor.viewerMapAPI = this; // set reference to mapAPI in floorAPI
 
-        this.layers;
         this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
         this.camera = new THREE.OrthographicCamera(
             - window.innerWidth / 2,    // frustum left plane 
@@ -23,10 +22,6 @@ export class ViewerMapAPI {
             - window.innerHeight / 2,   // frustum bottom plane
             1,                          // frustum near plane
             10);                        // frustum far plane
-        this.camera.position.z = 2;     // need to be in [near + 1, far + 1] to be displayed
-
-        this.spriteGroup = new THREE.Group(); //create an sprite group
-        this.mapScalingFactor = 0.2;
 
         this.baseURL = viewerAPI.baseURL;
 
@@ -175,7 +170,6 @@ export class ViewerMapAPI {
         // show current floor black points
         var currentVectorLayer = this.vectorLayer[floorIndex]
         this.map.addLayer(currentVectorLayer);
-        console.log("VIEWER STRUCURE", this.viewerImageAPI.currentImage);
         //adding red points, using this. for show_direction
         this.redlon = 87000 * (this.viewerImageAPI.currentImage.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
         this.redlan = 111000 * (this.viewerImageAPI.currentImage.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
@@ -226,8 +220,6 @@ export class ViewerMapAPI {
         // get direction triangle vertex
         var FOV = this.viewerViewState.fov / 2 * (Math.PI / 180);
         var RADIUS = this.viewerViewState.fov / MAX_FOV * 5;
-
-        //var angle = direction + FOV; 
         var pointsFOV = [[this.redlon, this.redlan],
         [this.redlon + RADIUS * Math.cos((direction + FOV)), this.redlan + RADIUS * Math.sin((direction + FOV))],  //left  vertex point 
         [this.redlon + RADIUS * Math.cos((direction - FOV)), this.redlan + RADIUS * Math.sin((direction - FOV))],  //right vertex point 
