@@ -51,14 +51,12 @@ export class ViewerMapAPI {
         this.map.removeLayer(layer);
     }
 
-    // Method
+    // Method: Get the scale used by the three.js scene overlayed over the map (2D) view.
     scale() {
-        //Get the scale used by the three.js scene overlayed over the map (2D) view.
         return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
 
     initDisplayMap() {
-
         let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
 
@@ -69,7 +67,7 @@ export class ViewerMapAPI {
                 projection: new ol.proj.Projection({
                     extent: extent
                 }),
-                center: new ol.extent.getCenter(extent), // TODO: update center to current position
+                center: new ol.extent.getCenter(extent), // Update center to current position
                 zoom: 1,
                 maxZoom: 4,
             }),
@@ -105,7 +103,7 @@ export class ViewerMapAPI {
             var currentMapdata = this.viewerFloorAPI.floors[i].mapData;
 
             var features = [];
-            // TODO retrieve information from stored data 
+            //Retrieve information from stored data 
             allImages.forEach(image => {
                 // Get Longitude and latitude from each point
                 var lon = 87000 * (image.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
@@ -135,7 +133,6 @@ export class ViewerMapAPI {
     }
 
     updateDisplayMap(floorIndex) {
-
         var group = this.map.getLayerGroup();
         var layers = group.getLayers();
 
@@ -152,14 +149,11 @@ export class ViewerMapAPI {
 
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
-
-
         if (this.init != true) {
             // remove prvious vector layers 
             this.map.removeLayer(this.lastVectorLayerRed);
             this.map.removeLayer(this.lastVectorLayer);
         }
-
 
         // show layer map
         this.updateDisplayMap(this.viewerFloorAPI.currentFloorId);
@@ -194,7 +188,6 @@ export class ViewerMapAPI {
 
         this.map.addLayer(vectorLayerRed);
 
-
         // save last vector layers for deleting next time
         this.lastVectorLayer = currentVectorLayer;
         this.lastVectorLayerRed = vectorLayerRed;
@@ -205,7 +198,6 @@ export class ViewerMapAPI {
     }
 
     show_direction() {
-
         // get viewing longitude direction (in degrees)
         var lonov = this.viewerViewState.lonov;
 
@@ -230,7 +222,6 @@ export class ViewerMapAPI {
             let point = new ol.geom.Point(pointsFOV[i]);
             triangleFeats.push(new ol.Feature({ geometry: point }));
         }
-
 
         // Draw Triangle Vertex
         var vectorLayerTriangleVertex = new ol.layer.Vector({
@@ -273,8 +264,6 @@ export class ViewerMapAPI {
 
         this.viewingDirectionLayer = vectorLayerTrianglePolygon;
         this.addLayer(this.viewingDirectionLayer);
-
     }
-
 }
 
