@@ -42,11 +42,10 @@ export class ViewerAPI {
 
             this.pano = new ViewerPanoAPI(this);
             this.map = new ViewerMapAPI(this);
-
+        }).then(() => {
             // the only html element we work with (the pano-viewer div)
-            const container = document.getElementById('pano-viewer');
+            const panoDiv = document.getElementById('pano-viewer');
 
-            console.log("init")
             this.pano.initMap(this.map);
 
             // create the renderer, and embed the attributed dom element in the html page
@@ -56,14 +55,11 @@ export class ViewerAPI {
             this.renderer.autoClear = false; // To allow render overlay on top of panorama scene
             this.renderer.sortObjects = false;
 
-            container.appendChild(this.renderer.domElement);
+            panoDiv.appendChild(this.renderer.domElement);
             
             // start animation loop
             this.animate();
         });
-
-        console.log(this.getMap());
-
     }
 
     animate() {
@@ -96,7 +92,6 @@ export class ViewerAPI {
         // avoid duplication
         if (bestImg != this.image.currentImage) {
             this.pano.display(bestImg.id);
-            console.log("move")
             this.map.redraw();
             return bestImg;
         }

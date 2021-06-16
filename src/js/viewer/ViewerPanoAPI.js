@@ -128,7 +128,7 @@ export class ViewerPanoAPI {
         document.addEventListener('pointermove', this.oPM);
         document.addEventListener('pointerup', this.oPU);
         
-        this.visualTest(event);
+        //this.visualTest(event);
     }
 
     // handles continues update of the distance mouse moved
@@ -147,16 +147,6 @@ export class ViewerPanoAPI {
         document.removeEventListener('pointerup', this.oPU);
 
         this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
-
-        console.info(this.viewerViewState);
-        console.info(this.camera.getWorldDirection());
-        console.info("current img original global ", this.viewerImageAPI.currentImage.pos)
-        const loc = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
-        console.info("current img pos loc ", loc);
-        const b = this.viewerAPI.toGlobal(loc);
-        console.info("back to global ", b);
-        const bb = this.viewerAPI.toLocal(b);
-        console.info("and back to loc one more time ", bb);
     }
 
     onDocumentMouseWheel(event) {
@@ -274,6 +264,16 @@ export class ViewerPanoAPI {
     }
 
     visualTest(event) {
+        console.info(this.viewerViewState);
+        console.info(this.camera.getWorldDirection());
+        console.info("current img original global ", this.viewerImageAPI.currentImage.pos)
+        const loc = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
+        console.info("current img pos loc ", loc);
+        const b = this.viewerAPI.toGlobal(loc);
+        console.info("back to global ", b);
+        const bb = this.viewerAPI.toLocal(b);
+        console.info("and back to loc one more time ", bb);
+
         // visual test, spawn in white sphere at cursor position in scene
         const direction = this.getCursorLocation(event);
         const sphere = new THREE.SphereGeometry(1 / this.depthAtPointer(event), 10, 10);
