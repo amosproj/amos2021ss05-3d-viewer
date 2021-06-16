@@ -1,6 +1,6 @@
 "use strict";
 
-import { MAX_FOV } from "./ViewerConfig.js";
+import { MAX_FOV, SCALING_MAP, MAP_ZOOM } from "./ViewerConfig.js";
 // Map (2D) Viewer API
 
 // Specific API for the Map View
@@ -69,7 +69,7 @@ export class ViewerMapAPI {
                 }),
                 center: new ol.extent.getCenter(extent), // Update center to current position
                 zoom: 1,
-                maxZoom: 4,
+                maxZoom: MAP_ZOOM,
             }),
             controls: ol.control.defaults({
                 // Hide Map rotation button
@@ -105,11 +105,10 @@ export class ViewerMapAPI {
             //Retrieve information from stored data 
             allImages.forEach(image => {
                 // Get Longitude and latitude from each point
-                var lon = 87000 * (image.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
-                var lan = 111000 * (image.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
+                var pos = this.getLonLanCoordinates(image.pos, currentMapdata); 
 
                 var current_feature = new ol.Feature({
-                    geometry: new ol.geom.Point([lon, lan]),
+                    geometry: new ol.geom.Point(pos),
                 })
                 features.push(current_feature)
             });
@@ -163,12 +162,14 @@ export class ViewerMapAPI {
         // show current floor black points
         var currentVectorLayer = this.vectorLayer[floorIndex]
         this.map.addLayer(currentVectorLayer);
+
         //adding red points, using this. for show_direction
-        this.redlon = 87000 * (this.viewerImageAPI.currentImage.pos[0] - this.viewerFloorAPI.origin[0]) + (currentMapdata.x / currentMapdata.density);
-        this.redlan = 111000 * (this.viewerImageAPI.currentImage.pos[1] - this.viewerFloorAPI.origin[1]) + (currentMapdata.y / currentMapdata.density);
+        let curren_position = this.getLonLanCoordinates(this.viewerImageAPI.currentImage.pos, currentMapdata); 
+        this.posLon = curren_position[0];
+        this.posLan = curren_position[1];
 
         var redFeature = new ol.Feature({
-            geometry: new ol.geom.Point([this.redlon, this.redlan]),
+            geometry: new ol.geom.Point([this.posLon, this.posLan]),
         });
 
         var vectorSourceRed = new ol.source.Vector({
@@ -204,16 +205,16 @@ export class ViewerMapAPI {
         var direction = -(lonov + 180) * (Math.PI / 180) % 360;
 
         // remove prvious vector layers 
-        this.removeLayer(this.lastVectorLayerRed);
+        
         this.removeLayer(this.lastLayerDirection);
         this.map.removeLayer(this.viewingDirectionLayer);
 
         // get direction triangle vertex
         var FOV = this.viewerViewState.fov / 2 * (Math.PI / 180);
-        var RADIUS = this.viewerViewState.fov / MAX_FOV * 5;
-        var pointsFOV = [[this.redlon, this.redlan],
-        [this.redlon + RADIUS * Math.cos((direction + FOV)), this.redlan + RADIUS * Math.sin((direction + FOV))],  //left  vertex point 
-        [this.redlon + RADIUS * Math.cos((direction - FOV)), this.redlan + RADIUS * Math.sin((direction - FOV))],  //right vertex point 
+        var RADIUS = this.viewerViewState.fov / (MAX_FOV * SCALING_MAP);
+        var pointsFOV = [[this.posLon, this.posLan],
+        [this.posLon + RADIUS * Math.cos((direction + FOV)), this.posLan + RADIUS * Math.sin((direction + FOV))],  //left  vertex point 
+        [this.posLon + RADIUS * Math.cos((direction - FOV)), this.posLan + RADIUS * Math.sin((direction - FOV))],  //right vertex point 
         ];
 
         var triangleFeats = [];
@@ -236,7 +237,7 @@ export class ViewerMapAPI {
         });
 
         this.lastLayerDirection = vectorLayerTriangleVertex;
-        this.addLayer(this.lastLayerDirection);
+       // this.addLayer(this.lastLayerDirection);
 
         // Draw Triangle Polygon
         let styleTriangle = new ol.style.Style({
@@ -263,6 +264,13 @@ export class ViewerMapAPI {
 
         this.viewingDirectionLayer = vectorLayerTrianglePolygon;
         this.addLayer(this.viewingDirectionLayer);
+    }
+
+    getLonLanCoordinates(position, mapdata){
+        // Compute the latitude and longitude  in reference to the origin in WGS84 and aff offset of the map 
+        let lon = 87000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
+        let lan = 111000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
+        return [lon, lan]; 
     }
 }
 
