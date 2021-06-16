@@ -118,8 +118,6 @@ export class ViewerPanoAPI {
 
         document.addEventListener('pointermove', this.oPM);
         document.addEventListener('pointerup', this.oPU);
-        
-        //this.visualTest(event);
     }
 
     // handles continues update of the distance mouse moved
