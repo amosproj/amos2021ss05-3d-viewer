@@ -139,12 +139,12 @@ export class ViewerAPI {
     // Convert the local metric three.js coordinates used by the viewer to WGS 84 coordinates [longitude, latitude, z].
     toGlobal(localCoords) {
         // localCoords : THREE.Vector3 // Local coordinates used by the viewer
-        const globalX = this.floor.origin[0] - (localCoords.x / 71.5);
-        const globalY = this.floor.origin[1] - (localCoords.y / 111.3);
-        const globalZ = localCoords.z - this.floor.currentFloor.z;
+        const globalX = this.floor.origin[0] - ((localCoords.x / 1000) / 71.5);
+        const globalY = this.floor.origin[1] - ((-localCoords.z / 1000) / 111.3);
+        const globalZ = localCoords.y - this.floor.currentFloor.z;
 
         // the three js scene sees the y axis as the up-down axis so we have to swap with z
-        return [globalX, globalZ, globalY];
+        return [globalX, globalY, globalZ];
         // Returns: [Number] : WGS 84 coordinates [longitude, latitude, z] (z value is floorZ + panoZ, where localCoords is just the panoZ)
     }
 
@@ -154,12 +154,12 @@ export class ViewerAPI {
         // Distance calculation math taken from here https://www.mkompf.com/gps/distcalc.html
         // The more accurate calculation breaks the pixel offset on the pre-created maps
         const dx = 71.5 * (this.floor.origin[0] - globalCoords[0]);
-        const dy = 111.3 * (this.floor.origin[1] - globalCoords[1]);
+        const dz = 111.3 * (this.floor.origin[1] - globalCoords[1]);
         
         return new this.THREE.Vector3(
             dx * 1000,
             globalCoords[2] + this.floor.currentFloor.z,
-            dy * 1000);
+            -dz * 1000);
     }
 
     // TODO: swap() and big(wanted)
