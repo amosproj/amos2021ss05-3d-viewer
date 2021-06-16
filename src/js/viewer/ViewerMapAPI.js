@@ -1,5 +1,6 @@
 "use strict";
 
+import { MAX_FOV, SCALING_MAP, MAP_ZOOM } from "./ViewerConfig.js";
 // Map (2D) Viewer API
 
 // Specific API for the Map View
@@ -8,239 +9,268 @@ export class ViewerMapAPI {
     constructor(viewerAPI) {
         this.viewerImageAPI = viewerAPI.image;
         this.viewerFloorAPI = viewerAPI.floor;
+        // draw direction 
+        this.viewerViewState = viewerAPI.pano.viewerViewState;
+
         viewerAPI.floor.viewerMapAPI = this; // set reference to mapAPI in floorAPI
 
-        this.layers;
         this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
-        this.camera = new THREE.OrthographicCamera( 
+        this.camera = new THREE.OrthographicCamera(
             - window.innerWidth / 2,    // frustum left plane 
             window.innerWidth / 2,      // frustum right plane
             window.innerHeight / 2,     // frustum top plane
             - window.innerHeight / 2,   // frustum bottom plane
             1,                          // frustum near plane
             10);                        // frustum far plane
-        this.camera.position.z = 2;     // need to be in [near + 1, far + 1] to be displayed
-
-        this.spriteGroup = new THREE.Group(); //create an sprite group
-        this.mapScalingFactor = 0.2;
 
         this.baseURL = viewerAPI.baseURL;
 
         // create Map and Layers
         this.map;
+        this.vectorLayer = [];
         this.initDisplayMap();
-        this.updateDisplayMap(this.viewerFloorAPI.currentFloorId);
+        this.init = true;
 
-        /*
-    
-        var popup = new ol.Overlay({
-            //element: 
-            positioning: 'bottom-center',
-            stopEvent: false,
-            offset: [0, -10],
-          });
-          this.mapLayer.addOvSerlay(popup);
-        */
-        //this.redraw();
-        //this.spriteGroup.position.set(window.innerWidth / 2, -window.innerHeight / 2, 0); // bottom right
-        //this.scene.add(this.spriteGroup);
+        // avoid duplicating
+        this.lastVectorLayer;
 
+        // direction
+        this.lastLayerDirection = [];
+
+        this.redraw();
     }
 
     // Method: Add an event layer to the map (2D) view.
     addLayer(layer) {
-        this.scene.add(layer);
+        this.map.addLayer(layer);
     }
 
     // Method: remove an event layer to the map (2D) view.
     removeLayer(layer) {
         // Layer: EventLayer
-        this.scene.remove(layer);
-    }
-   
-    // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
-    redraw() {
-        /*
-        this.spriteGroup.clear();
-        
-        // remove comment to draw all points on map
-        // let allImages = this.viewerFloorAPI.currentFloor.viewerImages;
-   
-        // allImages.forEach(image => {
-        //     this.addPoint("black", image.mapOffset);
-        // });
-        //
-
-        this.location = this.addPoint("red", this.viewerImageAPI.currentImage.mapOffset);
-        //this.addViewingDirection("yellow",  this.viewerImageAPI.currentImage.mapOffset);
-        */
-        var floorIndex = this.viewerFloorAPI.currentFloorId;
-        this.updateDisplayMap(floorIndex);
-
+        this.map.removeLayer(layer);
     }
 
-
-    /* draws a point in *color* on the map at *offset*, also returns the THREE.Sprite after it is drawn
-    addPoint(color, offset) {
-        const texture = new THREE.Texture(generateCircularSprite(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture,
-            transparent: false,
-            color: 0xffffff // BLACK, 
-        });
-        // Render on Top
-        mat.renderOrder = 3;
-        // Create the point sprite
-        let pointSprite = new THREE.Sprite(mat);
-        pointSprite.center.set(0.0, 0.0);
-
-        // draw it at pixel offset of as agruemnt passed pixel offset
-        pointSprite.position.set(-this.mapScalingFactor * offset[0], this.mapScalingFactor * offset[1], -3);
-
-        //scale the point
-        pointSprite.scale.set(5, 5, 1);
-        this.spriteGroup.add(pointSprite);
-
-        return pointSprite;
-    }*/
-    
-    // Method
+    // Method: Get the scale used by the three.js scene overlayed over the map (2D) view.
     scale() {
-        //Get the scale used by the three.js scene overlayed over the map (2D) view.
         return this.viewerFloorAPI.currentFloor.mapData.density; //  (in meter / pixel)
     }
-    
-    /*addViewingDirection(color, position){
-        const texture = new THREE.Texture(generateTriangleCanvas(color));
-        texture.needsUpdate = true;
-        var mat = new THREE.SpriteMaterial({
-            map: texture
-        });
-        position 
-        // Create the sprite
-        let triangleSprite = new THREE.Sprite(mat);
-        triangleSprite.center.set(0.0, 0.0);
 
-        // Draw it at The localization point
-        triangleSprite.position.set(-this.mapScalingFactor * position[0], this.mapScalingFactor * position[1], -3);
-
-        //var quartenion = new THREE.Quaternion(this.viewerImageAPI.currentImage.orientation);
-        //triangleSprite.transform.rotation = rotation;
-        //scale the point
-        triangleSprite.scale.set(10, 10, 1);
-        this.spriteGroup.add(triangleSprite);
-
-    }*/
-
-    initDisplayMap(){
-
-        var extent = [0, 0, 512, 512];
-
-        //  Projection map image coordinates directly to map coordinates in pixels. 
-        var projection = new ol.proj.Projection({
-        code: 'map-image',
-        units: 'pixels',
-        extent: extent,
-        });
+    initDisplayMap() {
+        let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
+        var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
 
         // create map 
-
-        this.map = new ol.Map({  //new ol.control.OverviewMap({
+        this.map = new ol.Map({
             target: 'map',
             view: new ol.View({
-                projection: projection,
-                center: new ol.extent.getCenter(extent),
+                projection: new ol.proj.Projection({
+                    extent: extent
+                }),
+                center: new ol.extent.getCenter(extent), // Update center to current position
                 zoom: 1,
-                maxZoom: 5,
+                maxZoom: MAP_ZOOM,
             }),
-            });
-        
-        // create layers for each floors 
-        for (var i =0; i < this.viewerFloorAPI.floors.length; i++){
-            this.map.addLayer((new ol.layer.Image({
+            controls: ol.control.defaults({
+                // Hide Map rotation button
+                rotate: false
+            }).extend([
+                // create fullScreen button
+                new ol.control.FullScreen(),
+            ]),
+            //Disable Zoom Control on MAP
+            interactions: ol.interaction.defaults({ mouseWheelZoom: false }),
+        });
+
+        // create image layers for each floors 
+        for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
+            let mapData = this.viewerFloorAPI.floors[i].mapData
+            this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
                     //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
-                    url: this.baseURL + this.viewerFloorAPI.floors[i].mapData.name + ".png",
-                    projection: projection,
-                    imageExtent: extent,
+                    url: this.baseURL + mapData.name + ".png",
+                    imageExtent: [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
                 })
-            })))
+            }))
+        }
+
+        this.updateDisplayMap((this.viewerFloorAPI.currentFloorId));
+
+        // create vector layers for each floors
+        for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
+            let allImages = this.viewerFloorAPI.floors[i].viewerImages;
+            var currentMapdata = this.viewerFloorAPI.floors[i].mapData;
+
+            var features = [];
+            //Retrieve information from stored data 
+            allImages.forEach(image => {
+                // Get Longitude and latitude from each point
+                var pos = this.getLonLanCoordinates(image.pos, currentMapdata); 
+
+                var current_feature = new ol.Feature({
+                    geometry: new ol.geom.Point(pos),
+                })
+                features.push(current_feature)
+            });
+
+            // create the vector layer for black points
+            var vectorSource = new ol.source.Vector({
+                features: features
+            });
+
+            this.vectorLayer.push(new ol.layer.Vector({
+                source: vectorSource,
+                style: new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 1,
+                        fill: new ol.style.Fill({ color: 'black' })
+                    })
+                })
+            }));
         }
     }
 
-    updateDisplayMap(floorIndex){
-
+    updateDisplayMap(floorIndex) {
         var group = this.map.getLayerGroup();
         var layers = group.getLayers();
-        
+
         // set layer visibility
         layers.forEach(function (layer, i) {
-            if (i == floorIndex){
+            if (i == floorIndex) {
                 layer.setVisible(true);
-                layer.set
             }
-            else{
+            else {
                 layer.setVisible(false);
             }
-          });
+        });
     }
- 
+
+    // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
+    redraw() {
+        if (this.init != true) {
+            // remove prvious vector layers 
+            this.map.removeLayer(this.lastVectorLayerRed);
+            this.map.removeLayer(this.lastVectorLayer);
+        }
+
+        // show layer map
+        this.updateDisplayMap(this.viewerFloorAPI.currentFloorId);
+
+        var floorIndex = this.viewerFloorAPI.currentFloorId;
+        var currentMapdata = this.viewerFloorAPI.currentFloor.mapData;
+
+        // show current floor black points
+        var currentVectorLayer = this.vectorLayer[floorIndex]
+        this.map.addLayer(currentVectorLayer);
+
+        //adding red points, using this. for show_direction
+        let curren_position = this.getLonLanCoordinates(this.viewerImageAPI.currentImage.pos, currentMapdata); 
+        this.posLon = curren_position[0];
+        this.posLan = curren_position[1];
+
+        var redFeature = new ol.Feature({
+            geometry: new ol.geom.Point([this.posLon, this.posLan]),
+        });
+
+        var vectorSourceRed = new ol.source.Vector({
+            features: [redFeature]
+        });
+
+        var vectorLayerRed = new ol.layer.Vector({
+            source: vectorSourceRed,
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 3,
+                    fill: new ol.style.Fill({ color: 'red' })
+                })
+            })
+        });
+
+        this.map.addLayer(vectorLayerRed);
+
+        // save last vector layers for deleting next time
+        this.lastVectorLayer = currentVectorLayer;
+        this.lastVectorLayerRed = vectorLayerRed;
+
+        // disable init
+        this.show_direction();
+        this.init = false;
+    }
+
+    show_direction() {
+        // get viewing longitude direction (in degrees)
+        var lonov = this.viewerViewState.lonov;
+
+        // temporary using 170 degree for correcting the starting zero degree of 2D map
+        var direction = -(lonov + 180) * (Math.PI / 180) % 360;
+
+        // remove prvious vector layers 
+        
+        this.removeLayer(this.lastLayerDirection);
+        this.map.removeLayer(this.viewingDirectionLayer);
+
+        // get direction triangle vertex
+        var FOV = this.viewerViewState.fov / 2 * (Math.PI / 180);
+        var RADIUS = this.viewerViewState.fov / (MAX_FOV * SCALING_MAP);
+        var pointsFOV = [[this.posLon, this.posLan],
+        [this.posLon + RADIUS * Math.cos((direction + FOV)), this.posLan + RADIUS * Math.sin((direction + FOV))],  //left  vertex point 
+        [this.posLon + RADIUS * Math.cos((direction - FOV)), this.posLan + RADIUS * Math.sin((direction - FOV))],  //right vertex point 
+        ];
+
+        var triangleFeats = [];
+        for (var i = 0; i < pointsFOV.length; i++) {
+            let point = new ol.geom.Point(pointsFOV[i]);
+            triangleFeats.push(new ol.Feature({ geometry: point }));
+        }
+
+        // Draw Triangle Vertex
+        var vectorLayerTriangleVertex = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: triangleFeats
+            }),
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 1,
+                    fill: new ol.style.Fill({ color: 'red' })
+                })
+            })
+        });
+
+        this.lastLayerDirection = vectorLayerTriangleVertex;
+       // this.addLayer(this.lastLayerDirection);
+
+        // Draw Triangle Polygon
+        let styleTriangle = new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'rgba(255, 0, 0, 0.4)',
+                width: 2
+            }),
+            fill: new ol.style.Fill({
+                color: 'rgba(255, 0, 0, 0.2)'
+            })
+        });
+
+        var polygonDirectionFeature = new ol.Feature({
+            geometry: new ol.geom.Polygon([pointsFOV])
+        });
+
+        var vectorLayerTrianglePolygon = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [polygonDirectionFeature],
+                projection: this.map.getView().projection
+            }),
+            style: styleTriangle,
+        });
+
+        this.viewingDirectionLayer = vectorLayerTrianglePolygon;
+        this.addLayer(this.viewingDirectionLayer);
+    }
+
+    getLonLanCoordinates(position, mapdata){
+        // Compute the latitude and longitude  in reference to the origin in WGS84 and aff offset of the map 
+        let lon = 87000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
+        let lan = 111000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
+        return [lon, lan]; 
+    }
 }
 
-/*
-function generateCircularSprite(color) {
-    var canvas = document.createElement('canvas');
-    canvas.height = 16;
-    canvas.width = 16;
-    var context = canvas.getContext('2d');
-    var centerX = canvas.width / 2;
-    var centerY = canvas.height / 2;
-    var radius = 8;
-
-    context.beginPath();
-    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-    context.fillStyle = color;
-    context.fill();
-    return canvas;
-
-}
-
-function generateTriangleCanvas(color){
-    var canvasTri = document.createElement('canvas');
-    var context = canvasTri.getContext('2d');
-
-    //Cretae triangle shape
-    context.beginPath();
-    context.moveTo(200, 100);
-    context.lineTo(300, 300);
-    context.lineTo(100, 300);
-    context.closePath();
-    
-    // outline
-    context.lineWidth = 10;
-    context.strokeStyle = '0xff0000'; //blue
-    context.stroke();
-    
-    // the fill color
-    context.fillStyle = color;
-    context.fill();
-    return context; 
-}
-/*
-var overviewMapControl = new OverviewMap({
-  // see in overviewmap-custom.html to see the custom CSS used
-  className: 'ol-overviewmap ol-custom-overviewmap',
-  layers: [
-    new TileLayer({
-      source: new OSM({
-        'url':
-          'https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png' +
-          '?apikey=Your API key from http://www.thunderforest.com/docs/apikeys/ here',
-      }),
-    }) ],
-  collapseLabel: '\u00BB',
-  label: '\u00AB',
-  collapsed: false,
-});
-*/
