@@ -46,6 +46,9 @@ export class ViewerAPI {
             // the only html element we work with (the pano-viewer div)
             const container = document.getElementById('pano-viewer');
 
+            console.log("init")
+            this.pano.initMap(this.map);
+
             // create the renderer, and embed the attributed dom element in the html page
             this.renderer = new THREE.WebGLRenderer();
             this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -58,6 +61,8 @@ export class ViewerAPI {
             // start animation loop
             this.animate();
         });
+
+        console.log(this.getMap());
 
     }
 
@@ -91,6 +96,7 @@ export class ViewerAPI {
         // avoid duplication
         if (bestImg != this.image.currentImage) {
             this.pano.display(bestImg.id);
+            console.log("move")
             this.map.redraw();
             return bestImg;
         }
@@ -163,5 +169,9 @@ export class ViewerAPI {
     }
 
     // TODO: swap() and big(wanted)
+
+    getMap(){
+        return this.map
+    }
 
 }
