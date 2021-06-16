@@ -28,9 +28,11 @@ export class ViewerPanoAPI {
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
 
-        document.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
-        document.addEventListener('pointerdown', (event) => this.onPointerDown(event));
-        document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+        this.panoViewer=document.getElementById('pano-viewer');
+        this.panoViewer.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
+        this.panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
+        this.panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+        
         $('#pano-viewer').mousedown((event) => this.onRightClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
@@ -106,8 +108,8 @@ export class ViewerPanoAPI {
 
         this.lastViewState = [this.viewerViewState.lonov, this.viewerViewState.latov];
 
-        document.addEventListener('pointermove', this.oPM);
-        document.addEventListener('pointerup', this.oPU);
+        this.panoViewer.addEventListener('pointermove', this.oPM);
+        this.panoViewer.addEventListener('pointerup', this.oPU);
     }
 
     // handles continues update of the distance mouse moved
@@ -120,8 +122,8 @@ export class ViewerPanoAPI {
 
     // this event listener is called when the user *ends* moving the picture
     onPointerUp() {
-        document.removeEventListener('pointermove', this.oPM);
-        document.removeEventListener('pointerup', this.oPU);
+        this.panoViewer.removeEventListener('pointermove', this.oPM);
+        this.panoViewer.removeEventListener('pointerup', this.oPU);
 
         this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
     }
