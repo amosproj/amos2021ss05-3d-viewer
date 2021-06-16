@@ -27,10 +27,10 @@ export class ViewerPanoAPI {
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
-
-        document.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
-        document.addEventListener('pointerdown', (event) => this.onPointerDown(event));
-        document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+        this.panoViewer=document.getElementById('pano-viewer');
+        this.panoViewer.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
+        this.panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
+        this.panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
         $('#pano-viewer').mousedown((event) => this.onRightClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
