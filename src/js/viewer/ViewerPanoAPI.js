@@ -32,21 +32,17 @@ export class ViewerPanoAPI {
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
 
-        document.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
-        document.addEventListener('pointerdown', (event) => this.onPointerDown(event));
-        document.addEventListener('dblclick', (event) => this.onDoubleClick(event));
-
-        this.panoViewer=document.getElementById('pano-viewer');
-        this.panoViewer.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
-        this.panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
-        this.panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+        const panoViewer = document.getElementById('pano-viewer');
+        panoViewer.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
+        panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
+        panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
 
       
         $('#pano-viewer').mousedown((event) => this.onRightClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
 
-        this.viewerMapAPI;
+        this.viewerMapAPI; // ?
     }
 
     // displays the panorama with idx *ImageNum* in the model
@@ -110,26 +106,12 @@ export class ViewerPanoAPI {
 
     // Set the panorama view characteristics.
     view(lonov, latov, fov) {
-
         const normalizedViewingDirection = lonLatToLocal(lonov, latov);
 
         // adjust looking direction for offset of current mesh in scene
         const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
 
         this.camera.lookAt(localCoord.add(normalizedViewingDirection));
-
-        let phi = THREE.MathUtils.degToRad(90 - latov);
-        let theta = THREE.MathUtils.degToRad(lonov);
-
-        const x = this.sphereRadius * Math.sin(phi) * Math.cos(theta);
-        const y = this.sphereRadius * Math.cos(phi);
-        const z = this.sphereRadius * Math.sin(phi) * Math.sin(theta);
-    
-        // adjust looking direction for offset of current mesh in scene
-        const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
-
-        this.camera.lookAt(x + localCoord.x, y + localCoord.y, z + localCoord.z);
-
 
         this.camera.fov = THREE.MathUtils.clamp(fov, MIN_FOV, MAX_FOV);
 
@@ -143,18 +125,15 @@ export class ViewerPanoAPI {
 
         this.lastViewState = [this.viewerViewState.lonov, this.viewerViewState.latov];
 
-
         document.addEventListener('pointermove', this.oPM);
         document.addEventListener('pointerup', this.oPU);
         
         this.visualTest(event);
-
- 
     }
 
     // handles continues update of the distance mouse moved
     onPointerMove(event) {
-        let scalingFactor = this.camera.fov / MAX_FOV;
+        const scalingFactor = this.camera.fov / MAX_FOV;
     
         this.viewerViewState.setLonov((this.lastMousePos[0] - event.clientX) * PAN_SPEED * scalingFactor + this.lastViewState[0]);
         this.viewerViewState.setLatov((event.clientY - this.lastMousePos[1]) * PAN_SPEED * scalingFactor + this.lastViewState[1]);
@@ -168,6 +147,16 @@ export class ViewerPanoAPI {
         document.removeEventListener('pointerup', this.oPU);
 
         this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
+
+        console.info(this.viewerViewState);
+        console.info(this.camera.getWorldDirection());
+        console.info("current img original global ", this.viewerImageAPI.currentImage.pos)
+        const loc = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
+        console.info("current img pos loc ", loc);
+        const b = this.viewerAPI.toGlobal(loc);
+        console.info("back to global ", b);
+        const bb = this.viewerAPI.toLocal(b);
+        console.info("and back to loc one more time ", bb);
     }
 
     onDocumentMouseWheel(event) {
@@ -181,19 +170,7 @@ export class ViewerPanoAPI {
     }
 
     onDoubleClick(event) {
-
         const [adjustedLonov, adjustedLatov] = this.getAdjustedViewstate(event);
-
-        const halfWidth = window.innerWidth / 2;
-        const halfHeight = window.innerHeight / 2;
-
-        const horizontalOffset = (event.x - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the mouse click is on the screen
-        const verticalOffset = (event.y - halfHeight) / halfHeight; // scaled between [-1,1] depending how up-down the mouse click is on the screen
-        
-        const adjustedLonov = ((this.viewerViewState.lonov + (horizontalOffset * this.viewerViewState.fov)) + 360) % 360;
-        const adjustedLatov = Math.max(-85, Math.min(85, this.viewerViewState.latov - (verticalOffset * this.viewerViewState.fov / 2)));
-                
-
         const MEDIAN_WALKING_DISTANCE = 5; // in meter
         // distance to be walked along adjustedHorizontalAngle from current location
         const distance = MEDIAN_WALKING_DISTANCE + ((adjustedLatov / 85) * MEDIAN_WALKING_DISTANCE);
@@ -227,7 +204,7 @@ export class ViewerPanoAPI {
             });
         }
     }
-}
+
 
     // returns: the depth information (in meter) of the panorama at the current curser position (event.clientX, event.clientY)
     depthAtPointer(event) {
@@ -310,6 +287,8 @@ export class ViewerPanoAPI {
         this.scene.add(mesh);
         
         this.testMesh = mesh;
+
+        console.info("current sphere pos ", direction);
     }
 
 
