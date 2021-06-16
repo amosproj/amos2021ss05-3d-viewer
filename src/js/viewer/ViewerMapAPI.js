@@ -14,15 +14,6 @@ export class ViewerMapAPI {
 
         viewerAPI.floor.viewerMapAPI = this; // set reference to mapAPI in floorAPI
 
-        this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
-        this.camera = new THREE.OrthographicCamera(
-            - window.innerWidth / 2,    // frustum left plane 
-            window.innerWidth / 2,      // frustum right plane
-            window.innerHeight / 2,     // frustum top plane
-            - window.innerHeight / 2,   // frustum bottom plane
-            1,                          // frustum near plane
-            10);                        // frustum far plane
-
         this.baseURL = viewerAPI.baseURL;
 
         // create Map and Layers

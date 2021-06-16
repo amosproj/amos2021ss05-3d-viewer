@@ -12,7 +12,7 @@ export class ViewerPanoAPI {
         this.camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
         this.viewerImageAPI = viewerAPI.image;
         this.viewerAPI = viewerAPI;
-        this.sphereRadius = 10;
+        this.sphereRadius = 5;
 
         this.viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0);
         this.lastViewState;
@@ -20,13 +20,10 @@ export class ViewerPanoAPI {
 
         //initialize the eventLayer
         this.eventLayer = new EventLayer();
-
-
-      
+        
         // properties needed for display and depthAtPointer method
         this.loadedMesh = null;
         this.depthCanvas = document.createElement("canvas");
-
 
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
@@ -37,12 +34,9 @@ export class ViewerPanoAPI {
         panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
 
-      
         $('#pano-viewer').mousedown((event) => this.onRightClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
-
-        this.viewerMapAPI; // ?
     }
 
     // displays the panorama with idx *ImageNum* in the model
@@ -63,10 +57,8 @@ export class ViewerPanoAPI {
             'r3.jpg');
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 
-
-        // also load depth-map for panorama
+        // --- load depth-map for panorama ---
         const image = new Image();
-
         //image.crossOrigin = "use-credentials";
         image.src = this.viewerAPI.baseURL +
                     Math.trunc(this.viewerImageAPI.currentImage.id / 100) + '/' +
@@ -75,8 +67,7 @@ export class ViewerPanoAPI {
         image.addEventListener('load', () => {
             this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
         }, false);
-
-
+        // -----
 
         // put the texture on the spehere and add it to the scene
         const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
@@ -138,7 +129,7 @@ export class ViewerPanoAPI {
         this.viewerViewState.setLonov((this.lastMousePos[0] - event.clientX) * PAN_SPEED * scalingFactor + this.lastViewState[0]);
         this.viewerViewState.setLatov((event.clientY - this.lastMousePos[1]) * PAN_SPEED * scalingFactor + this.lastViewState[1]);
 
-        this.initMap(this.viewerAPI.map).show_direction();
+        this.viewerAPI.map.show_direction();
     }
 
     // this event listener is called when the user *ends* moving the picture
@@ -156,7 +147,7 @@ export class ViewerPanoAPI {
         this.camera.updateProjectionMatrix();
 
         this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
-        this.initMap(this.viewerAPI.map).show_direction();
+        this.viewerAPI.map.show_direction();
     }
 
     onDoubleClick(event) {
@@ -289,12 +280,6 @@ export class ViewerPanoAPI {
         this.testMesh = mesh;
 
         console.info("current sphere pos ", direction);
-    }
-
-
-    initMap(map){
-        var viewerMapAPI = map;
-        return viewerMapAPI;
     }
 }
 
