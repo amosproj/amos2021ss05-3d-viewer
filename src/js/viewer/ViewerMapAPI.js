@@ -29,6 +29,10 @@ export class ViewerMapAPI {
         this.lastLayerDirection = [];
 
         this.redraw();
+
+        this.viewerAPI = viewerAPI;
+        let map = document.getElementById('map');
+        map.addEventListener('dblclick', (event) => this.onDoubleClick(event));
     }
 
     // Method: Add an event layer to the map (2D) view.
@@ -70,7 +74,7 @@ export class ViewerMapAPI {
                 new ol.control.FullScreen(),
             ]),
             //Disable Zoom Control on MAP
-            interactions: ol.interaction.defaults({ mouseWheelZoom: false }),
+            interactions: ol.interaction.defaults({doubleClickZoom :false}),
         });
 
         // create image layers for each floors 
@@ -179,6 +183,9 @@ export class ViewerMapAPI {
 
         this.map.addLayer(vectorLayerRed);
 
+        // set view to middle
+        this.setMiddle(this.posLon,this.posLan);
+
         // save last vector layers for deleting next time
         this.lastVectorLayer = currentVectorLayer;
         this.lastVectorLayerRed = vectorLayerRed;
@@ -262,6 +269,32 @@ export class ViewerMapAPI {
         let lon = 87000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
         let lan = 111000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
         return [lon, lan]; 
+    }
+
+    onDoubleClick(event) {
+
+        var coord = [];
+        var mousePosition = [];
+        var mapdata = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
+        var floor = this.viewerFloorAPI;
+        var z = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].z;
+        var viewerAPI = this.viewerAPI; 
+        // this.map.getView().setZoom(1);
+        
+        this.map.on('dblclick', function(event){
+
+            coord = event.coordinate;
+            mousePosition.push(((coord[0] - (mapdata.x / mapdata.density)) / 87000 ) + floor.origin[0]);
+            mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / 111000 ) + floor.origin[1]);
+
+            // move 
+            viewerAPI.move(mousePosition[0],mousePosition[1],z);
+
+        })
+    }
+
+    setMiddle(poslon, poslan){
+            this.map.getView().setCenter([poslon,poslan]);
     }
 }
 
