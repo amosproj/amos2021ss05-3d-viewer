@@ -264,9 +264,16 @@ export class ViewerMapAPI {
 
     getLonLanCoordinates(position, mapdata){
         // Compute the latitude and longitude  in reference to the origin in WGS84 and aff offset of the map 
-        let lon = 87000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
-        let lan = 111000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
+        let lon = 71500  *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
+        let lan = 113000  * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
         return [lon, lan]; 
+    }
+
+    getCoordinatesLonLan(position, mapdata){
+        // Compute the coordinate  in reference to the origin from WGS84 Longitude Latitude 
+        let x =  (position[0] -(mapdata.x / mapdata.density) )/71500   +   this.viewerFloorAPI.origin[0];
+        let y =  (position[1] -(mapdata.x / mapdata.density) )/113000  +   this.viewerFloorAPI.origin[1];
+        return [x, y]; 
     }
 
     onDoubleClick(event) {
@@ -279,13 +286,13 @@ export class ViewerMapAPI {
         var floor = this.viewerFloorAPI;
         var z = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].z;
         var viewerAPI = this.viewerAPI; 
-        // this.map.getView().setZoom(1);
+
         
         this.map.on('dblclick', function(event){
 
             coord = event.coordinate;
-            mousePosition.push(((coord[0] - (mapdata.x / mapdata.density)) / 87000 ) + floor.origin[0]);
-            mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / 111000 ) + floor.origin[1]);
+            mousePosition.push( ((coord[0] - (mapdata.x / mapdata.density)) / 71500 ) + floor.origin[0] );
+            mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / 113000 ) + floor.origin[1]);
 
             // move 
             viewerAPI.move(mousePosition[0],mousePosition[1],z);
