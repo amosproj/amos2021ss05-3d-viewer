@@ -190,7 +190,6 @@ export class ViewerMapAPI {
         this.lastVectorLayer = currentVectorLayer;
         this.lastVectorLayerRed = vectorLayerRed;
 
-        // disable init
         this.show_direction();
         this.init = false;
     }
@@ -235,7 +234,6 @@ export class ViewerMapAPI {
         });
 
         this.lastLayerDirection = vectorLayerTriangleVertex;
-       // this.addLayer(this.lastLayerDirection);
 
         // Draw Triangle Polygon
         let styleTriangle = new ol.style.Style({
@@ -272,9 +270,11 @@ export class ViewerMapAPI {
     }
 
     onDoubleClick(event) {
-
+    
+        // Function to trigger the position change
         var coord = [];
         var mousePosition = [];
+        // Update location metadata
         var mapdata = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var floor = this.viewerFloorAPI;
         var z = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].z;
