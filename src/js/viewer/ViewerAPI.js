@@ -43,6 +43,14 @@ export class ViewerAPI {
             this.pano = new ViewerPanoAPI(this);
             this.map = new ViewerMapAPI(this);
         }).then(() => {
+            // const test = THREE.Mesh(...);
+            // add the methods to test .vwr_oncontext vwr_...
+            // pano.addLayer(test)
+
+            // panoDiv.eventListener(onMove, check with raycaster if cursor over sphere, call vwr_onpointerenter or vwr_onpointerleave)
+            // panoDiv.eventListener(onClick, check with raycaster if cursor over sphere, call vwr_onclick)
+            // panoDiv.eventListener(onRightClick, check with raycaster if cursor over sphere, call vwr_oncontext )
+
             // the only html element we work with (the pano-viewer div)
             const panoDiv = document.getElementById('pano-viewer');
 
