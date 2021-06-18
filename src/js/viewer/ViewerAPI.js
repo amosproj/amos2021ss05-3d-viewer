@@ -27,7 +27,7 @@ export class ViewerAPI {
         this.baseURL = baseURL;
 
         this.listeners = [];
-        
+
         this.renderer;
         // Load the metadata only once
         $.ajax({
@@ -45,8 +45,25 @@ export class ViewerAPI {
         }).then(() => {
             // const test = THREE.Mesh(...);
             // add the methods to test .vwr_oncontext vwr_...
-            // pano.addLayer(test)
+            const testMesh = new THREE.Mesh();
 
+            testMesh.vwr_onclick = function () {
+                console.log("vwr_onclick is triggered.");
+            }
+
+            testMesh.vwr_oncontext = function () {
+                console.log("vwr_oncontext is triggered.");
+            }
+
+            testMesh.vwr_onpointerenter = function () {
+                console.log("vwr_onpointerenter is triggered.");
+            }
+
+            testMesh.vwr_onpointerleave = function () {
+                console.log("vwr_onpointerleave is triggered.");
+            }
+
+            // pano.addLayer(test)
             // panoDiv.eventListener(onMove, check with raycaster if cursor over sphere, call vwr_onpointerenter or vwr_onpointerleave)
             // panoDiv.eventListener(onClick, check with raycaster if cursor over sphere, call vwr_onclick)
             // panoDiv.eventListener(onRightClick, check with raycaster if cursor over sphere, call vwr_oncontext )
@@ -62,7 +79,7 @@ export class ViewerAPI {
             this.renderer.sortObjects = false;
 
             panoDiv.appendChild(this.renderer.domElement);
-            
+
             // start animation loop
             this.animate();
         });
@@ -81,12 +98,12 @@ export class ViewerAPI {
 
         let minDistance = 1000000000;
         let bestImg;
-        
+
         this.floor.currentFloor.viewerImages.forEach(element => {
             const currLocalPos = this.toLocal(element.pos);
             const [dx, dz] = [localPos.x - currLocalPos.x, localPos.z - currLocalPos.z];
             const currDistance = Math.sqrt(dx * dx + dz * dz);
-        
+
             if (currDistance < minDistance) {
                 minDistance = currDistance;
                 bestImg = element;
@@ -160,7 +177,7 @@ export class ViewerAPI {
         // The more accurate calculation breaks the pixel offset on the pre-created maps
         const dx = 71.5 * (this.floor.origin[0] - globalCoords[0]);
         const dz = 111.3 * (this.floor.origin[1] - globalCoords[1]);
-        
+
         return new this.THREE.Vector3(
             dx * 1000,
             globalCoords[2] + this.floor.currentFloor.z,
