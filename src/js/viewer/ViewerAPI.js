@@ -42,12 +42,9 @@ export class ViewerAPI {
 
             this.pano = new ViewerPanoAPI(this);
             this.map = new ViewerMapAPI(this);
-
+        }).then(() => {
             // the only html element we work with (the pano-viewer div)
-            const container = document.getElementById('pano-viewer');
-
-            console.log("init")
-            this.pano.initMap(this.map);
+            const panoDiv = document.getElementById('pano-viewer');
 
             // create the renderer, and embed the attributed dom element in the html page
             this.renderer = new THREE.WebGLRenderer();
@@ -56,14 +53,11 @@ export class ViewerAPI {
             this.renderer.autoClear = false; // To allow render overlay on top of panorama scene
             this.renderer.sortObjects = false;
 
-            container.appendChild(this.renderer.domElement);
+            panoDiv.appendChild(this.renderer.domElement);
             
             // start animation loop
             this.animate();
         });
-
-        console.log(this.getMap());
-
     }
 
     animate() {
@@ -71,8 +65,6 @@ export class ViewerAPI {
         this.pano.view(this.pano.viewerViewState.lonov, this.pano.viewerViewState.latov, this.pano.viewerViewState.fov);
         this.renderer.clear();
         this.renderer.render(this.pano.scene, this.pano.camera);
-        this.renderer.clearDepth();
-        this.renderer.render(this.map.scene, this.map.camera);
     }
 
     //Move the view to the nearest (euclidian distance) panorama to the given position. (ignore z value because only called on same floor)
@@ -96,7 +88,6 @@ export class ViewerAPI {
         // avoid duplication
         if (bestImg != this.image.currentImage) {
             this.pano.display(bestImg.id);
-            console.log("move")
             this.map.redraw();
             return bestImg;
         }
@@ -145,12 +136,12 @@ export class ViewerAPI {
     // Convert the local metric three.js coordinates used by the viewer to WGS 84 coordinates [longitude, latitude, z].
     toGlobal(localCoords) {
         // localCoords : THREE.Vector3 // Local coordinates used by the viewer
-        const globalX = this.floor.origin[0] - (localCoords.x / 71.5);
-        const globalY = this.floor.origin[1] - (localCoords.y / 111.3);
-        const globalZ = localCoords.z - this.floor.currentFloor.z;
+        const globalX = this.floor.origin[0] - ((localCoords.x / 1000) / 71.5);
+        const globalY = this.floor.origin[1] - ((-localCoords.z / 1000) / 111.3);
+        const globalZ = localCoords.y - this.floor.currentFloor.z;
 
         // the three js scene sees the y axis as the up-down axis so we have to swap with z
-        return [globalX, globalZ, globalY];
+        return [globalX, globalY, globalZ];
         // Returns: [Number] : WGS 84 coordinates [longitude, latitude, z] (z value is floorZ + panoZ, where localCoords is just the panoZ)
     }
 
@@ -160,18 +151,14 @@ export class ViewerAPI {
         // Distance calculation math taken from here https://www.mkompf.com/gps/distcalc.html
         // The more accurate calculation breaks the pixel offset on the pre-created maps
         const dx = 71.5 * (this.floor.origin[0] - globalCoords[0]);
-        const dy = 111.3 * (this.floor.origin[1] - globalCoords[1]);
+        const dz = 111.3 * (this.floor.origin[1] - globalCoords[1]);
         
         return new this.THREE.Vector3(
             dx * 1000,
             globalCoords[2] + this.floor.currentFloor.z,
-            dy * 1000);
+            -dz * 1000);
     }
 
     // TODO: swap() and big(wanted)
-
-    getMap(){
-        return this.map
-    }
 
 }

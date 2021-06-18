@@ -14,15 +14,6 @@ export class ViewerMapAPI {
 
         viewerAPI.floor.viewerMapAPI = this; // set reference to mapAPI in floorAPI
 
-        this.scene = new THREE.Scene(); // scene THREE.Scene scene overlayed over the map (2D) view
-        this.camera = new THREE.OrthographicCamera(
-            - window.innerWidth / 2,    // frustum left plane 
-            window.innerWidth / 2,      // frustum right plane
-            window.innerHeight / 2,     // frustum top plane
-            - window.innerHeight / 2,   // frustum bottom plane
-            1,                          // frustum near plane
-            10);                        // frustum far plane
-
         this.baseURL = viewerAPI.baseURL;
 
         // create Map and Layers
@@ -38,6 +29,10 @@ export class ViewerMapAPI {
         this.lastLayerDirection = [];
 
         this.redraw();
+
+        this.viewerAPI = viewerAPI;
+        let map = document.getElementById('map');
+        map.addEventListener('dblclick', (event) => this.onDoubleClick(event));
     }
 
     // Method: Add an event layer to the map (2D) view.
@@ -79,7 +74,7 @@ export class ViewerMapAPI {
                 new ol.control.FullScreen(),
             ]),
             //Disable Zoom Control on MAP
-            interactions: ol.interaction.defaults({ mouseWheelZoom: false }),
+            interactions: ol.interaction.defaults({doubleClickZoom :false}),
         });
 
         // create image layers for each floors 
@@ -188,11 +183,13 @@ export class ViewerMapAPI {
 
         this.map.addLayer(vectorLayerRed);
 
+        // set view to middle
+        this.setMiddle(this.posLon,this.posLan);
+
         // save last vector layers for deleting next time
         this.lastVectorLayer = currentVectorLayer;
         this.lastVectorLayerRed = vectorLayerRed;
 
-        // disable init
         this.show_direction();
         this.init = false;
     }
@@ -237,7 +234,6 @@ export class ViewerMapAPI {
         });
 
         this.lastLayerDirection = vectorLayerTriangleVertex;
-       // this.addLayer(this.lastLayerDirection);
 
         // Draw Triangle Polygon
         let styleTriangle = new ol.style.Style({
@@ -268,9 +264,44 @@ export class ViewerMapAPI {
 
     getLonLanCoordinates(position, mapdata){
         // Compute the latitude and longitude  in reference to the origin in WGS84 and aff offset of the map 
-        let lon = 87000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
-        let lan = 111000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
+        let lon = 71500  *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
+        let lan = 113000  * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
         return [lon, lan]; 
+    }
+
+    getCoordinatesLonLan(position, mapdata){
+        // Compute the coordinate  in reference to the origin from WGS84 Longitude Latitude 
+        let x =  (position[0] -(mapdata.x / mapdata.density) )/71500   +   this.viewerFloorAPI.origin[0];
+        let y =  (position[1] -(mapdata.x / mapdata.density) )/113000  +   this.viewerFloorAPI.origin[1];
+        return [x, y]; 
+    }
+
+    onDoubleClick(event) {
+    
+        // Function to trigger the position change
+        var coord = [];
+        var mousePosition = [];
+        // Update location metadata
+        var mapdata = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
+        var floor = this.viewerFloorAPI;
+        var z = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].z;
+        var viewerAPI = this.viewerAPI; 
+
+        
+        this.map.on('dblclick', function(event){
+
+            coord = event.coordinate;
+            mousePosition.push( ((coord[0] - (mapdata.x / mapdata.density)) / 71500 ) + floor.origin[0] );
+            mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / 113000 ) + floor.origin[1]);
+
+            // move 
+            viewerAPI.move(mousePosition[0],mousePosition[1],z);
+
+        })
+    }
+
+    setMiddle(poslon, poslan){
+            this.map.getView().setCenter([poslon,poslan]);
     }
 }
 
