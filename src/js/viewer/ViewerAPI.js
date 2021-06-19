@@ -43,9 +43,12 @@ export class ViewerAPI {
             this.pano = new ViewerPanoAPI(this);
             this.map = new ViewerMapAPI(this);
         }).then(() => {
-            // const test = THREE.Mesh(...);
-            // add the methods to test .vwr_oncontext vwr_...
-            const testMesh = new THREE.Mesh();
+            // --- EventMesh TEST ---
+            // visual test, spawn in white sphere at first image position in scene
+            const sphere = new THREE.SphereGeometry(1 / 5, 10, 10);
+            const testMesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial());
+            const startPos = this.toLocal(this.image.currentImage.pos);
+            testMesh.position.set(startPos.x, startPos.y - 2, startPos.z);
 
             testMesh.vwr_onclick = function () {
                 console.log("vwr_onclick is triggered.");
@@ -63,10 +66,12 @@ export class ViewerAPI {
                 console.log("vwr_onpointerleave is triggered.");
             }
 
-            // pano.addLayer(test)
+            this.pano.addLayer(testMesh);
             // panoDiv.eventListener(onMove, check with raycaster if cursor over sphere, call vwr_onpointerenter or vwr_onpointerleave)
             // panoDiv.eventListener(onClick, check with raycaster if cursor over sphere, call vwr_onclick)
             // panoDiv.eventListener(onRightClick, check with raycaster if cursor over sphere, call vwr_oncontext )
+
+            // --- ---
 
             // the only html element we work with (the pano-viewer div)
             const panoDiv = document.getElementById('pano-viewer');

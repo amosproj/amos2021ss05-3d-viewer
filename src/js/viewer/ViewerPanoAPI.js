@@ -12,7 +12,8 @@ export class ViewerPanoAPI {
         this.camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
         this.viewerImageAPI = viewerAPI.image;
         this.viewerAPI = viewerAPI;
-        this.sphereRadius = 5;
+        this.sphereRadius = 10;
+        this.addedLayers = new Set(); // EventMesh and EventLayer objects added via addLayer();
 
         this.viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0);
         this.lastViewState;
@@ -109,6 +110,23 @@ export class ViewerPanoAPI {
         this.camera.updateProjectionMatrix();
     }
 
+    // Add an event layer to the panorama (3D) viewer.
+    // param: EventLayer (or EventMesh) to add
+    addLayer(layer) { 
+        if (!layer) return;
+        if (this.addedLayers.has(layer)) return;
+        
+        this.scene.add(layer);
+        this.addedLayers.add(layer);
+    }
+
+    removeLayer(layer) {
+        if (!layer) return;
+        if (!this.addedLayers.has(layer)) return;
+
+        this.scene.remove(layer);
+        this.addedLayers.delete(layer);
+    }
 
     // ----- Event handling functions for panning, zooming and moving -----
     onPointerDown(event) {
