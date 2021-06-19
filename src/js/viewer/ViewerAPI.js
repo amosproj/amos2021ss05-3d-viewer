@@ -7,6 +7,7 @@ import { ViewerMapAPI } from "./ViewerMapAPI.js"
 import { ViewerState } from "./ViewerState.js";
 import { libraryInfo } from "./LibraryInfo.js";
 import { ViewerVersionAPI } from "./ViewerVersionAPI.js";
+import { ViewerContextItem } from "./ViewerContextItem.js";
 
 
 // API provided by the viewer
@@ -50,12 +51,30 @@ export class ViewerAPI {
             const startPos = this.toLocal(this.image.currentImage.pos);
             testMesh.position.set(startPos.x, startPos.y - 2, startPos.z);
 
-            testMesh.vwr_onclick = function () {
+            testMesh.vwr_onclick = function (xy, position) {
                 console.log("vwr_onclick is triggered.");
+                console.log("Pointer position: " + xy);
+                console.log("Local coordinate for pointer position: " + position);
+                return true;
             }
 
-            testMesh.vwr_oncontext = function () {
+            testMesh.vwr_oncontext = function (xy, position) {
                 console.log("vwr_oncontext is triggered.");
+                console.log("Pointer position: " + xy);
+                console.log("Local coordinate for pointer position: " + position);
+
+                //Creating callback function for context menu item:
+                let callback = function (key, options) {
+                    var msg = 'clicked: ' + key;
+                    (window.console && console.log(msg)) || alert(msg);
+                };
+
+                //Creating item objects
+                let itemEdit = new ViewerContextItem(callback, "edit", null, "Edit");
+                let itemCut = new ViewerContextItem(callback, "cut", null, "Cut");
+
+                //Creating list of item objects.
+                return [itemEdit, itemCut];
             }
 
             testMesh.vwr_onpointerenter = function () {
