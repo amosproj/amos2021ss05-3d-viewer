@@ -14,6 +14,7 @@ export class ViewerPanoAPI {
         this.viewerAPI = viewerAPI;
         this.sphereRadius = 10;
         this.addedLayers = new Set(); // EventMesh and EventLayer objects added via addLayer();
+        this.raycaster = new THREE.Raycaster();
 
         this.viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0);
         this.lastViewState;
@@ -35,7 +36,11 @@ export class ViewerPanoAPI {
         panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
 
-        $('#pano-viewer').mousedown((event) => this.onRightClick(event));
+        panoViewer.addEventListener('click', (event) => this.meshCheckClick(event));
+        panoViewer.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+            this.meshCheckRightClick(event);
+        });
 
         this.display(this.viewerImageAPI.currentImageId);
     }
@@ -183,22 +188,65 @@ export class ViewerPanoAPI {
         this.viewerAPI.propagateEvent("moved", this.viewerImageAPI.currentImage.id, true);
     }
 
-    onRightClick(event) {
-        //if right mouse is clicked:
-        if (event.which == 3) {
+    // ---- event handeling functions for EventMesh / EventLayer API interaction ----
+    getIntersectingMeshes(event) {
+        // calculate mouse position in normalized device coordinates
+        // (-1 to +1) for both components
+        const mouse = new THREE.Vector2();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+        
+        // update the picking ray with the camera and mouse position
+        this.raycaster.setFromCamera(mouse, this.camera);
 
-            //get the current pointer position:
-            const xy = new EventPosition(event);
+        // calculate objects intersecting the picking ray
+        const intersects = this.raycaster.intersectObjects(this.scene.children);
+        
+        // include only objects that are added meshes
+        const meshes = [];
+        for (const e in intersects) {
+            if (this.addedLayers.has(intersects[e].object)) {
+                meshes.push(intersects[e]);
+            }
+        }
 
+        return meshes;
+    }
+    
+    meshCheckClick(event) {
+        const meshes = this.getIntersectingMeshes(event);
+        const xy = new EventPosition(event);
+        const location = this.getCursorLocation(event);
 
-            //get the position of pointer in scene:
-            const location = this.getCursorLocation(event);
+        for (let i = 0; i < meshes.length; i++) {
+            const mesh = meshes[i].object;
 
-            //Set up the context menu:
-            $.contextMenu({
-                selector: '#pano-viewer',
-                items: this.eventLayer.vwr_oncontext(xy, location),
-            });
+            if (typeof mesh.vwr_onclick == "function") {
+                mesh.vwr_onclick(xy, location);
+            }
+
+            mesh.material.color.set(0xff0000); // as a test set color red
+        }
+    }
+
+    meshCheckRightClick(event) {
+        const meshes = this.getIntersectingMeshes(event);
+        const xy = new EventPosition(event);
+        const location = this.getCursorLocation(event);
+
+        for (let i = 0; i < meshes.length; i++) {
+            const mesh = meshes[i].object;
+
+            if (typeof mesh.vwr_oncontext == "function") {
+                const callback = mesh.vwr_oncontext(xy, location);
+                
+                $.contextMenu({
+                    selector: '#pano-viewer',
+                    items: callback,
+                });
+            }
+
+            mesh.material.color.set(0x00ff00); // as a test set color green
         }
     }
 
