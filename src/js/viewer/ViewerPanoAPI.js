@@ -14,6 +14,7 @@ export class ViewerPanoAPI {
         this.viewerAPI = viewerAPI;
         this.sphereRadius = 10;
         this.addedLayers = new Set(); // EventMesh and EventLayer objects added via addLayer();
+        this.preMeshes = new Set(); // meshes that the mouse pointer is currently over
         this.raycaster = new THREE.Raycaster();
 
         this.viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0);
@@ -45,7 +46,6 @@ export class ViewerPanoAPI {
 
 
         this.display(this.viewerImageAPI.currentImageId);
-        this.preMeshes;
     }
 
     // displays the panorama with idx *ImageNum* in the model
@@ -209,7 +209,7 @@ export class ViewerPanoAPI {
         const meshes = [];
         for (const e in intersects) {
             if (this.addedLayers.has(intersects[e].object)) {
-                meshes.push(intersects[e]);
+                meshes.push(intersects[e].object);
             }
         }
 
@@ -222,7 +222,7 @@ export class ViewerPanoAPI {
         const location = this.getCursorLocation(event);
 
         for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i].object;
+            const mesh = meshes[i];
 
             if (typeof mesh.vwr_onclick == "function") {
                 mesh.vwr_onclick(xy, location);
@@ -238,7 +238,7 @@ export class ViewerPanoAPI {
         const location = this.getCursorLocation(event);
 
         for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i].object;
+            const mesh = meshes[i];
 
             if (typeof mesh.vwr_oncontext == "function") {
                 const callback = mesh.vwr_oncontext(xy, location);
@@ -255,56 +255,39 @@ export class ViewerPanoAPI {
 
     meshCheckMouseOver(event) {
         const meshes = this.getIntersectingMeshes(event);
-        //if the current mesh exist.
-        if (meshes.length > 0) {
-            //store the current mesh
-            this.preMeshes = meshes;
-            for (let i = 0; i < meshes.length; i++) {
-                const mesh = meshes[i].object;
+
+        // check for meshes that mouse pointer is no longer over
+        this.preMeshes.forEach((preMesh) => {
+            if (!meshes.includes(preMesh)) {
+                if (typeof preMesh.vwr_onpointerleave == "function") {
+                    // remove the current mesh
+                    this.preMeshes.delete(preMesh); 
+                    
+                    preMesh.vwr_onpointerleave();
+                }
+
+                preMesh.material.color.set(0x0000ff); // as a test set color blue
+            }
+        });
+
+        // check for meshes that mouse pointer is newly over
+        for (let i = 0; i < meshes.length; i++) {
+            const mesh = meshes[i];
+            
+            //if the current mesh has not been entered before.
+            if (!this.preMeshes.has(mesh)) {   
                 if (typeof mesh.vwr_onpointerenter == "function") {
+                    // store the current mesh
+                    this.preMeshes.add(mesh); 
+                    
                     mesh.vwr_onpointerenter();
                 }
 
                 mesh.material.color.set(0xffff00); // as a test set color yellow
+                
             }
         }
-        else {
-            //if previous mesh exists
-            if (this.preMeshes) {
-                for (let i = 0; i < this.preMeshes.length; i++) {
-                    const mesh = this.preMeshes[i].object;
-                    if (typeof mesh.vwr_onpointerleave == "function") {
-                        mesh.vwr_onpointerleave();
-                    }
-
-                    mesh.material.color.set(0x0000FF); // as a test set color blue
-                }
-            }
-
-        }
-
-
-
-        // document.removeEventListener('pointermove', (event) => this.meshCheckMouseOut(event));
-
     }
-
-    // meshCheckMouseOut(event) {
-    //     const meshes = this.getIntersectingMeshes(event);
-    //     for (let i = 0; i < meshes.length; i++) {
-    //         const mesh = meshes[i].object;
-
-    //         if (typeof mesh.vwr_onpointerleave == "function") {
-    //             mesh.vwr_onpointerleave();
-    //         }
-
-    //         mesh.material.color.set(0x0000FF); // as a test set color blue
-    //     }
-
-    // }
-
-
-
 
     // returns: the depth information (in meter) of the panorama at the current curser position (event.clientX, event.clientY)
     depthAtPointer(event) {
