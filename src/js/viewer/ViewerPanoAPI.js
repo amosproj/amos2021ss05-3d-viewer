@@ -45,6 +45,7 @@ export class ViewerPanoAPI {
 
 
         this.display(this.viewerImageAPI.currentImageId);
+        this.preMeshes;
     }
 
     // displays the panorama with idx *ImageNum* in the model
@@ -254,35 +255,50 @@ export class ViewerPanoAPI {
 
     meshCheckMouseOver(event) {
         const meshes = this.getIntersectingMeshes(event);
-        for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i].object;
+        if (meshes.length > 0) {
+            this.preMeshes = meshes;
+            for (let i = 0; i < meshes.length; i++) {
+                const mesh = meshes[i].object;
+                if (typeof mesh.vwr_onpointerenter == "function") {
+                    mesh.vwr_onpointerenter();
+                }
 
-            if (typeof mesh.vwr_onpointerenter == "function") {
-                mesh.vwr_onpointerenter();
+                mesh.material.color.set(0xffff00); // as a test set color yellow
+            }
+        }
+        else {
+            if (this.preMeshes) {
+                for (let i = 0; i < this.preMeshes.length; i++) {
+                    const mesh = this.preMeshes[i].object;
+                    if (typeof mesh.vwr_onpointerleave == "function") {
+                        mesh.vwr_onpointerleave();
+                    }
+
+                    mesh.material.color.set(0x0000FF); // as a test set color blue
+                }
             }
 
-            mesh.material.color.set(0xffff00); // as a test set color yellow
         }
 
-        document.removeEventListener('pointermove', (event) => this.meshCheckMouseOut(event));
+
+
+        // document.removeEventListener('pointermove', (event) => this.meshCheckMouseOut(event));
 
     }
 
-    meshCheckMouseOut(event) {
-        const meshes = this.getIntersectingMeshes(event);
-        for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i].object;
+    // meshCheckMouseOut(event) {
+    //     const meshes = this.getIntersectingMeshes(event);
+    //     for (let i = 0; i < meshes.length; i++) {
+    //         const mesh = meshes[i].object;
 
-            if (typeof mesh.vwr_onpointerleave == "function") {
-                mesh.vwr_onpointerleave();
-            }
+    //         if (typeof mesh.vwr_onpointerleave == "function") {
+    //             mesh.vwr_onpointerleave();
+    //         }
 
-            mesh.material.color.set(0x0000FF); // as a test set color blue
-        }
-        //document.addEventListener('pointerenter', (event) => this.meshCheckMouseOver(event));
-        //document.addEventListener('pointerleave', (event) => this.meshCheckMouseOut(event));
+    //         mesh.material.color.set(0x0000FF); // as a test set color blue
+    //     }
 
-    }
+    // }
 
 
 
