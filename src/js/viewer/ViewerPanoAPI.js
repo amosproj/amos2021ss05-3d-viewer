@@ -284,7 +284,6 @@ export class ViewerPanoAPI {
                 }
 
                 mesh.material.color.set(0xffff00); // as a test set color yellow
-                
             }
         }
     }
@@ -356,33 +355,6 @@ export class ViewerPanoAPI {
         return [adjustedLonov, adjustedLatov];
     }
 
-    visualTest(event) {
-        console.info(this.viewerViewState);
-        console.info(this.camera.getWorldDirection());
-        console.info("current img original global ", this.viewerImageAPI.currentImage.pos)
-        const loc = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
-        console.info("current img pos loc ", loc);
-        const b = this.viewerAPI.toGlobal(loc);
-        console.info("back to global ", b);
-        const bb = this.viewerAPI.toLocal(b);
-        console.info("and back to loc one more time ", bb);
-
-        // visual test, spawn in white sphere at cursor position in scene
-        const direction = this.getCursorLocation(event);
-        const sphere = new THREE.SphereGeometry(1 / this.depthAtPointer(event), 10, 10);
-        const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial());
-        mesh.position.set(direction.x, direction.y, direction.z);
-
-        if (this.testMesh != null) {
-            this.scene.remove(this.testMesh);
-        }
-
-        this.scene.add(mesh);
-
-        this.testMesh = mesh;
-
-        console.info("current sphere pos ", direction);
-    }
 }
 
 
