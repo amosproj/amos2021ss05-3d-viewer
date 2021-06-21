@@ -255,7 +255,9 @@ export class ViewerPanoAPI {
 
     meshCheckMouseOver(event) {
         const meshes = this.getIntersectingMeshes(event);
+        //if the current mesh exist.
         if (meshes.length > 0) {
+            //store the current mesh
             this.preMeshes = meshes;
             for (let i = 0; i < meshes.length; i++) {
                 const mesh = meshes[i].object;
@@ -267,6 +269,7 @@ export class ViewerPanoAPI {
             }
         }
         else {
+            //if previous mesh exists
             if (this.preMeshes) {
                 for (let i = 0; i < this.preMeshes.length; i++) {
                     const mesh = this.preMeshes[i].object;
