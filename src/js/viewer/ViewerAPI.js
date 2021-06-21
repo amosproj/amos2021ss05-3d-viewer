@@ -53,15 +53,15 @@ export class ViewerAPI {
 
             testMesh.vwr_onclick = function (xy, position) {
                 console.log("vwr_onclick is triggered.");
-                console.log("Pointer position: " + xy);
-                console.log("Local coordinate for pointer position: " + position);
+                console.log("Pointer position: " , xy);
+                console.log("Local coordinate for pointer position: " , position);
                 return true;
             }
 
             testMesh.vwr_oncontext = function (xy, position) {
                 console.log("vwr_oncontext is triggered.");
-                console.log("Pointer position: " + xy);
-                console.log("Local coordinate for pointer position: " + position);
+                console.log("Pointer position: " , xy);
+                console.log("Local coordinate for pointer position: " , position);
 
                 //Creating callback function for context menu item:
                 let callback = function (key, options) {
