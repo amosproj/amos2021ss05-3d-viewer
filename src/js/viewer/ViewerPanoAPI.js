@@ -261,7 +261,7 @@ export class ViewerPanoAPI {
             if (!meshes.includes(preMesh)) {
                 if (typeof preMesh.vwr_onpointerleave == "function") {
                     // remove the current mesh
-                    this.preMeshes.delete(preMesh); 
+                    this.preMeshes.delete(preMesh);
                     
                     preMesh.vwr_onpointerleave();
                 }
@@ -273,10 +273,10 @@ export class ViewerPanoAPI {
             const mesh = meshes[i];
             
             //if the current mesh has not been entered before.
-            if (!this.preMeshes.has(mesh)) {   
+            if (!this.preMeshes.has(mesh)) {
                 if (typeof mesh.vwr_onpointerenter == "function") {
                     // store the current mesh
-                    this.preMeshes.add(mesh); 
+                    this.preMeshes.add(mesh);
                     
                     mesh.vwr_onpointerenter();
                 }
