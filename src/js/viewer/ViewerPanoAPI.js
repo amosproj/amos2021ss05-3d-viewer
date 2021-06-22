@@ -1,14 +1,12 @@
 "use strict";
 
 import { ViewerViewState } from "./ViewerViewState.js";
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED, LON_SCALAR, LAN_SCALAR } from "./ViewerConfig.js";
-import { EventLayer } from "./EventLayer.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED} from "./ViewerConfig.js";
 import { EventPosition } from "./EventPosition.js";
 
 export class ViewerPanoAPI {
 
     constructor(viewerAPI) {
-        this.viewerImageAPI = viewerAPI.image;
         this.viewerAPI = viewerAPI;
         this.addedLayers = new Set(); // EventMesh and EventLayer objects added via addLayer();
 
@@ -16,7 +14,6 @@ export class ViewerPanoAPI {
         this.camera = new THREE.PerspectiveCamera(DEFAULT_FOV, window.innerWidth / window.innerHeight, 1, 1100);
         this.camera.up = new THREE.Vector3(0, 0, 1);
         this.sphereRadius = 10;
-        this.preMeshes = new Set(); // meshes that the mouse pointer is currently over
 
         // property needed for display method 
         this.loadedMesh = null;
@@ -38,6 +35,7 @@ export class ViewerPanoAPI {
         this.oPU = () => this.onPointerUp();
         
         // handeling EventMesh / EventLayer API integration
+        this.preMeshes = new Set(); // meshes that the mouse pointer is currently over
         panoViewer.addEventListener('click', (event) => this.meshCheckClick(event));
         panoViewer.addEventListener('contextmenu', (event) => {
             event.preventDefault();
@@ -46,12 +44,12 @@ export class ViewerPanoAPI {
         panoViewer.addEventListener('pointermove', (event) => this.meshCheckMouseOver(event));
 
 
-        this.display(this.viewerImageAPI.currentImageId);
+        this.display(this.viewerAPI.image.currentImageId);
     }
 
     // displays the panorama with idx *ImageNum* in the model
     display(imageNum) {
-        this.viewerImageAPI.currentImageId = imageNum;
+        this.viewerAPI.image.currentImageId = imageNum;
 
         // create sphere
         const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
@@ -72,8 +70,8 @@ export class ViewerPanoAPI {
         const image = new Image();
         //image.crossOrigin = "use-credentials";
         image.src = this.viewerAPI.baseURL +
-            Math.trunc(this.viewerImageAPI.currentImage.id / 100) + '/' +
-            this.viewerImageAPI.currentImage.id + 'd.png';
+            Math.trunc(imageNum / 100) + '/' +
+            imageNum + 'd.png';
 
         image.addEventListener('load', () => {
             this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
@@ -84,10 +82,10 @@ export class ViewerPanoAPI {
         const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
 
         // adjust for orientation offset
-        mesh.applyQuaternion(this.viewerImageAPI.currentImage.orientation);
+        mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
 
         // put in the correct position in the scene
-        const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
+        const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
         mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
 
         // check if other panorama was previously already loaded
@@ -111,7 +109,7 @@ export class ViewerPanoAPI {
         const normalizedViewingDirection = lonLatToLocal(lonov, latov);
 
         // adjust looking direction for offset of current mesh in scene
-        const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
+        const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
 
         this.camera.lookAt(localCoord.add(normalizedViewingDirection));
 
@@ -177,13 +175,13 @@ export class ViewerPanoAPI {
     }
 
     onDoubleClick(event) {
-        const currentPos = this.viewerImageAPI.currentImage.pos;
+        const currentPos = this.viewerAPI.image.currentImage.pos;
         const newLocalPos = this.getCursorLocation(event);
         const newPos = this.viewerAPI.toGlobal(newLocalPos);
 
         this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
 
-        this.viewerAPI.propagateEvent("moved", this.viewerImageAPI.currentImage.id, true);
+        this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
     }
 
     onWindowResize() {
@@ -283,7 +281,7 @@ export class ViewerPanoAPI {
     depthAtPointer(event) {
         const raycaster = this.getRaycaster(event);
         // because depth map is not rotated by quaternion like panorama mesh, the quaternion adjustment need to happen first
-        const mappedCursorDirection = raycaster.ray.direction.applyQuaternion(this.viewerImageAPI.currentImage.orientation);
+        const mappedCursorDirection = raycaster.ray.direction.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
         const [cursorLon, cursorLat] = localToLonLat(mappedCursorDirection);
 
         // adjust to calculate pixel offset on image, values in [0;360, -90;90]
@@ -347,7 +345,7 @@ const localToLonLat = (vec) => {
     const phi = Math.acos(vec.z);
     const theta = Math.atan2(-vec.y, -vec.x);
 
-    let latov = THREE.MathUtils.radToDeg(phi);
+    const latov = THREE.MathUtils.radToDeg(phi);
     const lonov = (THREE.MathUtils.radToDeg(theta) + 360) % 360;
 
     return [lonov, 90 - latov];
