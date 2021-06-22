@@ -227,8 +227,6 @@ export class ViewerPanoAPI {
             if (typeof mesh.vwr_onclick == "function") {
                 mesh.vwr_onclick(xy, location);
             }
-
-            mesh.material.color.set(0xff0000); // as a test set color red
         }
     }
 
@@ -248,8 +246,6 @@ export class ViewerPanoAPI {
                     items: callback,
                 });
             }
-
-            mesh.material.color.set(0x00ff00); // as a test set color green
         }
     }
 
@@ -265,8 +261,6 @@ export class ViewerPanoAPI {
                     
                     preMesh.vwr_onpointerleave();
                 }
-
-                preMesh.material.color.set(0x0000ff); // as a test set color blue
             }
         });
 
@@ -282,8 +276,6 @@ export class ViewerPanoAPI {
                     
                     mesh.vwr_onpointerenter();
                 }
-
-                mesh.material.color.set(0xffff00); // as a test set color yellow
             }
         }
     }

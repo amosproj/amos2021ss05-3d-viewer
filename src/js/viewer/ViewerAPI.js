@@ -52,6 +52,7 @@ export class ViewerAPI {
             testMesh.position.set(startPos.x, startPos.y - 2, startPos.z);
 
             testMesh.vwr_onclick = function (xy, position) {
+                this.material.color.set(0xff0000); // as a test set color red
                 console.log("vwr_onclick is triggered.");
                 console.log("Pointer position: " , xy);
                 console.log("Local coordinate for pointer position: " , position);
@@ -59,6 +60,7 @@ export class ViewerAPI {
             }
 
             testMesh.vwr_oncontext = function (xy, position) {
+                this.material.color.set(0x00ff00); // as a test set color green
                 console.log("vwr_oncontext is triggered.");
                 console.log("Pointer position: " , xy);
                 console.log("Local coordinate for pointer position: " , position);
@@ -78,18 +80,16 @@ export class ViewerAPI {
             }
 
             testMesh.vwr_onpointerenter = function () {
+                this.material.color.set(0xffff00); // as a test set color yellow
                 console.log("vwr_onpointerenter is triggered.");
             }
 
             testMesh.vwr_onpointerleave = function () {
+                this.material.color.set(0x0000ff); // as a test set color blue
                 console.log("vwr_onpointerleave is triggered.");
             }
 
             this.pano.addLayer(testMesh);
-            // panoDiv.eventListener(onMove, check with raycaster if cursor over sphere, call vwr_onpointerenter or vwr_onpointerleave)
-            // panoDiv.eventListener(onClick, check with raycaster if cursor over sphere, call vwr_onclick)
-            // panoDiv.eventListener(onRightClick, check with raycaster if cursor over sphere, call vwr_oncontext )
-
             // --- ---
 
             // the only html element we work with (the pano-viewer div)
