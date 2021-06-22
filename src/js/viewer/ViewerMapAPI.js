@@ -1,6 +1,6 @@
 "use strict";
 
-import { MAX_FOV, SCALING_MAP, MAP_ZOOM } from "./ViewerConfig.js";
+import { MAX_FOV, SCALING_MAP, MAP_ZOOM, LON_SCALAR, LAN_SCALAR } from "./ViewerConfig.js";
 // Map (2D) Viewer API
 
 // Specific API for the Map View
@@ -19,6 +19,7 @@ export class ViewerMapAPI {
         // create Map and Layers
         this.map;
         this.vectorLayer = [];
+        this.fullscreen = new ol.control.FullScreen();
         this.initDisplayMap();
         this.init = true;
 
@@ -29,6 +30,14 @@ export class ViewerMapAPI {
         this.lastLayerDirection = [];
 
         this.redraw();
+
+        this.viewerAPI = viewerAPI;
+        let map = document.getElementById('map');
+        map.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+
+        this.fullscreen.on('propertychange', function(evt){
+            console.log(evt);
+        });
     }
 
     // Method: Add an event layer to the map (2D) view.
@@ -67,11 +76,13 @@ export class ViewerMapAPI {
                 rotate: false
             }).extend([
                 // create fullScreen button
-                new ol.control.FullScreen(),
+                this.fullscreen
             ]),
             //Disable Zoom Control on MAP
-            interactions: ol.interaction.defaults({ mouseWheelZoom: false }),
+            interactions: ol.interaction.defaults({doubleClickZoom :false}),
         });
+
+        
 
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
@@ -179,6 +190,9 @@ export class ViewerMapAPI {
 
         this.map.addLayer(vectorLayerRed);
 
+        // set view to middle
+        this.setMiddle(this.posLon,this.posLan);
+
         // save last vector layers for deleting next time
         this.lastVectorLayer = currentVectorLayer;
         this.lastVectorLayerRed = vectorLayerRed;
@@ -259,9 +273,34 @@ export class ViewerMapAPI {
 
     getLonLanCoordinates(position, mapdata){
         // Compute the latitude and longitude  in reference to the origin in WGS84 and aff offset of the map 
-        let lon = 87000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
-        let lan = 111000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
+        let lon = LON_SCALAR * 1000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
+        let lan = LAN_SCALAR * 1000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
         return [lon, lan]; 
+    }
+
+    onDoubleClick(event) {
+
+        var coord = [];
+        var mousePosition = [];
+        var mapdata = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
+        var floor = this.viewerFloorAPI;
+        var z = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].z;
+        var viewerAPI = this.viewerAPI; 
+        
+        this.map.on('dblclick', function(event){
+
+            coord = event.coordinate;
+            mousePosition.push(((coord[0] - (mapdata.x / mapdata.density)) / (LON_SCALAR * 1000) ) + floor.origin[0]);
+            mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / (LAN_SCALAR * 1000) ) + floor.origin[1]);
+
+            // move 
+            viewerAPI.move(mousePosition[0],mousePosition[1],z);
+
+        })
+    }
+
+    setMiddle(poslon, poslan){
+            this.map.getView().setCenter([poslon,poslan]);
     }
 }
 

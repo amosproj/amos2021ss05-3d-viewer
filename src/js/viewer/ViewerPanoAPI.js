@@ -1,7 +1,7 @@
 "use strict";
 
 import { ViewerViewState } from "./ViewerViewState.js";
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED } from "./ViewerConfig.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED, LON_SCALAR, LAN_SCALAR } from "./ViewerConfig.js";
 import { EventLayer } from "./EventLayer.js";
 import { EventPosition } from "./EventPosition.js";
 
@@ -362,8 +362,8 @@ const newLocationFromPointAngle = (lon1, lat1, angle, distance) => {
     const dx = (distance / 1000) * Math.cos(angle);
     const dy = (distance / 1000) * Math.sin(angle);
 
-    lon2 = lon1 - (dx / 71.5);
-    lat2 = lat1 - (dy / 111.3);
+    lon2 = lon1 - (dx / LON_SCALAR);
+    lat2 = lat1 - (dy / LAN_SCALAR);
 
     return [lon2, lat2];
 }

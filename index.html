@@ -27,6 +27,7 @@
             callback: function(viewerWindow, viewerAsync) {
                 console.info("initial callback called:", viewerWindow, viewerAsync);
                 viewerAsync("../assets/", (api) => {
+
                     console.info("loaded callback called with API:", api);
                 });
             }

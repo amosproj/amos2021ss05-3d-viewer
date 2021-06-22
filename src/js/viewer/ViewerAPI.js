@@ -8,6 +8,7 @@ import { ViewerState } from "./ViewerState.js";
 import { libraryInfo } from "./LibraryInfo.js";
 import { ViewerVersionAPI } from "./ViewerVersionAPI.js";
 import { ViewerContextItem } from "./ViewerContextItem.js";
+import { LON_SCALAR, LAN_SCALAR } from "./ViewerConfig.js";
 
 
 // API provided by the viewer
@@ -140,8 +141,8 @@ export class ViewerAPI {
     // Convert the local metric three.js coordinates used by the viewer to WGS 84 coordinates [longitude, latitude, z].
     toGlobal(localCoords) {
         // localCoords : THREE.Vector3 // Local coordinates used by the viewer
-        const globalX = this.floor.origin[0] - ((localCoords.x / 1000) / 71.5);
-        const globalY = this.floor.origin[1] - ((-localCoords.z / 1000) / 111.3);
+        const globalX = this.floor.origin[0] - ((localCoords.x / 1000) / LON_SCALAR);
+        const globalY = this.floor.origin[1] - ((-localCoords.z / 1000) / LAN_SCALAR);
         const globalZ = localCoords.y - this.floor.currentFloor.z;
 
         // the three js scene sees the y axis as the up-down axis so we have to swap with z
@@ -154,9 +155,9 @@ export class ViewerAPI {
     toLocal(globalCoords) {
         // Distance calculation math taken from here https://www.mkompf.com/gps/distcalc.html
         // The more accurate calculation breaks the pixel offset on the pre-created maps
-        const dx = 71.5 * (this.floor.origin[0] - globalCoords[0]);
-        const dz = 111.3 * (this.floor.origin[1] - globalCoords[1]);
-
+        const dx = LON_SCALAR * (this.floor.origin[0] - globalCoords[0]);
+        const dz = LAN_SCALAR * (this.floor.origin[1] - globalCoords[1]);
+        
         return new this.THREE.Vector3(
             dx * 1000,
             globalCoords[2] + this.floor.currentFloor.z,

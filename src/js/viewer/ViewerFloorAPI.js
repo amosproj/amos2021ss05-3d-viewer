@@ -1,5 +1,8 @@
 "use strict";
 
+import { LON_SCALAR, LAN_SCALAR } from "./ViewerConfig.js";
+
+
 export class ViewerFloorAPI {
    
     constructor(data, viewerAPI) {
@@ -28,7 +31,7 @@ export class ViewerFloorAPI {
                     if (currentImage.id >= interval[0] && currentImage.id <= interval[1]) {
                         currentImage.floor = key;
                         
-                        const [dx, dy] = [71.5 * (data.lon0 - currentImage.pos[0]), 111.3 * (data.lat0 - currentImage.pos[1])];
+                        const [dx, dy] = [LON_SCALAR * (data.lon0 - currentImage.pos[0]), LAN_SCALAR * (data.lat0 - currentImage.pos[1])];
 
                         const offsetX = currentFloor.mapData.x + currentFloor.mapData.density * (dx * 1000);
                         const offsetY = currentFloor.mapData.y - currentFloor.mapData.density * (dy * 1000);
