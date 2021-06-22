@@ -1,7 +1,7 @@
 "use strict";
 
 import { ViewerViewState } from "./ViewerViewState.js";
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED } from "./ViewerConfig.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED, LON_SCALAR, LAN_SCALAR } from "./ViewerConfig.js";
 import { EventLayer } from "./EventLayer.js";
 import { EventPosition } from "./EventPosition.js";
 
@@ -172,8 +172,9 @@ export class ViewerPanoAPI {
             //get the current pointer position:
             const xy = new EventPosition(event);
 
-            //get the viewing direction:
-            const location = this.camera.getWorldDirection();
+
+            //get the position of pointer in scene:
+            const location = this.getCursorLocation(event);
 
             //Set up the context menu:
             $.contextMenu({
@@ -280,16 +281,60 @@ export class ViewerPanoAPI {
     }
 }
 
+
 // takes in a location (in lot/lat), a direction (as a *angle*[rad, in birds eye view), and a distance (in meters) to move in the direction
-function newLocationFromPointAngle(lon1, lat1, angle, distance) {
+const newLocationFromPointAngle = (lon1, lat1, angle, distance) => {
     // angle: +-0 -> west, +pi/2 -> south, +-pi -> east, -pi/2 -> north
     let lon2, lat2;
 
     const dx = (distance / 1000) * Math.cos(angle);
     const dy = (distance / 1000) * Math.sin(angle);
 
-    lon2 = lon1 - (dx / 71.5);
-    lat2 = lat1 - (dy / 111.3);
+    lon2 = lon1 - (dx / LON_SCALAR);
+    lat2 = lat1 - (dy / LAN_SCALAR);
 
     return [lon2, lat2];
+}
+
+const averagePixelValues = (data) => {
+    const pixels = data.length / 4;
+    let [red, green, blue, alpha] = [0, 0, 0, 0]; // sum of all pixel values
+
+    for (let i = 0; i < data.length; i = i + 4) {
+        red = red + data[i];
+        green = green + data[i + 1];
+        blue = blue + data[i + 2];
+        alpha = alpha + data[i + 3];
+    }
+
+    // get average by dividing
+    red = red / pixels;
+    green = green / pixels;
+    blue = blue / pixels;
+    alpha = alpha / pixels;
+
+    return [red, green, blue, alpha];
+}
+
+// returns a normalized Vector3 pointing in the direction specified by lonov latov
+const lonLatToLocal = (lonov, latov) => {
+    const phi = THREE.MathUtils.degToRad(90 - latov);
+    const theta = THREE.MathUtils.degToRad(lonov);
+    
+    const x = Math.sin(phi) * Math.cos(theta);
+    const y = Math.cos(phi);
+    const z = Math.sin(phi) * Math.sin(theta);
+
+    return new THREE.Vector3(x, y, z);
+}
+
+// inverse operation to above
+const localToLonLat = (vec) => {
+    const phi = Math.acos(vec.y);
+    const theta = Math.atan2(vec.z, vec.x);
+
+    let latov = THREE.MathUtils.radToDeg(phi);
+    const lonov = (THREE.MathUtils.radToDeg(theta) + 360) % 360;
+
+    return [lonov, 90 - latov];
 }
