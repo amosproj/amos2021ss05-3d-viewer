@@ -20,7 +20,7 @@ export class ViewerPanoAPI {
 
         //initialize the eventLayer
         this.eventLayer = new EventLayer();
-        
+
         // properties needed for display and depthAtPointer method
         this.loadedMesh = null;
         this.depthCanvas = document.createElement("canvas");
@@ -33,7 +33,7 @@ export class ViewerPanoAPI {
         panoViewer.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
         panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
-
+        window.addEventListener("resize", () => this.onWindowResize());
         $('#pano-viewer').mousedown((event) => this.onRightClick(event));
 
         this.display(this.viewerImageAPI.currentImageId);
@@ -61,9 +61,9 @@ export class ViewerPanoAPI {
         const image = new Image();
         //image.crossOrigin = "use-credentials";
         image.src = this.viewerAPI.baseURL +
-                    Math.trunc(this.viewerImageAPI.currentImage.id / 100) + '/' +
-                    this.viewerImageAPI.currentImage.id + 'd.png';
-        
+            Math.trunc(this.viewerImageAPI.currentImage.id / 100) + '/' +
+            this.viewerImageAPI.currentImage.id + 'd.png';
+
         image.addEventListener('load', () => {
             this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
         }, false);
@@ -71,10 +71,10 @@ export class ViewerPanoAPI {
 
         // put the texture on the spehere and add it to the scene
         const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
-        
+
         // adjust for orientation offset
         mesh.applyQuaternion(this.viewerImageAPI.currentImage.orientation);
-        
+
         // put in the correct position in the scene
         const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
         mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
@@ -86,7 +86,7 @@ export class ViewerPanoAPI {
 
         this.scene.add(mesh);
         this.loadedMesh = mesh;
-        
+
         // put camera inside sphere mesh
         this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
     }
@@ -123,7 +123,7 @@ export class ViewerPanoAPI {
     // handles continues update of the distance mouse moved
     onPointerMove(event) {
         const scalingFactor = this.camera.fov / MAX_FOV;
-    
+
         this.viewerViewState.setLonov((this.lastMousePos[0] - event.clientX) * PAN_SPEED * scalingFactor + this.lastViewState[0]);
         this.viewerViewState.setLatov((event.clientY - this.lastMousePos[1]) * PAN_SPEED * scalingFactor + this.lastViewState[1]);
 
@@ -140,7 +140,7 @@ export class ViewerPanoAPI {
 
     onDocumentMouseWheel(event) {
         this.viewerViewState.fov = this.camera.fov + event.deltaY * ZOOM_SPEED;
-    
+
         this.view(this.viewerViewState.lonov, this.viewerViewState.latov, this.viewerViewState.fov);
         this.camera.updateProjectionMatrix();
 
@@ -156,13 +156,20 @@ export class ViewerPanoAPI {
 
         // convertedAngle converted to represent directions like specified in newLocationFromPointAngle
         const convertedAngle = (adjustedLonov < 180) ? -adjustedLonov : 360 - adjustedLonov;
-        
+
         const currentPos = this.viewerImageAPI.currentImage.pos;
-        
+
         const newPos = newLocationFromPointAngle(currentPos[0], currentPos[1], THREE.Math.degToRad(convertedAngle), distance);
         this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
 
         this.viewerAPI.propagateEvent("moved", this.viewerImageAPI.currentImage.id, true);
+    }
+    onWindowResize() {
+
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     onRightClick(event) {
@@ -197,7 +204,7 @@ export class ViewerPanoAPI {
         // pixel offsets in depth map at current curser position
         const pixelX = Math.trunc((realLonov / 360) * this.depthCanvas.width);
         const pixelY = Math.trunc((realLatov + 90) / 180 * this.depthCanvas.height);
-        
+
         const offsetX = (pixelX >= 2) ? pixelX - 2 : 0;
         const offsetY = (pixelY >= 2) ? pixelY - 2 : 0;
 
@@ -223,7 +230,7 @@ export class ViewerPanoAPI {
         // param: event.x event.y current cursor position on screen
         const [adjustedLonov, adjustedLatov] = this.getAdjustedViewstate(event);
         const normalizedLocalViewingDir = lonLatToLocal(adjustedLonov, adjustedLatov);
-        
+
         // adjust looking direction for offset of current mesh in scene
         const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
 
@@ -245,10 +252,10 @@ export class ViewerPanoAPI {
         // vertical (latov) : image top -> 85, image bottom -> -85
         const horizontalOffset = (event.clientX - halfWidth) / halfWidth; // scaled between [-1,1] depending how left-right the mouse click is on the screen
         const verticalOffset = (halfHeight - event.clientY) / halfHeight; // scaled between [-1,1] depending how up-down the mouse click is on the screen
-        
+
         const adjustedLonov = ((this.viewerViewState.lonov + (horizontalOffset * this.viewerViewState.fov / 2)) + 360) % 360;
         const adjustedLatov = Math.max(-85, Math.min(85, this.viewerViewState.latov + (verticalOffset * this.viewerViewState.fov / 2)));
-        
+
         return [adjustedLonov, adjustedLatov];
     }
 
@@ -268,13 +275,13 @@ export class ViewerPanoAPI {
         const sphere = new THREE.SphereGeometry(1 / this.depthAtPointer(event), 10, 10);
         const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial());
         mesh.position.set(direction.x, direction.y, direction.z);
-        
+
         if (this.testMesh != null) {
             this.scene.remove(this.testMesh);
         }
 
         this.scene.add(mesh);
-        
+
         this.testMesh = mesh;
 
         console.info("current sphere pos ", direction);
@@ -320,7 +327,7 @@ const averagePixelValues = (data) => {
 const lonLatToLocal = (lonov, latov) => {
     const phi = THREE.MathUtils.degToRad(90 - latov);
     const theta = THREE.MathUtils.degToRad(lonov);
-    
+
     const x = Math.sin(phi) * Math.cos(theta);
     const y = Math.cos(phi);
     const z = Math.sin(phi) * Math.sin(theta);
