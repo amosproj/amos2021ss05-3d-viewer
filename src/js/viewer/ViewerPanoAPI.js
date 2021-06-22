@@ -109,14 +109,9 @@ export class ViewerPanoAPI {
                 '/' +
                 temp_imageNum +
                 'r3.jpg');
-                console.log("-----------The name of images-------------");
-                console.log(this.loadimages[temp_imageNum]);
-
-                 this.loadtexturePano.push(this.viewerAPI.textureLoader.load(this.loadimages[temp_imageNum]));
-
-                //console.log(this.viewerAPI.textureLoader.load[loadimages[temp_imageNum]]);
+              
+                this.loadtexturePano.push(this.viewerAPI.textureLoader.load(this.loadimages[temp_imageNum]));
                 this.loadtexturePano[temp_imageNum].mapping = THREE.EquirectangularReflectionMapping;
-                console.log(this.loadtexturePano[temp_imageNum].mapping);
                 this.loadmesh.push(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: this.loadtexturePano[temp_imageNum] })));
         
             }
