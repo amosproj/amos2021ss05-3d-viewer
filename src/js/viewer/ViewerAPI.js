@@ -7,6 +7,8 @@ import { ViewerMapAPI } from "./ViewerMapAPI.js"
 import { ViewerState } from "./ViewerState.js";
 import { libraryInfo } from "./LibraryInfo.js";
 import { ViewerVersionAPI } from "./ViewerVersionAPI.js";
+import { ViewerContextItem } from "./ViewerContextItem.js";
+import { LON_SCALAR, LAN_SCALAR } from "./ViewerConfig.js";
 
 
 // API provided by the viewer
@@ -27,7 +29,7 @@ export class ViewerAPI {
         this.baseURL = baseURL;
 
         this.listeners = [];
-        
+
         this.renderer;
         // Load the metadata only once
         $.ajax({
@@ -43,6 +45,9 @@ export class ViewerAPI {
             this.pano = new ViewerPanoAPI(this);
             this.map = new ViewerMapAPI(this);
         }).then(() => {
+            this.eventMeshTest();
+            this.eventMeshTest(2);
+            this.eventMeshTest(-2);
             // the only html element we work with (the pano-viewer div)
             const panoDiv = document.getElementById('pano-viewer');
 
@@ -54,7 +59,7 @@ export class ViewerAPI {
             this.renderer.sortObjects = false;
 
             panoDiv.appendChild(this.renderer.domElement);
-            
+
             // start animation loop
             this.animate();
         });
@@ -73,12 +78,12 @@ export class ViewerAPI {
 
         let minDistance = 1000000000;
         let bestImg;
-        
+
         this.floor.currentFloor.viewerImages.forEach(element => {
             const currLocalPos = this.toLocal(element.pos);
-            const [dx, dz] = [localPos.x - currLocalPos.x, localPos.z - currLocalPos.z];
-            const currDistance = Math.sqrt(dx * dx + dz * dz);
-        
+            const [dx, dy, dz] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y, localPos.z - currLocalPos.z];
+            const currDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
             if (currDistance < minDistance) {
                 minDistance = currDistance;
                 bestImg = element;
@@ -136,11 +141,10 @@ export class ViewerAPI {
     // Convert the local metric three.js coordinates used by the viewer to WGS 84 coordinates [longitude, latitude, z].
     toGlobal(localCoords) {
         // localCoords : THREE.Vector3 // Local coordinates used by the viewer
-        const globalX = this.floor.origin[0] - ((localCoords.x / 1000) / 71.5);
-        const globalY = this.floor.origin[1] - ((-localCoords.z / 1000) / 111.3);
-        const globalZ = localCoords.y - this.floor.currentFloor.z;
+        const globalX = this.floor.origin[0] - ((localCoords.x / 1000) / LON_SCALAR);
+        const globalY = this.floor.origin[1] - ((localCoords.y / 1000) / LAN_SCALAR);
+        const globalZ = localCoords.z - this.floor.currentFloor.z;
 
-        // the three js scene sees the y axis as the up-down axis so we have to swap with z
         return [globalX, globalY, globalZ];
         // Returns: [Number] : WGS 84 coordinates [longitude, latitude, z] (z value is floorZ + panoZ, where localCoords is just the panoZ)
     }
@@ -150,13 +154,61 @@ export class ViewerAPI {
     toLocal(globalCoords) {
         // Distance calculation math taken from here https://www.mkompf.com/gps/distcalc.html
         // The more accurate calculation breaks the pixel offset on the pre-created maps
-        const dx = 71.5 * (this.floor.origin[0] - globalCoords[0]);
-        const dz = 111.3 * (this.floor.origin[1] - globalCoords[1]);
+        const dx = LON_SCALAR * (this.floor.origin[0] - globalCoords[0]);
+        const dy = LAN_SCALAR * (this.floor.origin[1] - globalCoords[1]);
         
         return new this.THREE.Vector3(
             dx * 1000,
-            globalCoords[2] + this.floor.currentFloor.z,
-            -dz * 1000);
+            dy * 1000,
+            globalCoords[2] + this.floor.currentFloor.z);
+    }
+
+    eventMeshTest(x = 0, y = 0, z = -2) {
+        // visual test, spawn in white sphere at first image position in scene (offset specified by parameters)
+        const sphere = new THREE.SphereGeometry(1 / 5, 10, 10);
+        const testMesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial());
+        const startPos = this.toLocal(this.image.currentImage.pos);
+        testMesh.position.set(startPos.x + x, startPos.y + y, startPos.z + z);
+
+        testMesh.vwr_onclick = function (xy, position) {
+            this.material.color.set(0xff0000); // as a test set color red
+            console.log("vwr_onclick is triggered.");
+            console.log("Pointer position: " , xy);
+            console.log("Local coordinate for pointer position: " , position);
+            return true;
+        }
+
+        testMesh.vwr_oncontext = function (xy, position) {
+            this.material.color.set(0x00ff00); // as a test set color green
+            console.log("vwr_oncontext is triggered.");
+            console.log("Pointer position: " , xy);
+            console.log("Local coordinate for pointer position: " , position);
+
+            //Creating callback function for context menu item:
+            let callback = function (key, options) {
+                var msg = 'clicked: ' + key;
+                (window.console && console.log(msg)) || alert(msg);
+            };
+
+            //Creating item objects
+            let itemEdit = new ViewerContextItem(callback, "edit", null, "Edit");
+            let itemCut = new ViewerContextItem(callback, "cut", null, "Cut");
+
+            //Creating list of item objects.
+            return [itemEdit, itemCut];
+        }
+
+        testMesh.vwr_onpointerenter = function () {
+            this.material.color.set(0xffff00); // as a test set color yellow
+            console.log("vwr_onpointerenter is triggered.");
+        }
+
+        testMesh.vwr_onpointerleave = function () {
+            this.material.color.set(0x0000ff); // as a test set color blue
+            console.log("vwr_onpointerleave is triggered.");
+        }
+
+        this.pano.addLayer(testMesh);
     }
 
     // TODO: swap() and big(wanted)
