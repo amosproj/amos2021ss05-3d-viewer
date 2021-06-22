@@ -70,35 +70,73 @@ export class ViewerAPI {
     //Move the view to the nearest (euclidian distance) panorama to the given position. (ignore z value because only called on same floor)
     move(lon, lat, z) {
         const localPos = this.toLocal([lon, lat, z]);
+       
 
         let minDistance = 1000000000;
         let bestImg;
-        
+        console.log("------ViewerAPI-------");
+        console.log([lon, lat, z]);
+        console.log(this.floor.currentFloor.viewerImages);
+
+        console.log("The length of viewerImages");
+        console.log((this.floor.currentFloor.viewerImages.length));
+        /* 
+        0: ViewerImage {floorZ: 0, id: 0, pos: Array(3), orientation: At, floor: "EG", …}
+        1: ViewerImage {floorZ: 0, id: 1, pos: Array(3), orientation: At, floor: "EG", …}
+        2: ViewerImage {floorZ: 0, id: 2, pos: Array(3), orientation: At, floor: "EG", …}
+        length: 3
+        __proto__: Array(0)
+        */
+
         this.floor.currentFloor.viewerImages.forEach(element => {
             const currLocalPos = this.toLocal(element.pos);
+            console.log("---------elements----------------");
+            console.log(element);
             const [dx, dz] = [localPos.x - currLocalPos.x, localPos.z - currLocalPos.z];
             const currDistance = Math.sqrt(dx * dx + dz * dz);
-        
+            console.log("-------Distance-------");
+            console.log(currDistance);
+            console.log(minDistance);
             if (currDistance < minDistance) {
                 minDistance = currDistance;
                 bestImg = element;
+                console.log("-----------In the loop of finding the best image--------------")
+                console.log(bestImg);        
             }
+
         });
+        console.log("The best image is :");
+        console.log(bestImg);
 
         // avoid duplication
-         if (bestImg != this.image.currentImage) {
+
+        
+
+        if (bestImg != this.image.currentImage) {
 
             if(this.pano.loadimages!=null){
                 this.pano.loaddisplay(bestImg.id);
+                console.log('showing which images');
+                console.log(bestImg);
                 this.map.redraw();
                 return bestImg;
 
 
             }else{
             this.pano.display(bestImg.id);
+            console.log('showing which images');
+            console.log(bestImg);
             this.map.redraw();
             return bestImg;
             }
+        }
+
+
+
+
+
+
+
     }
 
     /*
