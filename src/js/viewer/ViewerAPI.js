@@ -86,11 +86,19 @@ export class ViewerAPI {
         });
 
         // avoid duplication
-        if (bestImg != this.image.currentImage) {
+         if (bestImg != this.image.currentImage) {
+
+            if(this.pano.loadimages!=null){
+                this.pano.loaddisplay(bestImg.id);
+                this.map.redraw();
+                return bestImg;
+
+
+            }else{
             this.pano.display(bestImg.id);
             this.map.redraw();
             return bestImg;
-        }
+            }
     }
 
     /*
