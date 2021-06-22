@@ -24,7 +24,7 @@ export class ViewerPanoAPI {
         // property needed for depthAtPointer method
         this.depthCanvas = document.createElement("canvas");
 
-        // handeling zooming / panning / moving
+        // handeling zooming / panning / moving / resizing
         const panoViewer = document.getElementById('pano-viewer');
         this.viewerViewState = new ViewerViewState(DEFAULT_FOV, 0, 0);
         this.lastViewState;
@@ -32,6 +32,7 @@ export class ViewerPanoAPI {
         panoViewer.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
         panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+        window.addEventListener("resize", () => this.onWindowResize());
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
@@ -183,6 +184,13 @@ export class ViewerPanoAPI {
         this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
 
         this.viewerAPI.propagateEvent("moved", this.viewerImageAPI.currentImage.id, true);
+    }
+
+    onWindowResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+
+        this.viewerAPI.renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     // ---- event handeling functions for EventMesh / EventLayer API interaction ----
