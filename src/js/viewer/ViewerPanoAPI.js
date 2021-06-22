@@ -209,7 +209,11 @@ export class ViewerPanoAPI {
         const meshes = [];
         for (const e in intersects) {
             if (this.addedLayers.has(intersects[e].object)) {
-                meshes.push(intersects[e].object);
+                // check if mesh is within sphere radius to camera
+                const dist = this.camera.position.distanceTo(intersects[e].object.position);
+                if (dist < this.sphereRadius) {
+                    meshes.push(intersects[e].object);
+                }
             }
         }
 
