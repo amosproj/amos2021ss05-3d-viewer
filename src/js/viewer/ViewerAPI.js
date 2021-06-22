@@ -81,8 +81,8 @@ export class ViewerAPI {
 
         this.floor.currentFloor.viewerImages.forEach(element => {
             const currLocalPos = this.toLocal(element.pos);
-            const [dx, dz] = [localPos.x - currLocalPos.x, localPos.z - currLocalPos.z];
-            const currDistance = Math.sqrt(dx * dx + dz * dz);
+            const [dx, dy, dz] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y, localPos.z - currLocalPos.z];
+            const currDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
             if (currDistance < minDistance) {
                 minDistance = currDistance;
@@ -142,10 +142,9 @@ export class ViewerAPI {
     toGlobal(localCoords) {
         // localCoords : THREE.Vector3 // Local coordinates used by the viewer
         const globalX = this.floor.origin[0] - ((localCoords.x / 1000) / LON_SCALAR);
-        const globalY = this.floor.origin[1] - ((-localCoords.z / 1000) / LAN_SCALAR);
-        const globalZ = localCoords.y - this.floor.currentFloor.z;
+        const globalY = this.floor.origin[1] - ((localCoords.y / 1000) / LAN_SCALAR);
+        const globalZ = localCoords.z - this.floor.currentFloor.z;
 
-        // the three js scene sees the y axis as the up-down axis so we have to swap with z
         return [globalX, globalY, globalZ];
         // Returns: [Number] : WGS 84 coordinates [longitude, latitude, z] (z value is floorZ + panoZ, where localCoords is just the panoZ)
     }
@@ -156,15 +155,15 @@ export class ViewerAPI {
         // Distance calculation math taken from here https://www.mkompf.com/gps/distcalc.html
         // The more accurate calculation breaks the pixel offset on the pre-created maps
         const dx = LON_SCALAR * (this.floor.origin[0] - globalCoords[0]);
-        const dz = LAN_SCALAR * (this.floor.origin[1] - globalCoords[1]);
+        const dy = LAN_SCALAR * (this.floor.origin[1] - globalCoords[1]);
         
         return new this.THREE.Vector3(
             dx * 1000,
-            globalCoords[2] + this.floor.currentFloor.z,
-            -dz * 1000);
+            dy * 1000,
+            globalCoords[2] + this.floor.currentFloor.z);
     }
 
-    eventMeshTest(x = 0, y = -2, z = 0) {
+    eventMeshTest(x = 0, y = 0, z = -2) {
         // visual test, spawn in white sphere at first image position in scene (offset specified by parameters)
         const sphere = new THREE.SphereGeometry(1 / 5, 10, 10);
         const testMesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial());

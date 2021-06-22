@@ -207,7 +207,7 @@ export class ViewerMapAPI {
         var lonov = this.viewerViewState.lonov;
 
         // temporary using 170 degree for correcting the starting zero degree of 2D map
-        var direction = -(lonov + 180) * (Math.PI / 180) % 360;
+        var direction = lonov * (Math.PI / 180) % 360;
 
         // remove prvious vector layers 
         
