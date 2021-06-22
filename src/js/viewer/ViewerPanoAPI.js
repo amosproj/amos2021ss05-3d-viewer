@@ -41,6 +41,18 @@ export class ViewerPanoAPI {
 
     // displays the panorama with idx *ImageNum* in the model
     display(imageNum) {
+        
+        
+        this.loadimages=[];
+
+        this.loadtexturePano=[];
+
+        this.viewerImageAPI.currentImageId = imageNum;
+           
+        this.loadmesh=[];
+        
+        
+        
         this.viewerImageAPI.currentImageId = imageNum;
 
         // create sphere
@@ -89,6 +101,29 @@ export class ViewerPanoAPI {
         
         // put camera inside sphere mesh
         this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+        
+        
+        for(var temp_imageNum=0;temp_imageNum<this.viewerAPI.floor.currentFloor.viewerImages.length;temp_imageNum++){
+               this.loadimages.push(this.viewerAPI.baseURL +
+                Math.trunc(temp_imageNum / 100) +
+                '/' +
+                temp_imageNum +
+                'r3.jpg');
+                console.log("-----------The name of images-------------");
+                console.log(this.loadimages[temp_imageNum]);
+
+                 this.loadtexturePano.push(this.viewerAPI.textureLoader.load(this.loadimages[temp_imageNum]));
+
+                //console.log(this.viewerAPI.textureLoader.load[loadimages[temp_imageNum]]);
+                this.loadtexturePano[temp_imageNum].mapping = THREE.EquirectangularReflectionMapping;
+                console.log(this.loadtexturePano[temp_imageNum].mapping);
+                this.loadmesh.push(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: this.loadtexturePano[temp_imageNum] })));
+        
+            }
+        
+        
+        
+        
     }
 
     camera() {
@@ -279,6 +314,67 @@ export class ViewerPanoAPI {
 
         console.info("current sphere pos ", direction);
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+   loaddisplay(load_imageNum){
+
+   
+    
+        this.viewerImageAPI.currentImageId = load_imageNum;
+    
+    
+    
+        // create sphere
+        const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
+        // invert the geometry on the x-axis so that we look out from the middle of the sphere
+        sphere.scale(-1, 1, 1);
+    
+          
+    
+    
+        // --- load depth-map for panorama ---
+        const image = new Image();
+        //image.crossOrigin = "use-credentials";
+        image.src = this.viewerAPI.baseURL +
+                    Math.trunc(this.viewerImageAPI.currentImage.id / 100) + '/' +
+                    this.viewerImageAPI.currentImage.id + 'd.png';
+        
+        image.addEventListener('load', () => {
+            this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
+        }, false);
+ 
+        const mesh=this.loadmesh[load_imageNum];
+        // adjust for orientation offset
+        mesh.applyQuaternion(this.viewerImageAPI.currentImage.orientation);
+        
+        // put in the correct position in the scene
+        const localCoord = this.viewerAPI.toLocal(this.viewerImageAPI.currentImage.pos);
+        mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
+    
+        // check if other panorama was previously already loaded
+        if (this.loadedMesh != null) {
+            this.scene.remove(this.loadedMesh);
+        }
+    
+        this.scene.add(mesh);
+        this.loadedMesh = mesh;
+        
+        // put camera inside sphere mesh
+        this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+           
+    }
+    
+      
+    
 }
 
 
