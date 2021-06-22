@@ -7,6 +7,7 @@ import { ViewerMapAPI } from "./ViewerMapAPI.js"
 import { ViewerState } from "./ViewerState.js";
 import { libraryInfo } from "./LibraryInfo.js";
 import { ViewerVersionAPI } from "./ViewerVersionAPI.js";
+import { ViewerContextItem } from "./ViewerContextItem.js";
 import { LON_SCALAR, LAN_SCALAR } from "./ViewerConfig.js";
 
 
@@ -28,7 +29,7 @@ export class ViewerAPI {
         this.baseURL = baseURL;
 
         this.listeners = [];
-        
+
         this.renderer;
         // Load the metadata only once
         $.ajax({
@@ -44,6 +45,9 @@ export class ViewerAPI {
             this.pano = new ViewerPanoAPI(this);
             this.map = new ViewerMapAPI(this);
         }).then(() => {
+            this.eventMeshTest();
+            this.eventMeshTest(2);
+            this.eventMeshTest(-2);
             // the only html element we work with (the pano-viewer div)
             const panoDiv = document.getElementById('pano-viewer');
 
@@ -55,7 +59,7 @@ export class ViewerAPI {
             this.renderer.sortObjects = false;
 
             panoDiv.appendChild(this.renderer.domElement);
-            
+
             // start animation loop
             this.animate();
         });
@@ -74,12 +78,12 @@ export class ViewerAPI {
 
         let minDistance = 1000000000;
         let bestImg;
-        
+
         this.floor.currentFloor.viewerImages.forEach(element => {
             const currLocalPos = this.toLocal(element.pos);
             const [dx, dz] = [localPos.x - currLocalPos.x, localPos.z - currLocalPos.z];
             const currDistance = Math.sqrt(dx * dx + dz * dz);
-        
+
             if (currDistance < minDistance) {
                 minDistance = currDistance;
                 bestImg = element;
@@ -158,6 +162,54 @@ export class ViewerAPI {
             dx * 1000,
             globalCoords[2] + this.floor.currentFloor.z,
             -dz * 1000);
+    }
+
+    eventMeshTest(x = 0, y = -2, z = 0) {
+        // visual test, spawn in white sphere at first image position in scene (offset specified by parameters)
+        const sphere = new THREE.SphereGeometry(1 / 5, 10, 10);
+        const testMesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial());
+        const startPos = this.toLocal(this.image.currentImage.pos);
+        testMesh.position.set(startPos.x + x, startPos.y + y, startPos.z + z);
+
+        testMesh.vwr_onclick = function (xy, position) {
+            this.material.color.set(0xff0000); // as a test set color red
+            console.log("vwr_onclick is triggered.");
+            console.log("Pointer position: " , xy);
+            console.log("Local coordinate for pointer position: " , position);
+            return true;
+        }
+
+        testMesh.vwr_oncontext = function (xy, position) {
+            this.material.color.set(0x00ff00); // as a test set color green
+            console.log("vwr_oncontext is triggered.");
+            console.log("Pointer position: " , xy);
+            console.log("Local coordinate for pointer position: " , position);
+
+            //Creating callback function for context menu item:
+            let callback = function (key, options) {
+                var msg = 'clicked: ' + key;
+                (window.console && console.log(msg)) || alert(msg);
+            };
+
+            //Creating item objects
+            let itemEdit = new ViewerContextItem(callback, "edit", null, "Edit");
+            let itemCut = new ViewerContextItem(callback, "cut", null, "Cut");
+
+            //Creating list of item objects.
+            return [itemEdit, itemCut];
+        }
+
+        testMesh.vwr_onpointerenter = function () {
+            this.material.color.set(0xffff00); // as a test set color yellow
+            console.log("vwr_onpointerenter is triggered.");
+        }
+
+        testMesh.vwr_onpointerleave = function () {
+            this.material.color.set(0x0000ff); // as a test set color blue
+            console.log("vwr_onpointerleave is triggered.");
+        }
+
+        this.pano.addLayer(testMesh);
     }
 
     // TODO: swap() and big(wanted)
