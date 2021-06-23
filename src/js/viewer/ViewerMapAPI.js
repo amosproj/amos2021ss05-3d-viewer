@@ -303,7 +303,6 @@ export class ViewerMapAPI {
     }
 
     control_button(){
-        // let menu = document.getElementById('menu');
         var zoom_in = document.getElementById('zoom-in');
         var zoom_out = document.getElementById('zoom-out');
         var full_screen = document.getElementById('full-screen');
