@@ -25,9 +25,9 @@ body {
 #map{
     position: fixed;
     bottom: 1%;
-    right: 3%;
+    right: 1%;
     width: 20%;
-    height:20%;
+    height: 20%;
     color: #fff;
 }
 
@@ -37,9 +37,16 @@ body {
 
 .control-OL{
     position: fixed;
-    bottom:20.5%;
-    right: 3%;
+    bottom: 22%;
+    right: 1%;
     color: #fff;
 }
 
+#menu {
+    float: left;
+    position: absolute;
+    top: 0 px;
+    left: 0%;
+    z-index: 2000;
+}
 
