@@ -310,23 +310,18 @@ export class ViewerMapAPI {
         var map = this.map;
 
         zoom_in.addEventListener('click', function () {
-            console.log("zoom in")
-            console.log(map)
-
             var view = map.getView();
 			var zoom = view.getZoom();
 			view.setZoom(zoom + 1);
         })
 
         zoom_out.addEventListener('click', function () {
-            console.log("zoom out")
             var view = map.getView();
 			var zoom = view.getZoom();
             view.setZoom(zoom - 1);
         })
 
         full_screen.addEventListener('click', function () {
-            console.log("full screen")
             var elem = document.getElementById('map');
             elem.requestFullscreen();
         })
