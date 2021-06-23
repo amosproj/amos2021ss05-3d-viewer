@@ -45,6 +45,7 @@ export class ViewerAPI {
             this.pano = new ViewerPanoAPI(this);
             this.map = new ViewerMapAPI(this);
         }).then(() => {
+            document.addEventListener('mousedown', function (e) { e.preventDefault(); }, false);
             // the only html element we work with (the pano-viewer div)
             const panoDiv = document.getElementById('pano-viewer');
 
