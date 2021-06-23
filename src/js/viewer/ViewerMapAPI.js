@@ -35,9 +35,10 @@ export class ViewerMapAPI {
         let map = document.getElementById('map');
         map.addEventListener('dblclick', (event) => this.onDoubleClick(event));
 
-        this.fullscreen.on('propertychange', function(evt){
-            console.log(evt);
-        });
+        map.addEventListener('fullscreenchange', (event) => {
+            // If map set to full screen, hide the floor setting buttons
+            hideButtons( "floorOL"); 
+          });
     }
 
     // Method: Add an event layer to the map (2D) view.
@@ -304,3 +305,15 @@ export class ViewerMapAPI {
     }
 }
 
+function hideButtons(divId) {
+
+    //let divId = "floorOL"; 
+    var element = document.getElementById(divId); 
+    
+    /* Toggle to hide HTML div */
+    if (element.style.display === "none") {
+      element.style.display = "block";
+    } else {
+      element.style.display = "none";
+    }
+  }
