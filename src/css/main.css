@@ -37,9 +37,19 @@ body {
 
 .control-OL{
     position: fixed;
-    bottom:20.5%;
+    bottom:21%;
     right: 3%;
     color: #fff;
 }
 
+#menu {
+    float: left;
+    position: absolute;
+    top: 0 px;
+    left: 0%;
+    z-index: 2000;
+}
 
+.menu {
+    background-color: white;
+}

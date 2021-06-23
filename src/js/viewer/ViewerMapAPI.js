@@ -19,7 +19,6 @@ export class ViewerMapAPI {
         // create Map and Layers
         this.map;
         this.vectorLayer = [];
-        this.fullscreen = new ol.control.FullScreen();
         this.initDisplayMap();
         this.init = true;
 
@@ -74,11 +73,9 @@ export class ViewerMapAPI {
             }),
             controls: ol.control.defaults({
                 // Hide Map rotation button
-                rotate: false
-            }).extend([
-                // create fullScreen button
-                this.fullscreen
-            ]),
+                rotate: false,
+                zoom: false
+            }),
             //Disable Zoom Control on MAP
             interactions: ol.interaction.defaults({doubleClickZoom :false}),
         });
@@ -301,7 +298,38 @@ export class ViewerMapAPI {
     }
 
     setMiddle(poslon, poslan){
+        console.log(this.map)
             this.map.getView().setCenter([poslon,poslan]);
+    }
+
+    control_button(){
+        // let menu = document.getElementById('menu');
+        var zoom_in = document.getElementById('zoom-in');
+        var zoom_out = document.getElementById('zoom-out');
+        var full_screen = document.getElementById('full-screen');
+        var map = this.map;
+
+        zoom_in.addEventListener('click', function () {
+            console.log("zoom in ")
+            console.log(map)
+
+            var view = map.getView();
+			var zoom = view.getZoom();
+			view.setZoom(zoom + 1);
+        })
+
+        zoom_out.addEventListener('click', function () {
+            console.log("zoom out")
+            var view = map.getView();
+			var zoom = view.getZoom();
+            view.setZoom(zoom - 1);
+        })
+
+        full_screen.addEventListener('click', function () {
+            console.log("full screen")
+            var elem = document.getElementById('map');
+            elem.requestFullscreen();
+        })
     }
 }
 
