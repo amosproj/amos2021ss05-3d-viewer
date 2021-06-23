@@ -38,6 +38,7 @@ export class ViewerMapAPI {
             // If map set to full screen, hide the floor setting buttons
             hideButtons( "floorOL"); 
           });
+        this.control_button();
     }
 
     // Method: Add an event layer to the map (2D) view.
@@ -309,7 +310,7 @@ export class ViewerMapAPI {
         var map = this.map;
 
         zoom_in.addEventListener('click', function () {
-            console.log("zoom in ")
+            console.log("zoom in")
             console.log(map)
 
             var view = map.getView();
