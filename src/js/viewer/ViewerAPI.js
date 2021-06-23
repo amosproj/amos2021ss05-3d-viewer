@@ -45,9 +45,6 @@ export class ViewerAPI {
             this.pano = new ViewerPanoAPI(this);
             this.map = new ViewerMapAPI(this);
         }).then(() => {
-            this.eventMeshTest();
-            this.eventMeshTest(2);
-            this.eventMeshTest(-2);
             // the only html element we work with (the pano-viewer div)
             const panoDiv = document.getElementById('pano-viewer');
 
