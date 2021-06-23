@@ -42,4 +42,11 @@ body {
     color: #fff;
 }
 
+#menu {
+    float: left;
+    position: absolute;
+    top: 0 px;
+    left: 0%;
+    z-index: 2000;
+}
 

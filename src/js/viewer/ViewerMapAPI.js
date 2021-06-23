@@ -19,7 +19,6 @@ export class ViewerMapAPI {
         // create Map and Layers
         this.map;
         this.vectorLayer = [];
-        this.fullscreen = new ol.control.FullScreen();
         this.initDisplayMap();
         this.init = true;
 
@@ -38,7 +37,8 @@ export class ViewerMapAPI {
         map.addEventListener('fullscreenchange', (event) => {
             // If map set to full screen, hide the floor setting buttons
             hideButtons( "floorOL"); 
-          });
+        });
+        this.control_button();
     }
 
     // Method: Add an event layer to the map (2D) view.
@@ -74,11 +74,9 @@ export class ViewerMapAPI {
             }),
             controls: ol.control.defaults({
                 // Hide Map rotation button
-                rotate: false
-            }).extend([
-                // create fullScreen button
-                this.fullscreen
-            ]),
+                rotate: false,
+                zoom: false
+            }),
             //Disable Zoom Control on MAP
             interactions: ol.interaction.defaults({doubleClickZoom :false}),
         });
@@ -302,6 +300,30 @@ export class ViewerMapAPI {
 
     setMiddle(poslon, poslan){
             this.map.getView().setCenter([poslon,poslan]);
+    }
+
+    control_button(){
+        var zoom_in = document.getElementById('zoom-in');
+        var zoom_out = document.getElementById('zoom-out');
+        var full_screen = document.getElementById('full-screen');
+        var map = this.map;
+
+        zoom_in.addEventListener('click', function () {
+            var view = map.getView();
+			var zoom = view.getZoom();
+			view.setZoom(zoom + 1);
+        })
+
+        zoom_out.addEventListener('click', function () {
+            var view = map.getView();
+			var zoom = view.getZoom();
+            view.setZoom(zoom - 1);
+        })
+
+        full_screen.addEventListener('click', function () {
+            var elem = document.getElementById('map');
+            elem.requestFullscreen();
+        })
     }
 }
 
