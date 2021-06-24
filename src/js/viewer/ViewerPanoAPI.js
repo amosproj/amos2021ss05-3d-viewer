@@ -35,13 +35,17 @@ export class ViewerPanoAPI {
         this.oPU = () => this.onPointerUp();
         
         // handeling EventMesh / EventLayer API integration
-        this.preMeshes = new Set(); // meshes that the mouse pointer is currently over
         panoViewer.addEventListener('click', (event) => this.meshCheckClick(event));
         panoViewer.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             this.meshCheckRightClick(event);
         });
+        this.hoveredMeshes = new Set(); // meshes that the mouse pointer is currently over
         panoViewer.addEventListener('pointermove', (event) => this.meshCheckMouseOver(event));
+        this.draggedMeshes = new Set(); // meshes that the mouse is currently dragging (left button pressed)
+        panoViewer.addEventListener('mousedown', (event) => this.meshCheckStartDragging(event));
+        panoViewer.addEventListener('pointermove', (event) => this.meshCheckWhileDragging(event));
+        panoViewer.addEventListener('mouseup', () => this.meshCheckEndDragging());
 
 
         this.display(this.viewerAPI.image.currentImageId);
@@ -218,13 +222,11 @@ export class ViewerPanoAPI {
         const xy = new EventPosition(event);
         const location = this.getCursorLocation(event);
 
-        for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i];
-
+        meshes.forEach((mesh) => {
             if (typeof mesh.vwr_onclick == "function") {
                 mesh.vwr_onclick(xy, location);
             }
-        }
+        });
     }
 
     meshCheckRightClick(event) {
@@ -232,9 +234,7 @@ export class ViewerPanoAPI {
         const xy = new EventPosition(event);
         const location = this.getCursorLocation(event);
 
-        for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i];
-
+        meshes.forEach((mesh) => {
             if (typeof mesh.vwr_oncontext == "function") {
                 const callback = mesh.vwr_oncontext(xy, location);
 
@@ -243,18 +243,17 @@ export class ViewerPanoAPI {
                     items: callback,
                 });
             }
-        }
+        });
     }
 
     meshCheckMouseOver(event) {
         const meshes = this.getIntersectingMeshes(event);
 
         // check for meshes that mouse pointer is no longer over
-        this.preMeshes.forEach((preMesh) => {
+        this.hoveredMeshes.forEach((preMesh) => {
             if (!meshes.includes(preMesh)) {
                 if (typeof preMesh.vwr_onpointerleave == "function") {
-                    // remove the current mesh
-                    this.preMeshes.delete(preMesh);
+                    this.hoveredMeshes.delete(preMesh);
                     
                     preMesh.vwr_onpointerleave();
                 }
@@ -262,19 +261,53 @@ export class ViewerPanoAPI {
         });
 
         // check for meshes that mouse pointer is newly over
-        for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i];
-            
-            //if the current mesh has not been entered before.
-            if (!this.preMeshes.has(mesh)) {
+        meshes.forEach((mesh) => {
+            if (!this.hoveredMeshes.has(mesh)) {
                 if (typeof mesh.vwr_onpointerenter == "function") {
-                    // store the current mesh
-                    this.preMeshes.add(mesh);
+                    this.hoveredMeshes.add(mesh);
                     
                     mesh.vwr_onpointerenter();
                 }
             }
-        }
+        });
+    }
+
+    meshCheckStartDragging(event) {
+        const meshes = this.getIntersectingMeshes(event);
+        const xy = new EventPosition(event);
+        const location = this.getCursorLocation(event);
+
+        meshes.forEach((mesh) => {
+            if (!this.draggedMeshes.has(mesh)) {
+                if (typeof mesh.vwr_ondragstart == "function") {
+                    this.draggedMeshes.add(mesh);
+                    
+                    mesh.vwr_ondragstart(xy, location);
+                }
+            }
+        });
+    }
+
+    meshCheckWhileDragging(event) {
+        const xy = new EventPosition(event);
+        const location = this.getCursorLocation(event);
+
+        this.draggedMeshes.forEach((mesh) => {
+            if (typeof mesh.vwr_ondrag == "function") {
+                mesh.vwr_ondrag(xy, location);
+            }
+        });
+    }
+
+    meshCheckEndDragging() {
+        this.draggedMeshes.forEach((mesh) => {
+            if (typeof mesh.vwr_ondragend == "function") {
+                
+                mesh.vwr_ondragend();
+            }
+        });
+
+        this.draggedMeshes.clear();
     }
 
     // returns: the depth information (in meter) of the panorama at the current curser position (event.clientX, event.clientY)

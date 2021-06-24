@@ -48,7 +48,7 @@ export class ViewerAPI {
             document.addEventListener('mousedown', function (e) { e.preventDefault(); }, false);
             // the only html element we work with (the pano-viewer div)
             const panoDiv = document.getElementById('pano-viewer');
-
+            this.eventMeshTest();
             // create the renderer, and embed the attributed dom element in the html page
             this.renderer = new THREE.WebGLRenderer();
             this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -168,42 +168,62 @@ export class ViewerAPI {
         const startPos = this.toLocal(this.image.currentImage.pos);
         testMesh.position.set(startPos.x + x, startPos.y + y, startPos.z + z);
 
-        testMesh.vwr_onclick = function (xy, position) {
+        // testMesh.vwr_onclick = function (xy, position) {
+        //     //this.material.color.set(0xff0000); // as a test set color red
+        //     console.log("vwr_onclick is triggered.");
+        //     console.log("Pointer position: " , xy);
+        //     console.log("Local coordinate for pointer position: " , position);
+        //     return true;
+        // }
+
+        // testMesh.vwr_oncontext = function (xy, position) {
+        //     //this.material.color.set(0x00ff00); // as a test set color green
+        //     console.log("vwr_oncontext is triggered.");
+        //     console.log("Pointer position: " , xy);
+        //     console.log("Local coordinate for pointer position: " , position);
+
+        //     //Creating callback function for context menu item:
+        //     let callback = function (key, options) {
+        //         var msg = 'clicked: ' + key;
+        //         (window.console && console.log(msg)) || alert(msg);
+        //     };
+
+        //     //Creating item objects
+        //     let itemEdit = new ViewerContextItem(callback, "edit", null, "Edit");
+        //     let itemCut = new ViewerContextItem(callback, "cut", null, "Cut");
+
+        //     //Creating list of item objects.
+        //     return [itemEdit, itemCut];
+        // }
+
+        // testMesh.vwr_onpointerenter = function () {
+        //     //this.material.color.set(0xffff00); // as a test set color yellow
+        //     console.log("vwr_onpointerenter is triggered.");
+        // }
+
+        // testMesh.vwr_onpointerleave = function () {
+        //     //this.material.color.set(0x0000ff); // as a test set color blue
+        //     console.log("vwr_onpointerleave is triggered.");
+        // }
+
+        testMesh.vwr_ondragstart = function (xy, position) {
             this.material.color.set(0xff0000); // as a test set color red
-            console.log("vwr_onclick is triggered.");
+            console.log("vwr_ondragstart is triggered.");
             console.log("Pointer position: " , xy);
             console.log("Local coordinate for pointer position: " , position);
             return true;
         }
 
-        testMesh.vwr_oncontext = function (xy, position) {
+        testMesh.vwr_ondrag = function (xy, position) {
             this.material.color.set(0x00ff00); // as a test set color green
-            console.log("vwr_oncontext is triggered.");
-            console.log("Pointer position: " , xy);
-            console.log("Local coordinate for pointer position: " , position);
-
-            //Creating callback function for context menu item:
-            let callback = function (key, options) {
-                var msg = 'clicked: ' + key;
-                (window.console && console.log(msg)) || alert(msg);
-            };
-
-            //Creating item objects
-            let itemEdit = new ViewerContextItem(callback, "edit", null, "Edit");
-            let itemCut = new ViewerContextItem(callback, "cut", null, "Cut");
-
-            //Creating list of item objects.
-            return [itemEdit, itemCut];
+            console.log("vwr_ondrag is triggered.");
+            //console.log("Pointer position: " , xy);
+            //console.log("Local coordinate for pointer position: " , position);
         }
 
-        testMesh.vwr_onpointerenter = function () {
-            this.material.color.set(0xffff00); // as a test set color yellow
-            console.log("vwr_onpointerenter is triggered.");
-        }
-
-        testMesh.vwr_onpointerleave = function () {
+        testMesh.vwr_ondragend = function () {
             this.material.color.set(0x0000ff); // as a test set color blue
-            console.log("vwr_onpointerleave is triggered.");
+            console.log("vwr_ondragend is triggered.");
         }
 
         this.pano.addLayer(testMesh);
