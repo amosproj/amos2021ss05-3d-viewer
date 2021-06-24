@@ -44,7 +44,7 @@ export class ViewerPanoAPI {
         panoViewer.addEventListener('pointermove', (event) => this.meshCheckMouseOver(event));
 
 
-        this.display(this.viewerAPI.image.currentImageId + 1);
+        this.display(this.viewerAPI.image.currentImageId);
     }
 
     // displays the panorama with idx *ImageNum* in the model
