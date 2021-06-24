@@ -62,8 +62,16 @@ export class ViewerPanoAPI {
 
 
         // load the 360-panorama image data (highest resolution hardcoded for now)
-        for (loadnum=0;loadnum<4;loadnum++){
+      for (loadnum=0;loadnum<4;loadnum++){
+        console.log("---image id is :----",imageNum);
         console.log("image "+loadnum +" is loading");
+
+        var flag_imgid=0;
+        if(flag_imgid!=imageNum){
+        console.log("The image loading"+flag_imgid+'r'+loadnum+'.jpg will be broken');
+        break;
+       }else{
+        
         var texturePano = this.viewerAPI.textureLoader.load(
             this.viewerAPI.baseURL +
             Math.trunc(imageNum / 100) +
@@ -105,7 +113,11 @@ export class ViewerPanoAPI {
 
         // put camera inside sphere mesh
         this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+        flag_imgid=imageNum;
+        console.log("---flag id is : ---",flag_imgid);
        }
+     }
+      
     }
 
     camera() {
