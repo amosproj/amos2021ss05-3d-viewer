@@ -47,78 +47,103 @@ export class ViewerPanoAPI {
         this.display(this.viewerAPI.image.currentImageId);
     }
 
+
     // displays the panorama with idx *ImageNum* in the model
     display(imageNum) {
         this.viewerAPI.image.currentImageId = imageNum;
+        console.log("image id is :",imageNum);
        let loadnum=0;
-        // create sphere
-        const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
-        // invert the geometry on the x-axis so that we look out from the middle of the sphere
-        sphere.scale(-1, 1, 1);
-        sphere.rotateX(Math.PI / 2);
-    
-
-
-
-
-        // load the 360-panorama image data (highest resolution hardcoded for now)
-      for (loadnum=0;loadnum<4;loadnum++){
+       let count=0;
+       let flag_imgid=0;
         console.log("---image id is :----",imageNum);
-        console.log("image "+loadnum +" is loading");
-
-        var flag_imgid=0;
-        if(flag_imgid!=imageNum){
-        console.log("The image loading"+flag_imgid+'r'+loadnum+'.jpg will be broken');
-        break;
-       }else{
-        
-        var texturePano = this.viewerAPI.textureLoader.load(
-            this.viewerAPI.baseURL +
+    
+        console.log("loading image");
+        console.log("The path");
+        console.log(this.viewerAPI.baseURL +
             Math.trunc(imageNum / 100) +
             '/' +
             imageNum +
             'r'+loadnum+'.jpg');
-            
-        texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 
-        // --- load depth-map for panorama ---
-        const image = new Image();
-        //image.crossOrigin = "use-credentials";
-        image.src = this.viewerAPI.baseURL +
-            Math.trunc(imageNum / 100) + '/' +
-            imageNum + 'd.png';
+        const texttureloader0=this.viewerAPI.textureLoader;
 
-        image.addEventListener('load', () => {
-            this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
-        }, false);
-        // -----
-
-        // put the texture on the spehere and add it to the scene
-        var mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
-
-        // adjust for orientation offset
-        mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
-
-        // put in the correct position in the scene
-        const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
-        mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
-
-        // check if other panorama was previously already loaded
-        if (this.loadedMesh != null) {
-            this.scene.remove(this.loadedMesh);
-        }
-
-        this.scene.add(mesh);
-        this.loadedMesh = mesh;
-
-        // put camera inside sphere mesh
-        this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
-        flag_imgid=imageNum;
-        console.log("---flag id is : ---",flag_imgid);
-       }
-     }
+        texttureloader0.load(this.viewerAPI.baseURL +
+            Math.trunc(imageNum / 100) +
+            '/' +
+            imageNum +
+            'r'+loadnum+'.jpg',
+    
       
-    }
+            
+       (texturePano)=>{ 
+           
+        const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
+        // invert the geometry on the x-axis so that we look out from the middle of the sphere
+        sphere.scale(-1, 1, 1);
+        sphere.rotateX(Math.PI / 2);
+        console.log("+++++++++++++++++++++++++++++")
+        console.log(texturePano);
+        texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+       
+        const material =new THREE.MeshBasicMaterial({ map: texturePano });
+  
+        const mesh = new THREE.Mesh(sphere, material);
+   
+     
+        console.log(mesh);
+        mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation)
+        count++;
+
+        console.log("The count is :",count);
+        console.log("$$$$$$$$$$$$$$$$$$$$$$");
+     
+         // put in the correct position in the scene
+         const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
+         mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
+     
+         // check if other panorama was previously already loaded
+         if (this.loadedMesh != null) {
+             this.scene.remove(this.loadedMesh);
+         }
+     
+         this.scene.add(mesh);
+         this.loadedMesh = mesh;
+     
+         // put camera inside sphere mesh
+         this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+         flag_imgid=imageNum;
+         console.log("---flag id is : ---",flag_imgid);
+       
+         console.log("--------------------");
+         console.log(mesh);
+         console.log("image "+loadnum +" is loading");
+ 
+       
+    },
+
+
+
+
+
+    function(e){
+
+     console.log('onprocess',e);
+    },
+
+
+
+
+      function(e){
+      console.log('onerror',e);
+    }  
+
+
+    );
+
+  
+
+
+}
 
     camera() {
         return this.camera;
