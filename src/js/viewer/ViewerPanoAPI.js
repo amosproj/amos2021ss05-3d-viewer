@@ -51,7 +51,6 @@ export class ViewerPanoAPI {
     
  display(imageNum) {
        this.viewerAPI.image.currentImageId = imageNum;
-       console.log("image id is :",imageNum);
        let loadnum=0;
        let count=0;
        let flag_imgid=0;
@@ -76,23 +75,15 @@ export class ViewerPanoAPI {
         // invert the geometry on the x-axis so that we look out from the middle of the sphere
         sphere.scale(-1, 1, 1);
         sphere.rotateX(Math.PI / 2);
-        console.log("+++++++++++++++++++++++++++++")
-        console.log(texturePano);
+       
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
        
         const material =new THREE.MeshBasicMaterial({ map: texturePano });
   
         const mesh = new THREE.Mesh(sphere, material);
-   
-     
-        console.log(mesh);
+         
         mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation)
-      
-        console.log("--------------------------------------");
-        console.log("The count is :",count);
-        
-     
-         // put in the correct position in the scene
+       // put in the correct position in the scene
          const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
          mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
      
@@ -107,19 +98,10 @@ export class ViewerPanoAPI {
          // put camera inside sphere mesh
          this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
          flag_imgid=imageNum;
-        
-         
-         console.log("---flag id is : ---",flag_imgid);
-       
-       
-         console.log(mesh);
-         console.log("image "+count +" is loading");
-         console.log("--------------------");
          count++;
          loadImage(count);
        
     });
-
 
 };
 
