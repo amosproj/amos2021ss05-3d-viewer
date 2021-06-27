@@ -77,6 +77,17 @@ export class ViewerPanoAPI {
         sphere.rotateX(Math.PI / 2);
        
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+	       
+        const image = new Image();
+        //image.crossOrigin = "use-credentials";
+        image.src = this.viewerAPI.baseURL +
+            Math.trunc(imageNum / 100) + '/' +
+            imageNum + 'd.png';
+
+        image.addEventListener('load', () => {
+            this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
+        }, false);     
+	       
        
         const material =new THREE.MeshBasicMaterial({ map: texturePano });
   
