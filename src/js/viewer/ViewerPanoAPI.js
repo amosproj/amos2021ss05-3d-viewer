@@ -180,113 +180,70 @@ export class ViewerPanoAPI {
     }
 
     onDoubleClick(event) {
-        // const currentPos = this.viewerAPI.image.currentImage.pos;
-        // const newLocalPos = this.getCursorLocation(event);
-        // const newPos = this.viewerAPI.toGlobal(newLocalPos);
-        // console.log(newPos[0])
-        // console.log(newPos[1])
-        // console.log(currentPos[2])
-
-        // this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
-
-        console.log(this.viewerAPI.toLocal(this.bestImg.pos))
-        // avoid duplication
-        if (this.bestImg != this.viewerAPI.image.currentImage) {
-            this.display(this.bestImg.id);
+        // always clickable but to the limited bestImg 
+        if (this.clickableImg != this.viewerAPI.image.currentImage) {
+            this.display(this.clickableImg.id);
             this.viewerAPI.map.redraw();
         }
-
         this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
     }
 
     onMouseMove(event){
 
-        // const raycaster = this.getRaycaster(event);
-        // // formula for position is currentLoc + direction*distance (where the direction is normalized)
-        // const distance = this.depthAtPointer(event);
-        // const cursorLocation = raycaster.ray.origin.addScaledVector(raycaster.ray.direction, distance);
-        // console.log(cursorLocation)
+        // get depth data 
+        const raycaster = this.getRaycaster(event);
+        const distance = this.depthAtPointer(event);
+        const cursorLocation = raycaster.ray.origin.addScaledVector(raycaster.ray.direction, distance);
 
+        // get cursor data
         const currentPos = this.viewerAPI.image.currentImage.pos;
         const newLocalPos = this.getCursorLocation(event);
         const newPos = this.viewerAPI.toGlobal(newLocalPos);
+        var localPos = this.viewerAPI.toLocal([newPos[0], newPos[1], currentPos[2]]);
 
-        var lon = newPos[0];
-        var lat = newPos[1];
-        var z = currentPos[2];
+        let minDistance = 15.00; 
 
-        var localPos = this.viewerAPI.toLocal([lon, lat, z]);
-        // console.log(localPos)
-
-        let minDistance = 1000000000;
-
-        this.viewerAPI.floor.currentFloor.viewerImages.forEach(element => {
-            const currLocalPos = this.viewerAPI.toLocal(element.pos);
-            // console.log("current"+currentPos)
-            const [dx, dy, dz] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y, localPos.z - currLocalPos.z];
-            const currDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-            if (currDistance < minDistance) {
-                minDistance = currDistance;
-                this.bestImg = element;
-            }
-        });
-        
-        // console.log("localPos:"+localPos.x+"y"+localPos.y+"z"+localPos.z)
+            this.viewerAPI.floor.currentFloor.viewerImages.forEach(element => {
+                const currLocalPos = this.viewerAPI.toLocal(element.pos);
+                const [dx, dy] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
+                // Get the distance with no depth
+                const currDistance = Math.sqrt(dx * dx + dy * dy); 
+                if (currDistance < minDistance) {
+                    minDistance = currDistance;
+                    this.bestImg = element;
+                }
+            });
         
         // limit distance to current mesh
         const bestLocalPos = this.viewerAPI.toLocal(this.bestImg.pos);
-        console.log("best:"+bestLocalPos.x + ","+bestLocalPos.y + ","+bestLocalPos.z)
-        console.log("camera:"+this.camera.position.x + ","+this.camera.position.y + ","+this.camera.position.z)
-        const [dx, dy, dz] = [this.camera.position.x - bestLocalPos.x, this.camera.position.y - bestLocalPos.y, this.camera.position.z - bestLocalPos.z];
-        const currDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        // avoid duplication
-        // if the nearest image of mouse position is not the same as the previous one
-        // create new mesh and remove old mesh, and save latest mesh and image
-        if (this.bestImg != this.lastBestImg && currDistance < 4) {
+        const [dx, dy] = [this.camera.position.x - bestLocalPos.x, this.camera.position.y - bestLocalPos.y];
+        const currDistance = Math.sqrt(dx * dx + dy * dy);
+        const [deepx, deepy] = [this.camera.position.x - cursorLocation.x, this.camera.position.y - cursorLocation.y]
+        const currDeepDistance = Math.sqrt(deepx * deepx + deepy * deepy);
 
+        // difference between "camera to img" and "camera to raycaster"
+        const diff = Math.abs(currDistance-currDeepDistance)
+
+        // avoid duplication
+        // if the nearest image of mouse position is not the same as the previous one, and the diff is smaller than 1
+        // create new mesh and remove old mesh, and save latest mesh and image
+        if (this.bestImg != this.lastBestImg && diff < 1) {
             var x = 0, y = 0, z = -2 
 
-            /*
-            // creating a square mesh
-            // const geometry = new THREE.BufferGeometry();
-            // // create a simple square shape. We duplicate the top left and bottom right
-            // // vertices because each vertex needs to appear once per triangle.
-            // const vertices = new Float32Array( [
-            //     -0.2, -0.2,  0.2,
-            //     0.2, -0.2,  0.2,
-            //     0.2,  0.2,  0.2,
-
-            //     0.2,  0.2,  0.2,
-            //     -0.2,  0.2,  0.2,
-            //     -0.2, -0.2,  0.2
-            // ] );
-            // // itemSize = 3 because there are 3 values (components) per vertex
-            // geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-            */
-
-            
-            // add an cross picture to the textrure
-            const myUrl = this.viewerAPI.baseURL+'/cross2.jpg'
-            const textureLoader = new THREE.TextureLoader()
-            textureLoader.crossOrigin = "Anonymous"
-            const myTexture = textureLoader.load(myUrl)
-            const material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true, map:myTexture} );
-            
+            // clickable meshes are the bestImg 
+            this.clickableImg = this.bestImg;
 
             // creating a circle mesh
             var geometry = new THREE.CircleBufferGeometry( 0.4, 32 );
-            // const material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true});
-            
-
+            const myTexture =  new THREE.TextureLoader().load('x-mark.png');
+            const material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true, map:myTexture} );
+        
             // set mesh
-            // const sphere = new THREE.SphereGeometry(1 / 5, 10, 10);
-            // const newMesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial());
             const newMesh = new THREE.Mesh(geometry, material);
             const startPos = this.viewerAPI.toLocal(this.bestImg.pos);
-
             newMesh.position.set(startPos.x + x, startPos.y + y, startPos.z + z);
-
+            
+            // save some parameters to avoid duplication
             this.lastBestImg = this.bestImg;
             this.removeLayer(this.lastMesh);
             this.addLayer(newMesh);
