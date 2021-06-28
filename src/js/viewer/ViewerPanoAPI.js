@@ -53,7 +53,7 @@ export class ViewerPanoAPI {
        this.viewerAPI.image.currentImageId = imageNum;
        let loadnum=0;
        let count=0;
-       let displayimgid=0;
+       let displayimgid=this.viewerAPI.image.currentImageId;
        const texttureloader0=this.viewerAPI.textureLoader;
        
 
