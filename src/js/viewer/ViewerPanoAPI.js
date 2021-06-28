@@ -71,6 +71,21 @@ export class ViewerPanoAPI {
                   
        (texturePano)=>{ 
            
+	//loding depth data          
+        if(count==0){
+            const image = new Image();
+            //image.crossOrigin = "use-credentials";
+            image.src = this.viewerAPI.baseURL +
+                Math.trunc(imageNum / 100) + '/' +
+                imageNum + 'd.png';
+    
+            image.addEventListener('load', () => {
+                this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
+            }, false);
+            console.log("The depth image "+ count + " is loading");
+    
+          }  
+
         const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
         // invert the geometry on the x-axis so that we look out from the middle of the sphere
         sphere.scale(-1, 1, 1);
@@ -78,15 +93,7 @@ export class ViewerPanoAPI {
        
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 	       
-        const image = new Image();
-        //image.crossOrigin = "use-credentials";
-        image.src = this.viewerAPI.baseURL +
-            Math.trunc(imageNum / 100) + '/' +
-            imageNum + 'd.png';
-
-        image.addEventListener('load', () => {
-            this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
-        }, false);     
+       
 	       
        
         const material =new THREE.MeshBasicMaterial({ map: texturePano });
