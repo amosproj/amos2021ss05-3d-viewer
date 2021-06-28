@@ -29,6 +29,7 @@ export class ViewerPanoAPI {
         panoViewer.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
         panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+        panoViewer.addEventListener('mousemove', (event) => this.onMouseMove(event));
         window.addEventListener("resize", () => this.onWindowResize());
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
@@ -43,8 +44,12 @@ export class ViewerPanoAPI {
         });
         panoViewer.addEventListener('pointermove', (event) => this.meshCheckMouseOver(event));
 
-
         this.display(this.viewerAPI.image.currentImageId);
+
+        // handling duplication of showing closest mesh
+        this.bestImg = this.viewerAPI.image.currentImage;
+        this.lastBestImg = this.viewerAPI.image.currentImage;
+
     }
 
     // displays the panorama with idx *ImageNum* in the model
@@ -175,14 +180,119 @@ export class ViewerPanoAPI {
     }
 
     onDoubleClick(event) {
+        // const currentPos = this.viewerAPI.image.currentImage.pos;
+        // const newLocalPos = this.getCursorLocation(event);
+        // const newPos = this.viewerAPI.toGlobal(newLocalPos);
+        // console.log(newPos[0])
+        // console.log(newPos[1])
+        // console.log(currentPos[2])
+
+        // this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
+
+        console.log(this.viewerAPI.toLocal(this.bestImg.pos))
+        // avoid duplication
+        if (this.bestImg != this.viewerAPI.image.currentImage) {
+            this.display(this.bestImg.id);
+            this.viewerAPI.map.redraw();
+        }
+
+        this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
+    }
+
+    onMouseMove(event){
+
+        // const raycaster = this.getRaycaster(event);
+        // // formula for position is currentLoc + direction*distance (where the direction is normalized)
+        // const distance = this.depthAtPointer(event);
+        // const cursorLocation = raycaster.ray.origin.addScaledVector(raycaster.ray.direction, distance);
+        // console.log(cursorLocation)
+
         const currentPos = this.viewerAPI.image.currentImage.pos;
         const newLocalPos = this.getCursorLocation(event);
         const newPos = this.viewerAPI.toGlobal(newLocalPos);
 
-        this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
+        var lon = newPos[0];
+        var lat = newPos[1];
+        var z = currentPos[2];
 
-        this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
-    }
+        var localPos = this.viewerAPI.toLocal([lon, lat, z]);
+        // console.log(localPos)
+
+        let minDistance = 1000000000;
+
+        this.viewerAPI.floor.currentFloor.viewerImages.forEach(element => {
+            const currLocalPos = this.viewerAPI.toLocal(element.pos);
+            // console.log("current"+currentPos)
+            const [dx, dy, dz] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y, localPos.z - currLocalPos.z];
+            const currDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+            if (currDistance < minDistance) {
+                minDistance = currDistance;
+                this.bestImg = element;
+            }
+        });
+        
+        // console.log("localPos:"+localPos.x+"y"+localPos.y+"z"+localPos.z)
+        
+        // limit distance to current mesh
+        const bestLocalPos = this.viewerAPI.toLocal(this.bestImg.pos);
+        console.log("best:"+bestLocalPos.x + ","+bestLocalPos.y + ","+bestLocalPos.z)
+        console.log("camera:"+this.camera.position.x + ","+this.camera.position.y + ","+this.camera.position.z)
+        const [dx, dy, dz] = [this.camera.position.x - bestLocalPos.x, this.camera.position.y - bestLocalPos.y, this.camera.position.z - bestLocalPos.z];
+        const currDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        // avoid duplication
+        // if the nearest image of mouse position is not the same as the previous one
+        // create new mesh and remove old mesh, and save latest mesh and image
+        if (this.bestImg != this.lastBestImg && currDistance < 4) {
+
+            var x = 0, y = 0, z = -2 
+
+            /*
+            // creating a square mesh
+            // const geometry = new THREE.BufferGeometry();
+            // // create a simple square shape. We duplicate the top left and bottom right
+            // // vertices because each vertex needs to appear once per triangle.
+            // const vertices = new Float32Array( [
+            //     -0.2, -0.2,  0.2,
+            //     0.2, -0.2,  0.2,
+            //     0.2,  0.2,  0.2,
+
+            //     0.2,  0.2,  0.2,
+            //     -0.2,  0.2,  0.2,
+            //     -0.2, -0.2,  0.2
+            // ] );
+            // // itemSize = 3 because there are 3 values (components) per vertex
+            // geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+            */
+
+            
+            // add an cross picture to the textrure
+            const myUrl = this.viewerAPI.baseURL+'/cross2.jpg'
+            const textureLoader = new THREE.TextureLoader()
+            textureLoader.crossOrigin = "Anonymous"
+            const myTexture = textureLoader.load(myUrl)
+            const material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true, map:myTexture} );
+            
+
+            // creating a circle mesh
+            var geometry = new THREE.CircleBufferGeometry( 0.4, 32 );
+            // const material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true});
+            
+
+            // set mesh
+            // const sphere = new THREE.SphereGeometry(1 / 5, 10, 10);
+            // const newMesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial());
+            const newMesh = new THREE.Mesh(geometry, material);
+            const startPos = this.viewerAPI.toLocal(this.bestImg.pos);
+
+            newMesh.position.set(startPos.x + x, startPos.y + y, startPos.z + z);
+
+            this.lastBestImg = this.bestImg;
+            this.removeLayer(this.lastMesh);
+            this.addLayer(newMesh);
+            this.lastMesh = newMesh;
+        }
+    };
 
     onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -308,7 +418,6 @@ export class ViewerPanoAPI {
         // formula for position is currentLoc + direction*distance (where the direction is normalized)
         const distance = this.depthAtPointer(event);
         const cursorLocation = raycaster.ray.origin.addScaledVector(raycaster.ray.direction, distance);
-        
         return cursorLocation;
     }
 
