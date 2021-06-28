@@ -82,7 +82,6 @@ export class ViewerPanoAPI {
             image.addEventListener('load', () => {
                 this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
             }, false);
-            console.log("The depth image "+ count + " is loading");
     
           }  
 
