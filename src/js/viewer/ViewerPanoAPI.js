@@ -53,15 +53,17 @@ export class ViewerPanoAPI {
        this.viewerAPI.image.currentImageId = imageNum;
        let loadnum=0;
        let count=0;
-       let flag_imgid=0;
+       let displayimgid=0;
        const texttureloader0=this.viewerAPI.textureLoader;
-
+       
 
 
       let loadImage=(count)=>{
        if(count>3){
            return ;
        }
+
+    if(displayimgid==imageNum){	      
        texttureloader0.load(this.viewerAPI.baseURL +
             Math.trunc(imageNum / 100) +
             '/' +
@@ -118,7 +120,11 @@ export class ViewerPanoAPI {
          count++;
          loadImage(count);
        
-    });
+    });}
+    else {
+        displayimgid=imageNum;
+       return;
+     }
 
 };
 
