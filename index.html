@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Minimal Outside</title>
@@ -28,7 +27,7 @@
         window.parent = {
             callback: function(viewerWindow, viewerAsync) {
                 console.info("initial callback called:", viewerWindow, viewerAsync);
-                viewerAsync("https://bora.bup-nbg.de/amos2floors/", (api) => {
+                viewerAsync("../assets/", (api) => {
 
                     console.info("loaded callback called with API:", api);
                 });
