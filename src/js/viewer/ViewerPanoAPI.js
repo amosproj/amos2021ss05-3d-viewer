@@ -47,26 +47,48 @@ export class ViewerPanoAPI {
         this.display(this.viewerAPI.image.currentImageId);
     }
 
-    // displays the panorama with idx *ImageNum* in the model
+    // displays the panorama with idx *ImageNum* in the model (externally always called without a second parameter)
     display(imageNum, resolution = 0) {
         if (resolution > 3) return; // loaded highest res already
         if (resolution != 0 && imageNum != this.viewerAPI.image.currentImageId) return; // changed location in the meantime
 
-        if (resolution == 0) {
-            this.viewerAPI.image.currentImageId = imageNum;
+        if (resolution > 0) {
+            // load the 360-panorama image data
+            this.viewerAPI.textureLoader.load(
+                this.viewerAPI.baseURL +
+                Math.trunc(imageNum / 100) +
+                '/' +
+                imageNum +
+                'r' + resolution + '.jpg',
+                (texturePano) => {
+                    this.loadedMesh.material.map = texturePano
+                    this.loadedMesh.material.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 
-            // --- load depth-map for panorama ---
-            const image = new Image();
-            //image.crossOrigin = "use-credentials";
-            image.src = this.viewerAPI.baseURL +
-                Math.trunc(imageNum / 100) + '/' +
-                imageNum + 'd.png';
+                    this.loadedMesh.material.needsUpdate = true;
 
-            image.addEventListener('load', () => {
-                this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
-            }, false);
-            // -----
+                    this.display(imageNum, resolution + 1);
+                }
+            );
+            
+            // only needed to update the resolution
+            return;
         }
+
+        // initial case from here on (resolution == 0)
+
+        this.viewerAPI.image.currentImageId = imageNum;
+
+        // --- load depth-map for panorama ---
+        const image = new Image();
+        //image.crossOrigin = "use-credentials";
+        image.src = this.viewerAPI.baseURL +
+            Math.trunc(imageNum / 100) + '/' +
+            imageNum + 'd.png';
+
+        image.addEventListener('load', () => {
+            this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
+        }, false);
+        // -----
         
         // create sphere
         const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
@@ -75,37 +97,39 @@ export class ViewerPanoAPI {
         sphere.rotateX(Math.PI / 2);
 
         // load the 360-panorama image data
-        const texturePano = this.viewerAPI.textureLoader.load(
+        this.viewerAPI.textureLoader.load(
             this.viewerAPI.baseURL +
             Math.trunc(imageNum / 100) +
             '/' +
             imageNum +
             'r' + resolution + '.jpg',
-            () => this.display(imageNum, resolution + 1));
-        texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+            (texturePano) => {
+                texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 
-        // put the texture on the spehere and add it to the scene
-        const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
+                // put the texture on the spehere and add it to the scene
+                const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
 
-        // adjust for orientation offset
-        mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
+                // adjust for orientation offset
+                mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
 
-        // put in the correct position in the scene
-        const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
-        mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
+                // put in the correct position in the scene
+                const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
+                mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
 
-        // check if other panorama was previously already loaded
-        if (this.loadedMesh != null) {
-            this.scene.remove(this.loadedMesh);
-        }
+                // check if other panorama was previously already loaded
+                if (this.loadedMesh != null) {
+                    this.scene.remove(this.loadedMesh);
+                }
 
-        this.scene.add(mesh);
-        this.loadedMesh = mesh;
+                this.scene.add(mesh);
+                this.loadedMesh = mesh;
 
-        // put camera inside sphere mesh
-        this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
-        console.log('loaded imgNum ', imageNum);
-        console.log('resolution', resolution);
+                // put camera inside sphere mesh
+                this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+                
+                this.display(imageNum, resolution + 1);
+            }
+        );
     }
 
     camera() {
