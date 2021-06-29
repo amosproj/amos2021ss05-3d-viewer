@@ -48,35 +48,41 @@ export class ViewerPanoAPI {
     }
 
     // displays the panorama with idx *ImageNum* in the model
-    display(imageNum) {
-        this.viewerAPI.image.currentImageId = imageNum;
+    display(imageNum, resolution = 0) {
+        if (resolution > 3) return; // loaded highest res already
+        if (resolution != 0 && imageNum != this.viewerAPI.image.currentImageId) return; // changed location in the meantime
 
+        if (resolution == 0) {
+            this.viewerAPI.image.currentImageId = imageNum;
+
+            // --- load depth-map for panorama ---
+            const image = new Image();
+            //image.crossOrigin = "use-credentials";
+            image.src = this.viewerAPI.baseURL +
+                Math.trunc(imageNum / 100) + '/' +
+                imageNum + 'd.png';
+
+            image.addEventListener('load', () => {
+                this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
+            }, false);
+            // -----
+        }
+        
         // create sphere
         const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
         // invert the geometry on the x-axis so that we look out from the middle of the sphere
         sphere.scale(-1, 1, 1);
         sphere.rotateX(Math.PI / 2);
 
-        // load the 360-panorama image data (highest resolution hardcoded for now)
+        // load the 360-panorama image data
         const texturePano = this.viewerAPI.textureLoader.load(
             this.viewerAPI.baseURL +
             Math.trunc(imageNum / 100) +
             '/' +
             imageNum +
-            'r3.jpg');
+            'r' + resolution + '.jpg',
+            () => this.display(imageNum, resolution + 1));
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
-
-        // --- load depth-map for panorama ---
-        const image = new Image();
-        //image.crossOrigin = "use-credentials";
-        image.src = this.viewerAPI.baseURL +
-            Math.trunc(imageNum / 100) + '/' +
-            imageNum + 'd.png';
-
-        image.addEventListener('load', () => {
-            this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
-        }, false);
-        // -----
 
         // put the texture on the spehere and add it to the scene
         const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
@@ -98,6 +104,8 @@ export class ViewerPanoAPI {
 
         // put camera inside sphere mesh
         this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+        console.log('loaded imgNum ', imageNum);
+        console.log('resolution', resolution);
     }
 
     camera() {
