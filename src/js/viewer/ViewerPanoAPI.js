@@ -67,15 +67,15 @@ export class ViewerPanoAPI {
         texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 
         // --- load depth-map for panorama ---
-        const image = new Image();
-        //image.crossOrigin = "use-credentials";
-        image.src = this.viewerAPI.baseURL +
-            Math.trunc(imageNum / 100) + '/' +
-            imageNum + 'd.png';
-
+        const image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+        image.crossOrigin = 'use-credentials';
+        image.src = this.viewerAPI.baseURL + Math.trunc(imageNum / 100) + '/' + imageNum + 'd.png';
         image.addEventListener('load', () => {
             this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
-        }, false);
+        });
+        image.addEventListener('error', function(event) {
+            console.error(event);
+        });
         // -----
 
         // put the texture on the spehere and add it to the scene
