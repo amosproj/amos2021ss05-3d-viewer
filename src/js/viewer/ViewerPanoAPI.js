@@ -52,14 +52,11 @@ export class ViewerPanoAPI {
         if (resolution > 3) return; // loaded highest res already
         if (resolution != 0 && imageNum != this.viewerAPI.image.currentImageId) return; // changed location in the meantime
 
+        const resourceURL = this.viewerAPI.baseURL + Math.trunc(imageNum / 100) + '/' + imageNum + 'r' + resolution + '.jpg';
         if (resolution > 0) {
             // load the 360-panorama image data
             this.viewerAPI.textureLoader.load(
-                this.viewerAPI.baseURL +
-                Math.trunc(imageNum / 100) +
-                '/' +
-                imageNum +
-                'r' + resolution + '.jpg',
+                resourceURL,
                 (texturePano) => {
                     this.loadedMesh.material.map = texturePano
                     this.loadedMesh.material.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
@@ -98,11 +95,7 @@ export class ViewerPanoAPI {
 
         // load the 360-panorama image data
         this.viewerAPI.textureLoader.load(
-            this.viewerAPI.baseURL +
-            Math.trunc(imageNum / 100) +
-            '/' +
-            imageNum +
-            'r' + resolution + '.jpg',
+            resourceURL,
             (texturePano) => {
                 texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 
