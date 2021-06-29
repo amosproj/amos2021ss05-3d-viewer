@@ -51,24 +51,33 @@ export class ViewerPanoAPI {
         this.display(this.viewerAPI.image.currentImageId);
     }
 
-    // displays the panorama with idx *ImageNum* in the model
-    display(imageNum) {
+    // displays the panorama with idx *ImageNum* in the model (externally always called without a second parameter)
+    display(imageNum, resolution = 0) {
+        if (resolution > 3) return; // loaded highest res already
+        if (resolution != 0 && imageNum != this.viewerAPI.image.currentImageId) return; // changed location in the meantime
+
+        const resourceURL = this.viewerAPI.baseURL + Math.trunc(imageNum / 100) + '/' + imageNum + 'r' + resolution + '.jpg';
+        if (resolution > 0) {
+            // load the 360-panorama image data
+            this.viewerAPI.textureLoader.load(
+                resourceURL,
+                (texturePano) => {
+                    this.loadedMesh.material.map = texturePano
+                    this.loadedMesh.material.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+
+                    this.loadedMesh.material.needsUpdate = true;
+
+                    this.display(imageNum, resolution + 1);
+                }
+            );
+            
+            // only needed to update the resolution
+            return;
+        }
+
+        // initial case from here on (resolution == 0)
+
         this.viewerAPI.image.currentImageId = imageNum;
-
-        // create sphere
-        const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
-        // invert the geometry on the x-axis so that we look out from the middle of the sphere
-        sphere.scale(-1, 1, 1);
-        sphere.rotateX(Math.PI / 2);
-
-        // load the 360-panorama image data (highest resolution hardcoded for now)
-        const texturePano = this.viewerAPI.textureLoader.load(
-            this.viewerAPI.baseURL +
-            Math.trunc(imageNum / 100) +
-            '/' +
-            imageNum +
-            'r3.jpg');
-        texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 
         // --- load depth-map for panorama ---
         const image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
@@ -81,27 +90,43 @@ export class ViewerPanoAPI {
             console.error(event);
         });
         // -----
+        
+        // create sphere
+        const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
+        // invert the geometry on the x-axis so that we look out from the middle of the sphere
+        sphere.scale(-1, 1, 1);
+        sphere.rotateX(Math.PI / 2);
 
-        // put the texture on the spehere and add it to the scene
-        const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
+        // load the 360-panorama image data
+        this.viewerAPI.textureLoader.load(
+            resourceURL,
+            (texturePano) => {
+                texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 
-        // adjust for orientation offset
-        mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
+                // put the texture on the spehere and add it to the scene
+                const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
 
-        // put in the correct position in the scene
-        const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
-        mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
+                // adjust for orientation offset
+                mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
 
-        // check if other panorama was previously already loaded
-        if (this.loadedMesh != null) {
-            this.scene.remove(this.loadedMesh);
-        }
+                // put in the correct position in the scene
+                const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
+                mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
 
-        this.scene.add(mesh);
-        this.loadedMesh = mesh;
+                // check if other panorama was previously already loaded
+                if (this.loadedMesh != null) {
+                    this.scene.remove(this.loadedMesh);
+                }
 
-        // put camera inside sphere mesh
-        this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+                this.scene.add(mesh);
+                this.loadedMesh = mesh;
+
+                // put camera inside sphere mesh
+                this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+                
+                this.display(imageNum, resolution + 1);
+            }
+        );
     }
 
     camera() {
