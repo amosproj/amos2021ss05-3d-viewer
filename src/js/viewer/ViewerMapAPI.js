@@ -307,6 +307,7 @@ export class ViewerMapAPI {
         var zoom_in = document.getElementById('zoom-in');
         var zoom_out = document.getElementById('zoom-out');
         var full_screen = document.getElementById('full-screen');
+        var close_full_screen = document.getElementById('close-full-screen');
         var map = this.map;
 
         zoom_in.addEventListener('click', function () {
@@ -324,6 +325,11 @@ export class ViewerMapAPI {
         full_screen.addEventListener('click', function () {
             var elem = document.getElementById('map');
             elem.requestFullscreen();
+        })
+
+        close_full_screen.addEventListener('click', function () {
+            document.getElementById('map');
+            document.exitFullscreen();
         })
     }
 }
