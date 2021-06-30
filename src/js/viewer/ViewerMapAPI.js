@@ -36,7 +36,7 @@ export class ViewerMapAPI {
 
         map.addEventListener('fullscreenchange', (event) => {
             // If map set to full screen, hide the floor setting buttons
-            hideButtons( "floorOL"); 
+            hideButtons("floorOL");
         });
         this.control_button();
     }
@@ -284,22 +284,23 @@ export class ViewerMapAPI {
         var mapdata = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var floor = this.viewerFloorAPI;
         var z = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].z;
-        var viewerAPI = this.viewerAPI; 
+        var viewerAPI = this.viewerAPI;
         
-        this.map.on('dblclick', function(event){
+        this.map.on('dblclick', function (event) {
 
             coord = event.coordinate;
             mousePosition.push(((coord[0] - (mapdata.x / mapdata.density)) / (LON_SCALAR * 1000) ) + floor.origin[0]);
             mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / (LAN_SCALAR * 1000) ) + floor.origin[1]);
 
             // move 
-            viewerAPI.move(mousePosition[0],mousePosition[1],z);
+            viewerAPI.move(mousePosition[0], mousePosition[1], z);
+        });
 
-        })
+        viewerAPI.propagateEvent("moved", viewerAPI.image.currentImage.id, true);
     }
 
-    setMiddle(poslon, poslan){
-            this.map.getView().setCenter([poslon,poslan]);
+    setMiddle(poslon, poslan) {
+        this.map.getView().setCenter([poslon,poslan]);
     }
 
     control_button(){
@@ -328,7 +329,6 @@ export class ViewerMapAPI {
 }
 
 function hideButtons(divId) {
-
     //let divId = "floorOL"; 
     var element = document.getElementById(divId); 
     
@@ -338,4 +338,4 @@ function hideButtons(divId) {
     } else {
       element.style.display = "none";
     }
-  }
+}
