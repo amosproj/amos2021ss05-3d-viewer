@@ -36,13 +36,17 @@ export class ViewerPanoAPI {
         this.oPU = () => this.onPointerUp();
         
         // handeling EventMesh / EventLayer API integration
-        this.preMeshes = new Set(); // meshes that the mouse pointer is currently over
         panoViewer.addEventListener('click', (event) => this.meshCheckClick(event));
         panoViewer.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             this.meshCheckRightClick(event);
         });
+        this.hoveredMeshes = new Set(); // meshes that the mouse pointer is currently over
         panoViewer.addEventListener('pointermove', (event) => this.meshCheckMouseOver(event));
+        this.draggedMeshes = new Set(); // meshes that the mouse is currently dragging (left button pressed)
+        panoViewer.addEventListener('mousedown', (event) => this.meshCheckStartDragging(event));
+        panoViewer.addEventListener('pointermove', (event) => this.meshCheckWhileDragging(event));
+        panoViewer.addEventListener('mouseup', () => this.meshCheckEndDragging());
 
         this.display(this.viewerAPI.image.currentImageId);
 
@@ -52,57 +56,82 @@ export class ViewerPanoAPI {
 
     }
 
-    // displays the panorama with idx *ImageNum* in the model
-    display(imageNum) {
+    // displays the panorama with idx *ImageNum* in the model (externally always called without a second parameter)
+    display(imageNum, resolution = 0) {
+        if (resolution > 3) return; // loaded highest res already
+        if (resolution != 0 && imageNum != this.viewerAPI.image.currentImageId) return; // changed location in the meantime
+
+        const resourceURL = this.viewerAPI.baseURL + Math.trunc(imageNum / 100) + '/' + imageNum + 'r' + resolution + '.jpg';
+        if (resolution > 0) {
+            // load the 360-panorama image data
+            this.viewerAPI.textureLoader.load(
+                resourceURL,
+                (texturePano) => {
+                    this.loadedMesh.material.map = texturePano
+                    this.loadedMesh.material.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+
+                    this.loadedMesh.material.needsUpdate = true;
+
+                    this.display(imageNum, resolution + 1);
+                }
+            );
+            
+            // only needed to update the resolution
+            return;
+        }
+
+        // initial case from here on (resolution == 0)
+
         this.viewerAPI.image.currentImageId = imageNum;
 
+        // --- load depth-map for panorama ---
+        const image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+        image.crossOrigin = 'use-credentials';
+        image.src = this.viewerAPI.baseURL + Math.trunc(imageNum / 100) + '/' + imageNum + 'd.png';
+        image.addEventListener('load', () => {
+            this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
+        });
+        image.addEventListener('error', function(event) {
+            console.error(event);
+        });
+        // -----
+        
         // create sphere
         const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
         // invert the geometry on the x-axis so that we look out from the middle of the sphere
         sphere.scale(-1, 1, 1);
         sphere.rotateX(Math.PI / 2);
 
-        // load the 360-panorama image data (highest resolution hardcoded for now)
-        const texturePano = this.viewerAPI.textureLoader.load(
-            this.viewerAPI.baseURL +
-            Math.trunc(imageNum / 100) +
-            '/' +
-            imageNum +
-            'r3.jpg');
-        texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
+        // load the 360-panorama image data
+        this.viewerAPI.textureLoader.load(
+            resourceURL,
+            (texturePano) => {
+                texturePano.mapping = THREE.EquirectangularReflectionMapping; // not sure if this line matters
 
-        // --- load depth-map for panorama ---
-        const image = new Image();
-        //image.crossOrigin = "use-credentials";
-        image.src = this.viewerAPI.baseURL +
-            Math.trunc(imageNum / 100) + '/' +
-            imageNum + 'd.png';
+                // put the texture on the spehere and add it to the scene
+                const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
 
-        image.addEventListener('load', () => {
-            this.depthCanvas.getContext("2d").drawImage(image, 0, 0);
-        }, false);
-        // -----
+                // adjust for orientation offset
+                mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
 
-        // put the texture on the spehere and add it to the scene
-        const mesh = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ map: texturePano }));
+                // put in the correct position in the scene
+                const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
+                mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
 
-        // adjust for orientation offset
-        mesh.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
+                // check if other panorama was previously already loaded
+                if (this.loadedMesh != null) {
+                    this.scene.remove(this.loadedMesh);
+                }
 
-        // put in the correct position in the scene
-        const localCoord = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
-        mesh.position.set(localCoord.x, localCoord.y, localCoord.z);
+                this.scene.add(mesh);
+                this.loadedMesh = mesh;
 
-        // check if other panorama was previously already loaded
-        if (this.loadedMesh != null) {
-            this.scene.remove(this.loadedMesh);
-        }
-
-        this.scene.add(mesh);
-        this.loadedMesh = mesh;
-
-        // put camera inside sphere mesh
-        this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+                // put camera inside sphere mesh
+                this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
+                
+                this.display(imageNum, resolution + 1);
+            }
+        );
     }
 
     camera() {
@@ -268,13 +297,11 @@ export class ViewerPanoAPI {
         const xy = new EventPosition(event);
         const location = this.getCursorLocation(event);
 
-        for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i];
-
+        meshes.forEach((mesh) => {
             if (typeof mesh.vwr_onclick == "function") {
                 mesh.vwr_onclick(xy, location);
             }
-        }
+        });
     }
 
     meshCheckRightClick(event) {
@@ -282,9 +309,7 @@ export class ViewerPanoAPI {
         const xy = new EventPosition(event);
         const location = this.getCursorLocation(event);
 
-        for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i];
-
+        meshes.forEach((mesh) => {
             if (typeof mesh.vwr_oncontext == "function") {
                 const callback = mesh.vwr_oncontext(xy, location);
 
@@ -293,18 +318,17 @@ export class ViewerPanoAPI {
                     items: callback,
                 });
             }
-        }
+        });
     }
 
     meshCheckMouseOver(event) {
         const meshes = this.getIntersectingMeshes(event);
 
         // check for meshes that mouse pointer is no longer over
-        this.preMeshes.forEach((preMesh) => {
+        this.hoveredMeshes.forEach((preMesh) => {
             if (!meshes.includes(preMesh)) {
                 if (typeof preMesh.vwr_onpointerleave == "function") {
-                    // remove the current mesh
-                    this.preMeshes.delete(preMesh);
+                    this.hoveredMeshes.delete(preMesh);
                     
                     preMesh.vwr_onpointerleave();
                 }
@@ -312,19 +336,53 @@ export class ViewerPanoAPI {
         });
 
         // check for meshes that mouse pointer is newly over
-        for (let i = 0; i < meshes.length; i++) {
-            const mesh = meshes[i];
-            
-            //if the current mesh has not been entered before.
-            if (!this.preMeshes.has(mesh)) {
+        meshes.forEach((mesh) => {
+            if (!this.hoveredMeshes.has(mesh)) {
                 if (typeof mesh.vwr_onpointerenter == "function") {
-                    // store the current mesh
-                    this.preMeshes.add(mesh);
+                    this.hoveredMeshes.add(mesh);
                     
                     mesh.vwr_onpointerenter();
                 }
             }
-        }
+        });
+    }
+
+    meshCheckStartDragging(event) {
+        const meshes = this.getIntersectingMeshes(event);
+        const xy = new EventPosition(event);
+        const location = this.getCursorLocation(event);
+
+        meshes.forEach((mesh) => {
+            if (!this.draggedMeshes.has(mesh)) {
+                if (typeof mesh.vwr_ondragstart == "function") {
+                    this.draggedMeshes.add(mesh);
+                    
+                    mesh.vwr_ondragstart(xy, location);
+                }
+            }
+        });
+    }
+
+    meshCheckWhileDragging(event) {
+        const xy = new EventPosition(event);
+        const location = this.getCursorLocation(event);
+
+        this.draggedMeshes.forEach((mesh) => {
+            if (typeof mesh.vwr_ondrag == "function") {
+                mesh.vwr_ondrag(xy, location);
+            }
+        });
+    }
+
+    meshCheckEndDragging() {
+        this.draggedMeshes.forEach((mesh) => {
+            if (typeof mesh.vwr_ondragend == "function") {
+                
+                mesh.vwr_ondragend();
+            }
+        });
+
+        this.draggedMeshes.clear();
     }
 
     // returns: the depth information (in meter) of the panorama at the current curser position (event.clientX, event.clientY)
