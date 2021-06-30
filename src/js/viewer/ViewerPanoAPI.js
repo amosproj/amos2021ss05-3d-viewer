@@ -189,45 +189,28 @@ export class ViewerPanoAPI {
     }
 
     onMouseMove(event){
-
-        // get depth data 
-        const raycaster = this.getRaycaster(event);
-        const distance = this.depthAtPointer(event);
-        const cursorLocation = raycaster.ray.origin.addScaledVector(raycaster.ray.direction, distance);
-
         // get cursor data
         const currentPos = this.viewerAPI.image.currentImage.pos;
         const newLocalPos = this.getCursorLocation(event);
         const newPos = this.viewerAPI.toGlobal(newLocalPos);
-        var localPos = this.viewerAPI.toLocal([newPos[0], newPos[1], currentPos[2]]);
+        const localPos = this.viewerAPI.toLocal([newPos[0], newPos[1], currentPos[2]]);
+        let minDistance = this.sphereRadius + 5; 
 
-        let minDistance = 15.00; 
-
-            this.viewerAPI.floor.currentFloor.viewerImages.forEach(element => {
-                const currLocalPos = this.viewerAPI.toLocal(element.pos);
-                const [dx, dy] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
-                // Get the distance with no depth
-                const currDistance = Math.sqrt(dx * dx + dy * dy); 
-                if (currDistance < minDistance) {
-                    minDistance = currDistance;
-                    this.bestImg = element;
-                }
-            });
+        this.viewerAPI.image.calcImagesInPanoSphere(this.sphereRadius, this.viewerAPI).forEach(element => {
+            const currLocalPos = this.viewerAPI.toLocal(element.pos);
+            const [dx, dy] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
+            // Get the distance with no height
+            const currDistance = Math.sqrt(dx * dx + dy * dy); 
+            if (currDistance < minDistance) {
+                minDistance = currDistance;
+                this.bestImg = element;
+            }
+        });
         
-        // limit distance to current mesh
-        const bestLocalPos = this.viewerAPI.toLocal(this.bestImg.pos);
-        const [dx, dy] = [this.camera.position.x - bestLocalPos.x, this.camera.position.y - bestLocalPos.y];
-        const currDistance = Math.sqrt(dx * dx + dy * dy);
-        const [deepx, deepy] = [this.camera.position.x - cursorLocation.x, this.camera.position.y - cursorLocation.y]
-        const currDeepDistance = Math.sqrt(deepx * deepx + deepy * deepy);
-
-        // difference between "camera to img" and "camera to raycaster"
-        const diff = Math.abs(currDistance-currDeepDistance)
-
         // avoid duplication
-        // if the nearest image of mouse position is not the same as the previous one, and the diff is smaller than 1
+        // if the nearest image of mouse position is not the same as the previous one
         // create new mesh and remove old mesh, and save latest mesh and image
-        if (this.bestImg != this.lastBestImg && diff < 1) {
+        if (this.bestImg != this.lastBestImg) {
             var x = 0, y = 0, z = -2 
 
             // clickable meshes are the bestImg 

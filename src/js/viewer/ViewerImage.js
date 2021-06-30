@@ -20,6 +20,7 @@ export class ViewerImage {
 
         this.mapOffset; // : [offsetX, offsetY] // in pixels, offset from map png
         
+        this.imagesInRadius = null; // : [ViewerImage] // used for displaying closest pano mesh at cursor (set in ViewerImageAPI:calcImagesInPanoSphere)
     }
 
 }
