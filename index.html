@@ -28,7 +28,7 @@
         window.parent = {
             callback: function(viewerWindow, viewerAsync) {
                 console.info("initial callback called:", viewerWindow, viewerAsync);
-                viewerAsync("https://bora.bup-nbg.de/amos2floors/", (api) => {
+                viewerAsync("https://bora.bup-nbg.de/amos2floors", (api) => {
 
                     console.info("loaded callback called with API:", api);
 
