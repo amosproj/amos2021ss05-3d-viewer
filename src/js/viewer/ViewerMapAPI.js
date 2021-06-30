@@ -36,7 +36,7 @@ export class ViewerMapAPI {
 
         map.addEventListener('fullscreenchange', (event) => {
             // If map set to full screen, hide the floor setting buttons
-            hideButtons("floorOL"); 
+            hideButtons("floorOL");
         });
         this.control_button();
     }
@@ -241,7 +241,7 @@ export class ViewerMapAPI {
         });
 
         this.lastLayerDirection = vectorLayerTriangleVertex;
-        // this.addLayer(this.lastLayerDirection);
+       // this.addLayer(this.lastLayerDirection);
 
         // Draw Triangle Polygon
         let styleTriangle = new ol.style.Style({
@@ -289,8 +289,8 @@ export class ViewerMapAPI {
         this.map.on('dblclick', function (event) {
 
             coord = event.coordinate;
-            mousePosition.push(((coord[0] - (mapdata.x / mapdata.density)) / (LON_SCALAR * 1000)) + floor.origin[0]);
-            mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / (LAN_SCALAR * 1000)) + floor.origin[1]);
+            mousePosition.push(((coord[0] - (mapdata.x / mapdata.density)) / (LON_SCALAR * 1000) ) + floor.origin[0]);
+            mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / (LAN_SCALAR * 1000) ) + floor.origin[1]);
 
             // move 
             viewerAPI.move(mousePosition[0], mousePosition[1], z);
@@ -303,7 +303,7 @@ export class ViewerMapAPI {
         this.map.getView().setCenter([poslon,poslan]);
     }
 
-    control_button() {
+    control_button(){
         var zoom_in = document.getElementById('zoom-in');
         var zoom_out = document.getElementById('zoom-out');
         var full_screen = document.getElementById('full-screen');

@@ -33,4 +33,29 @@ export class ViewerImageAPI {
         return this.currentImage();
     }
 
+    calcImagesInPanoSphere(radius, viewerAPI) {
+        if (this.currentImage.imagesInRadius != null) return this.currentImage.imagesInRadius; // already calculated
+
+        this.currentImage.imagesInRadius = [];
+
+        const currGlobalPos = this.currentImage.pos;
+        const currLocalPos = viewerAPI.toLocal([currGlobalPos[0], currGlobalPos[1], currGlobalPos[2]]);
+
+        viewerAPI.floor.currentFloor.viewerImages.forEach(element => {
+            const loopLocalPos = viewerAPI.toLocal(element.pos);
+            const [dx, dy] = [currLocalPos.x - loopLocalPos.x, currLocalPos.y - loopLocalPos.y];
+            const currDistance = Math.sqrt(dx * dx + dy * dy);
+
+            if (currDistance <= radius) {
+                this.currentImage.imagesInRadius.push(element);
+            }
+        });
+
+        if (this.currentImage.imagesInRadius == []) {
+            console.error("No other positions found in sphere radius");
+        }
+
+        return this.currentImage.imagesInRadius;
+    }
+
 }

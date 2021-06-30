@@ -29,6 +29,7 @@ export class ViewerPanoAPI {
         panoViewer.addEventListener('wheel', (event) => this.onDocumentMouseWheel(event));
         panoViewer.addEventListener('pointerdown', (event) => this.onPointerDown(event));
         panoViewer.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+        panoViewer.addEventListener('mousemove', (event) => this.onMouseMove(event));
         window.addEventListener("resize", () => this.onWindowResize());
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
@@ -47,8 +48,12 @@ export class ViewerPanoAPI {
         panoViewer.addEventListener('pointermove', (event) => this.meshCheckWhileDragging(event));
         panoViewer.addEventListener('mouseup', () => this.meshCheckEndDragging());
 
-
         this.display(this.viewerAPI.image.currentImageId);
+
+        // handling duplication of showing closest mesh
+        this.bestImg = this.viewerAPI.image.currentImage;
+        this.lastBestImg = this.viewerAPI.image.currentImage;
+
     }
 
     // displays the panorama with idx *ImageNum* in the model (externally always called without a second parameter)
@@ -204,14 +209,59 @@ export class ViewerPanoAPI {
     }
 
     onDoubleClick(event) {
+        // always clickable but to the limited bestImg 
+        if (this.clickableImg != this.viewerAPI.image.currentImage) {
+            this.display(this.clickableImg.id);
+            this.viewerAPI.map.redraw();
+        }
+        this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
+    }
+
+    onMouseMove(event){
+        // get cursor data
         const currentPos = this.viewerAPI.image.currentImage.pos;
         const newLocalPos = this.getCursorLocation(event);
         const newPos = this.viewerAPI.toGlobal(newLocalPos);
+        const localPos = this.viewerAPI.toLocal([newPos[0], newPos[1], currentPos[2]]);
+        let minDistance = this.sphereRadius + 5; 
 
-        this.viewerAPI.move(newPos[0], newPos[1], currentPos[2]);
+        this.viewerAPI.image.calcImagesInPanoSphere(this.sphereRadius, this.viewerAPI).forEach(element => {
+            const currLocalPos = this.viewerAPI.toLocal(element.pos);
+            const [dx, dy] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
+            // Get the distance with no height
+            const currDistance = Math.sqrt(dx * dx + dy * dy); 
+            if (currDistance < minDistance) {
+                minDistance = currDistance;
+                this.bestImg = element;
+            }
+        });
+        
+        // avoid duplication
+        // if the nearest image of mouse position is not the same as the previous one
+        // create new mesh and remove old mesh, and save latest mesh and image
+        if (this.bestImg != this.lastBestImg) {
+            var x = 0, y = 0, z = -2 
 
-        this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
-    }
+            // clickable meshes are the bestImg 
+            this.clickableImg = this.bestImg;
+
+            // creating a circle mesh
+            var geometry = new THREE.CircleBufferGeometry( 0.4, 32 );
+            const myTexture =  new THREE.TextureLoader().load('x-mark.png');
+            const material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true, map:myTexture} );
+        
+            // set mesh
+            const newMesh = new THREE.Mesh(geometry, material);
+            const startPos = this.viewerAPI.toLocal(this.bestImg.pos);
+            newMesh.position.set(startPos.x + x, startPos.y + y, startPos.z + z);
+            
+            // save some parameters to avoid duplication
+            this.lastBestImg = this.bestImg;
+            this.removeLayer(this.lastMesh);
+            this.addLayer(newMesh);
+            this.lastMesh = newMesh;
+        }
+    };
 
     onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -366,7 +416,6 @@ export class ViewerPanoAPI {
         // formula for position is currentLoc + direction*distance (where the direction is normalized)
         const distance = this.depthAtPointer(event);
         const cursorLocation = raycaster.ray.origin.addScaledVector(raycaster.ray.direction, distance);
-        
         return cursorLocation;
     }
 
