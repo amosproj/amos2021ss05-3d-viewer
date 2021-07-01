@@ -16,9 +16,9 @@ export class ViewerAPI {
     constructor(baseURL) {
         this.libs = libraryInfo();              // : [ViewerLibrary] // List of used third party libraries
         this.version = new ViewerVersionAPI(    // : ViewerVersionAPI // Version API
-            0.7, // Sprint 7
-            NaN,
-            "three.js 0.128.0 360 pano image viewer"
+            1, 
+            0,
+            "360 pano image viewer version Sprint 11"
         );
         this.jQuery = $;
         this.THREE = THREE;
