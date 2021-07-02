@@ -29,6 +29,23 @@
                 viewerAsync("../assets/", (api) => {
 
                     console.info("loaded callback called with API:", api);
+                   //////////////////////////////////////////////////////////
+                    var myvar=setInterval(function(){
+                    if(api.pano!==undefined ||api.pano!=null){
+
+                        clearInterval(myvar);
+
+                      
+                        console.log(api.pano);
+                        api.pano.arrowMove(document);
+                   
+                   
+                    }
+             
+                  },1000);
+
+                    /////////////////
+                    
                 });
             }
         };
