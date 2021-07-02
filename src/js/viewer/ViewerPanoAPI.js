@@ -152,6 +152,70 @@ loadImage(0);
 
 
 
+   arrowMove(Documentpara) {
+        console.log("current image id is ",this.viewerAPI.image.currentImageId);
+      
+    //let forwardimgid=this.viewerAPI.image.currentImageId
+    
+    
+    
+    var keyboard=(event)=> {
+        let forwardimgid=this.viewerAPI.image.currentImageId
+        console.log("function starts");
+        var e = event || window.event || arguments.callee.caller.arguments[0];
+                if (e && e.keyCode == 40) { 
+                    console.log('down');
+    
+                  if(forwardimgid>0){
+                    console.log("lets show this.viewerAPI.image.currentImageId :",this.viewerAPI.image.currentImageId);
+       
+                    console.log("The image id of forward image is ",--forwardimgid);
+                    console.log("lets show this.viewerAPI.image.currentImageId one more time:",this.viewerAPI.image.currentImageId);
+                    this.viewerAPI.image.currentImageId=forwardimgid;
+                    console.log("lets show this.viewerAPI.image.currentImageId one more time x2:",this.viewerAPI.image.currentImageId);
+                    this.display(forwardimgid,resolution=0);//?
+    
+                  }
+    
+    
+    
+                }
+                if (e && e.keyCode == 37) { 
+                    console.log('left');
+                }
+                if (e && e.keyCode == 39) { 
+                    console.log('right');
+                }
+                if (e && e.keyCode == 38) { 
+                    console.log('up');
+                    console.log("lets show this.viewerAPI.image.currentImageId :",this.viewerAPI.image.currentImageId);
+       
+                    console.log("The image id of forward image is ",++forwardimgid);
+                    console.log("lets show this.viewerAPI.image.currentImageId one more time:",this.viewerAPI.image.currentImageId);
+                    this.viewerAPI.image.currentImageId=forwardimgid;
+                    console.log("lets show this.viewerAPI.image.currentImageId one more time x2:",this.viewerAPI.image.currentImageId);
+                   
+                   //display new position
+                    this.display(forwardimgid,resolution=0);//?
+    
+     
+    
+    
+    
+                
+                }
+      
+    
+    }
+    
+    Documentpara.onkeyup = keyboard;
+    }
+	
+	
+	
+	
+	
+
     camera() {
         return this.camera;
     }
