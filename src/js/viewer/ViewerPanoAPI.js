@@ -153,12 +153,8 @@ loadImage(0);
 
 
    arrowMove(Documentpara) {
-        console.log("current image id is ",this.viewerAPI.image.currentImageId);
-      
-    //let forwardimgid=this.viewerAPI.image.currentImageId
-    
-    
-    
+    console.log("current image id is ",this.viewerAPI.image.currentImageId);
+         
     var keyboard=(event)=> {
         let forwardimgid=this.viewerAPI.image.currentImageId
         console.log("function starts");
@@ -167,18 +163,17 @@ loadImage(0);
                     console.log('down');
     
                   if(forwardimgid>0){
-                    console.log("lets show this.viewerAPI.image.currentImageId :",this.viewerAPI.image.currentImageId);
+                 
        
-                    console.log("The image id of forward image is ",--forwardimgid);
-                    console.log("lets show this.viewerAPI.image.currentImageId one more time:",this.viewerAPI.image.currentImageId);
+                    --forwardimgid;
+                   
                     this.viewerAPI.image.currentImageId=forwardimgid;
-                    console.log("lets show this.viewerAPI.image.currentImageId one more time x2:",this.viewerAPI.image.currentImageId);
+                  
                     this.display(forwardimgid,resolution=0);//?
     
                   }
     
-    
-    
+        
                 }
                 if (e && e.keyCode == 37) { 
                     console.log('left');
@@ -188,24 +183,18 @@ loadImage(0);
                 }
                 if (e && e.keyCode == 38) { 
                     console.log('up');
-                    console.log("lets show this.viewerAPI.image.currentImageId :",this.viewerAPI.image.currentImageId);
+                    
        
-                    console.log("The image id of forward image is ",++forwardimgid);
-                    console.log("lets show this.viewerAPI.image.currentImageId one more time:",this.viewerAPI.image.currentImageId);
+                    ++forwardimgid
+                   
                     this.viewerAPI.image.currentImageId=forwardimgid;
-                    console.log("lets show this.viewerAPI.image.currentImageId one more time x2:",this.viewerAPI.image.currentImageId);
+                   
                    
                    //display new position
-                    this.display(forwardimgid,resolution=0);//?
-    
-     
-    
-    
-    
-                
+                    this.display(forwardimgid,resolution=0);//
+                    
                 }
-      
-    
+          
     }
     
     Documentpara.onkeyup = keyboard;
