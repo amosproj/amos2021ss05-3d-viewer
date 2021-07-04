@@ -334,6 +334,18 @@ export class ViewerPanoAPI {
                 });
             }
         });
+
+        // call onContext for all eventLayers that were added (no visual representation)
+        this.addedLayers.filter(l => l.material == null).forEach(layer => {
+            if (typeof layer.vwr_oncontext == "function") {
+                const callback = layer.vwr_oncontext(xy, location);
+
+                $.contextMenu({
+                    selector: '#pano-viewer',
+                    items: callback,
+                });
+            }
+        });
     }
 
     meshCheckMouseOver(event) {
