@@ -20,6 +20,9 @@ export class ViewerPanoAPI {
 
         // property needed for depthAtPointer method
         this.depthCanvas = document.createElement("canvas");
+        // according to model data information depth pictures always have the same size
+        this.depthCanvas.getContext("2d").canvas.width = 1024;
+        this.depthCanvas.getContext("2d").canvas.height = 512;
 
         // handeling zooming / panning / moving / resizing
         const panoViewer = document.getElementById('pano-viewer');
@@ -34,7 +37,7 @@ export class ViewerPanoAPI {
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
-        
+
         // handeling EventMesh / EventLayer API integration
         panoViewer.addEventListener('click', (event) => this.meshCheckClick(event));
         panoViewer.addEventListener('contextmenu', (event) => {
@@ -80,11 +83,10 @@ export class ViewerPanoAPI {
             return;
         }
 
-        // initial case from here on (resolution == 0)
-
+        // --- initial case from here on (resolution == 0) ---
         this.viewerAPI.image.currentImageId = imageNum;
 
-        // --- load depth-map for panorama ---
+        // load depth-map for panorama
         const image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
         image.crossOrigin = 'use-credentials';
         image.src = this.viewerAPI.baseURL + Math.trunc(imageNum / 100) + '/' + imageNum + 'd.png';
@@ -94,7 +96,6 @@ export class ViewerPanoAPI {
         image.addEventListener('error', function(event) {
             console.error(event);
         });
-        // -----
         
         // create sphere
         const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
@@ -128,7 +129,7 @@ export class ViewerPanoAPI {
 
                 // put camera inside sphere mesh
                 this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
-                
+
                 this.display(imageNum, resolution + 1);
             }
         );
@@ -228,13 +229,13 @@ export class ViewerPanoAPI {
         const newLocalPos = this.getCursorLocation(event);
         const newPos = this.viewerAPI.toGlobal(newLocalPos);
         const localPos = this.viewerAPI.toLocal([newPos[0], newPos[1], currentPos[2]]);
-        let minDistance = this.sphereRadius + 5; 
+        let minDistance = this.sphereRadius + 5;
 
         this.viewerAPI.image.calcImagesInPanoSphere(this.sphereRadius, this.viewerAPI).forEach(element => {
             const currLocalPos = this.viewerAPI.toLocal(element.pos);
             const [dx, dy] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
             // Get the distance with no height
-            const currDistance = Math.sqrt(dx * dx + dy * dy); 
+            const currDistance = Math.sqrt(dx * dx + dy * dy);
             if (currDistance < minDistance) {
                 minDistance = currDistance;
                 this.bestImg = element;
@@ -245,24 +246,24 @@ export class ViewerPanoAPI {
         const bestLocalPos = this.viewerAPI.toLocal(this.bestImg.pos);
         const [dx, dy] = [this.camera.position.x - bestLocalPos.x, this.camera.position.y - bestLocalPos.y];
         const currDistance = Math.sqrt(dx * dx + dy * dy);
-        const [deepx, deepy] = [this.camera.position.x - cursorLocation.x, this.camera.position.y - cursorLocation.y]
+        const [deepx, deepy] = [this.camera.position.x - cursorLocation.x, this.camera.position.y - cursorLocation.y];
         const currDeepDistance = Math.sqrt(deepx * deepx + deepy * deepy);
 
         // difference between "camera to img" and "camera to raycaster"
-        const diff = Math.abs(currDistance-currDeepDistance)
+        const diff = Math.abs(currDistance-currDeepDistance);
 
         // avoid duplication
         // if the nearest image of mouse position is not the same as the previous one, and the diff is smaller than 1
         // create new mesh and remove old mesh, and save latest mesh and image
         if (this.bestImg != this.lastBestImg && diff < 1) {
-            var x = 0, y = 0, z = -2 
+            var x = 0, y = 0, z = -2;
 
             // clickable meshes are the bestImg 
             this.clickableImg = this.bestImg;
 
             // creating a circle mesh
             var geometry = new THREE.CircleBufferGeometry( 0.4, 32 );
-            const myTexture =  new THREE.TextureLoader().load('x-mark.png');
+            const myTexture = new THREE.TextureLoader().load('x-mark.png');
             const material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true, map:myTexture} );
         
             // set mesh
@@ -414,7 +415,7 @@ export class ViewerPanoAPI {
         const pixelX = Math.trunc((adjustedLonov / 360) * this.depthCanvas.width);
         const pixelY = Math.trunc((adjustedLatov + 90) / 180 * this.depthCanvas.height);
 
-        // convert pixel value to depth information 
+        // convert pixel value to depth information
         const imgData = this.depthCanvas.getContext("2d").getImageData(pixelX, pixelY, 1, 1);
         const [red, green, blue, alpha] = imgData.data;
 
@@ -436,18 +437,18 @@ export class ViewerPanoAPI {
 
     getRaycaster(event) {
         // calculate mouse position in normalized device coordinates
-	    // (-1 to +1) for both components
+        // (-1 to +1) for both components
         const mouse = new THREE.Vector2();
         const raycaster = new THREE.Raycaster();
 
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;    
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
         
         raycaster.setFromCamera(mouse, this.camera);
     
         return raycaster;
     }
-    
+
 }
 
 // returns a normalized Vector3 pointing in the direction specified by lonov latov
