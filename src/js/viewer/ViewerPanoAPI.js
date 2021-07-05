@@ -1,7 +1,7 @@
 "use strict";
 
 import { ViewerViewState } from "./ViewerViewState.js";
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED, ARROW_LEFT_RIGHT_SPEED, ARROW_UP_DOWN_DISTANCE } from "./ViewerConfig.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED, ARROW_LEFT_RIGHT_SPEED, ARROW_UP_DOWN_DISTANCE, PLUS_MINUS_ZOOM_SPEED } from "./ViewerConfig.js";
 import { EventPosition } from "./EventPosition.js";
 
 export class ViewerPanoAPI {
@@ -205,9 +205,6 @@ export class ViewerPanoAPI {
     onDocumentMouseWheel(event) {
         this.viewerViewState.fov = this.camera.fov + event.deltaY * ZOOM_SPEED;
 
-        // this.view(this.viewerViewState.lonov, this.viewerViewState.latov, this.viewerViewState.fov);
-        // this.camera.updateProjectionMatrix();
-
         this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
         this.viewerAPI.map.show_direction();
     }
@@ -319,6 +316,15 @@ export class ViewerPanoAPI {
 
                 this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
                 break;
+            case "+":
+                this.viewerViewState.fov = this.camera.fov - PLUS_MINUS_ZOOM_SPEED;
+
+                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
+                break;
+            case "-":
+                this.viewerViewState.fov = this.camera.fov + PLUS_MINUS_ZOOM_SPEED;
+
+                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
         }
         this.viewerAPI.map.show_direction();
     }

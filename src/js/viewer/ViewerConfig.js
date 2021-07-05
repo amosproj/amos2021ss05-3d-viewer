@@ -33,6 +33,11 @@ export const LON_SCALAR = 71.5;
 // Scalar for Langitude from degree to km
 export const LAN_SCALAR = 111.3;
 
-// Amount of degrees changed on one arrow key press left-right and distance walked forward-backward (meter)
+// Amount of degrees changed on one arrow key press left-right
 export const ARROW_LEFT_RIGHT_SPEED = 10;
+
+// Distance walked forward-backward (meter) on arrow key press
 export const ARROW_UP_DOWN_DISTANCE = 4;
+
+// Change in FOV (degrees) on +/- keyboard buttons;
+export const PLUS_MINUS_ZOOM_SPEED = 10;
