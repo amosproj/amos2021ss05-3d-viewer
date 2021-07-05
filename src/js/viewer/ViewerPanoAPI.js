@@ -183,30 +183,33 @@ loadImage(0);
                 this.lastViewState[1]= 0 * PAN_SPEED * scalingFactor + this.lastViewState[1];
                        
                 this.lastViewState[0]=30 * PAN_SPEED * scalingFactor + this.lastViewState[0];
-                this.viewerAPI.map.show_direction()
-               
-             
-              
-               
-   
-
-            }
-                if (e && e.keyCode == 39) { 
-                    console.log('right');
-                }
+                this.viewerAPI.map.show_direction();
+             }
+          
             if (e && e.keyCode == 39) { 
-             
+                console.log('right');
                 const scalingFactor = this.camera.fov / MAX_FOV;
                 this.viewerViewState.setLonov(-30 * PAN_SPEED * scalingFactor + this.lastViewState[0]);
                 this.viewerViewState.setLatov(0 * PAN_SPEED * scalingFactor + this.lastViewState[1]);
                 this.lastViewState[0]=-30 * PAN_SPEED * scalingFactor + this.lastViewState[0]
                 this.lastViewState[1]= 0 * PAN_SPEED * scalingFactor + this.lastViewState[1];
-                this.viewerAPI.map.show_direction()
-  
-            }
-    }
+                this.viewerAPI.map.show_direction();
+             }
+            if (e && e.keyCode == 38) { 
+                console.log('up');
+                console.log("lets show this.viewerAPI.image.currentImageId :",this.viewerAPI.image.currentImageId);
+   
+                console.log("The image id of forward image is ",++forwardimgid);
+                console.log("lets show this.viewerAPI.image.currentImageId one more time:",this.viewerAPI.image.currentImageId);
+                this.viewerAPI.image.currentImageId=forwardimgid;
+                console.log("lets show this.viewerAPI.image.currentImageId one more time x2:",this.viewerAPI.image.currentImageId);          
+                this.display(forwardimgid);
+                
+             }
+
+       }
     
-    Documentpara.onkeyup = keyboard;
+         Documentpara.onkeyup = keyboard;
     }
 	
 	
