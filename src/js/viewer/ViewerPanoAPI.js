@@ -325,6 +325,7 @@ export class ViewerPanoAPI {
                 this.viewerViewState.fov = this.camera.fov + PLUS_MINUS_ZOOM_SPEED;
 
                 this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
+                break;
         }
         this.viewerAPI.map.show_direction();
     }

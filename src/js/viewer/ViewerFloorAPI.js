@@ -53,6 +53,9 @@ export class ViewerFloorAPI {
         viewerAPI.image.currentImageId = this.floors[this.currentFloorId].i[0][0];
 
         this.createControlMenuButtonsOL();
+
+        // event listener for up/down with keyboard
+        document.addEventListener('keydown', (event) => this.upDownKeyboard(event));
     }
 
     all(callback) {
@@ -220,6 +223,74 @@ export class ViewerFloorAPI {
         });
     }
 
+    upDownKeyboard(event) {
+        // reference needed for scope of $ functions
+        const selfRef = this;
+
+        // push all floor names into an array
+        const totalFloorsname = [];
+        this.floors.forEach(function (item) {
+            totalFloorsname.push(item.name);
+        });
+
+        // get buttonUp and buttonDown for enable/disable
+        const buttonUp = document.getElementById('buttonUpOL');
+        const buttonDown = document.getElementById('buttonDownOL');
+
+        // get droplist
+        const dropdownFloorsOL = document.getElementById("dropdown-floors-OL");
+        
+        switch (event.key) {
+            case "u":
+            case "U":
+                // already on highest floor
+                if (selfRef.currentFloorId == selfRef.floors.length - 1) return;
+
+                selfRef.currentFloorId++;
+
+                $("#cfOL").text("Current Floor: " + selfRef.currentFloor.name + ". ");
+
+                // change to higher floor
+                if (selfRef.currentFloorId == selfRef.floors.length - 1) {
+                    // disable the up button if it's already at the highest floor
+                    buttonUp.disabled = true;
+                    buttonDown.disabled = false;  
+                } else {
+                    //enable the up button if it's not in the highest floor
+                    buttonUp.disabled = false;
+                    buttonDown.disabled = false; 
+                }
+
+                dropdownFloorsOL.value = totalFloorsname[selfRef.currentFloorId];
+
+                selfRef.set(dropdownFloorsOL.value);
+                break;
+            case "d":
+            case "D":
+                // alredy on lowest floor
+                if (selfRef.currentFloorId < 1) return;
+
+                selfRef.currentFloorId--;
+
+                $("#cfOL").text("Current Floor: " + selfRef.currentFloor.name + ". ");
+
+                // change to lower floor
+                if (selfRef.currentFloorId < 1) {
+                    // disable the down button if it's already at the lowest floor
+                    buttonUp.disabled = false;
+                    buttonDown.disabled = true;
+                } else {
+                    //enable the down button if it's not in the lowest floor
+                    buttonUp.disabled = false;
+                    buttonDown.disabled = false;
+                }
+
+                dropdownFloorsOL.value = totalFloorsname[selfRef.currentFloorId];
+
+                selfRef.set(dropdownFloorsOL.value);
+                break;
+        }
+    }
 }
 
 class ViewerFloor {
