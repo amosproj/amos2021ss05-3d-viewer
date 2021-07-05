@@ -304,6 +304,7 @@ export class ViewerPanoAPI {
                 // Down pressed
                 break;
         }
+        this.viewerAPI.map.show_direction();
     }
 
     // ---- event handeling functions for EventMesh / EventLayer API interaction ----
