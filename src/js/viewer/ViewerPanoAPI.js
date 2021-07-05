@@ -1,7 +1,7 @@
 "use strict";
 
 import { ViewerViewState } from "./ViewerViewState.js";
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED} from "./ViewerConfig.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED, ARROW_LEFT_RIGHT_SPEED} from "./ViewerConfig.js";
 import { EventPosition } from "./EventPosition.js";
 
 export class ViewerPanoAPI {
@@ -38,6 +38,9 @@ export class ViewerPanoAPI {
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
 
+        // event listener for arrow keys
+        document.addEventListener('keydown', (event) => this.arrowKeyHandler(event));
+        
         // handeling EventMesh / EventLayer API integration
         panoViewer.addEventListener('click', (event) => this.meshCheckClick(event));
         panoViewer.addEventListener('contextmenu', (event) => {
@@ -284,6 +287,23 @@ export class ViewerPanoAPI {
         this.camera.updateProjectionMatrix();
 
         this.viewerAPI.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    arrowKeyHandler(event) {
+        switch (event.key) {
+            case "ArrowLeft":
+                this.viewerViewState.setLonov(this.viewerViewState.lonov + ARROW_LEFT_RIGHT_SPEED);
+                break;
+            case "ArrowRight":
+                this.viewerViewState.setLonov(this.viewerViewState.lonov - ARROW_LEFT_RIGHT_SPEED);
+                break;
+            case "ArrowUp":
+                // Up pressed
+                break;
+            case "ArrowDown":
+                // Down pressed
+                break;
+        }
     }
 
     // ---- event handeling functions for EventMesh / EventLayer API interaction ----

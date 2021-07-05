@@ -32,3 +32,6 @@ export const LON_SCALAR = 71.5;
 
 // Scalar for Langitude from degree to km
 export const LAN_SCALAR = 111.3;
+
+// Amount of degrees changed on one arrow key press
+export const ARROW_LEFT_RIGHT_SPEED = 10;
