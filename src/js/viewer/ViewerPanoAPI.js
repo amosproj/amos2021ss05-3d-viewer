@@ -175,26 +175,35 @@ loadImage(0);
     
         
                 }
-                if (e && e.keyCode == 37) { 
-                    console.log('left');
-                }
+               if (e && e.keyCode == 37) { 
+           
+                const scalingFactor = this.camera.fov / MAX_FOV;
+                this.viewerViewState.setLonov(30 * PAN_SPEED * scalingFactor + this.lastViewState[0]);
+                this.viewerViewState.setLatov(0 * PAN_SPEED * scalingFactor + this.lastViewState[1]);
+                this.lastViewState[1]= 0 * PAN_SPEED * scalingFactor + this.lastViewState[1];
+                       
+                this.lastViewState[0]=30 * PAN_SPEED * scalingFactor + this.lastViewState[0];
+                this.viewerAPI.map.show_direction()
+               
+             
+              
+               
+   
+
+            }
                 if (e && e.keyCode == 39) { 
                     console.log('right');
                 }
-                if (e && e.keyCode == 38) { 
-                    console.log('up');
-                    
-       
-                    ++forwardimgid
-                   
-                    this.viewerAPI.image.currentImageId=forwardimgid;
-                   
-                   
-                   //display new position
-                    this.display(forwardimgid,resolution=0);//
-                    
-                }
-          
+            if (e && e.keyCode == 39) { 
+             
+                const scalingFactor = this.camera.fov / MAX_FOV;
+                this.viewerViewState.setLonov(-30 * PAN_SPEED * scalingFactor + this.lastViewState[0]);
+                this.viewerViewState.setLatov(0 * PAN_SPEED * scalingFactor + this.lastViewState[1]);
+                this.lastViewState[0]=-30 * PAN_SPEED * scalingFactor + this.lastViewState[0]
+                this.lastViewState[1]= 0 * PAN_SPEED * scalingFactor + this.lastViewState[1];
+                this.viewerAPI.map.show_direction()
+  
+            }
     }
     
     Documentpara.onkeyup = keyboard;
