@@ -288,7 +288,7 @@ export class ViewerPanoAPI {
 
     arrowKeyHandler(event) {
         const currentPos = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
-        const viewingDireciton = lonLatToLocal(this.viewerViewState.lonov, this.viewerViewState.latov);
+        const viewingDirection = lonLatToLocal(this.viewerViewState.lonov, this.viewerViewState.latov);
         
         switch (event.key) {
             case "ArrowLeft":
@@ -302,7 +302,7 @@ export class ViewerPanoAPI {
                 this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
                 break;
             case "ArrowUp":
-                const forward = currentPos.addScaledVector(viewingDireciton, ARROW_UP_DOWN_DISTANCE);
+                const forward = currentPos.addScaledVector(viewingDirection, ARROW_UP_DOWN_DISTANCE);
                 const globalForward = this.viewerAPI.toGlobal(forward);
                 this.viewerAPI.move(globalForward[0], globalForward[1], globalForward[2]);
 
@@ -310,7 +310,7 @@ export class ViewerPanoAPI {
                 break;
             case "ArrowDown":
                 // negative distance because walking backwards
-                const backward = currentPos.addScaledVector(viewingDireciton, - ARROW_UP_DOWN_DISTANCE);
+                const backward = currentPos.addScaledVector(viewingDirection, - ARROW_UP_DOWN_DISTANCE);
                 const globalBackward = this.viewerAPI.toGlobal(backward);
                 this.viewerAPI.move(globalBackward[0], globalBackward[1], globalBackward[2]);
 
