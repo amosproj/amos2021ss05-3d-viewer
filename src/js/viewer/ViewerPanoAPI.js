@@ -152,40 +152,41 @@ loadImage(0);
 
 
 
-   arrowMove(Documentpara) {
+arrowMove(Documentpara) {
     console.log("current image id is ",this.viewerAPI.image.currentImageId);
-         
-    var keyboard=(event)=> {
-        let forwardimgid=this.viewerAPI.image.currentImageId
-        console.log("function starts");
-        var e = event || window.event || arguments.callee.caller.arguments[0];
-                if (e && e.keyCode == 40) { 
-                    console.log('down');
-    
-                  if(forwardimgid>0){
-                 
-       
-                    --forwardimgid;
-                   
-                    this.viewerAPI.image.currentImageId=forwardimgid;
-                  
-                    this.display(forwardimgid,resolution=0);//?
-    
-                  }
-    
-        
-                }
-               if (e && e.keyCode == 37) { 
-           
+  
+
+var keyboard=(event)=> {
+
+    const currentPos = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
+ 
+    const viewingDireciton = lonLatToLocal(this.viewerViewState.lonov, this.viewerViewState.latov);
+
+    let forwardimgid=this.viewerAPI.image.currentImageId;
+    let ARROW_UP_DOWN_DISTANCE=4;
+
+    var e = event || window.event || arguments.callee.caller.arguments[0];
+            if (e && e.keyCode == 40) { 
+                const backward = currentPos.addScaledVector(viewingDireciton, - ARROW_UP_DOWN_DISTANCE);
+                const globalBackward = this.viewerAPI.toGlobal(backward);
+                this.viewerAPI.move(globalBackward[0], globalBackward[1], globalBackward[2]);
+
+                this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
+              
+            }
+            if (e && e.keyCode == 37) { 
+                console.log('left');
+               // console.log(event.clientY);
                 const scalingFactor = this.camera.fov / MAX_FOV;
                 this.viewerViewState.setLonov(30 * PAN_SPEED * scalingFactor + this.lastViewState[0]);
                 this.viewerViewState.setLatov(0 * PAN_SPEED * scalingFactor + this.lastViewState[1]);
                 this.lastViewState[1]= 0 * PAN_SPEED * scalingFactor + this.lastViewState[1];
                        
                 this.lastViewState[0]=30 * PAN_SPEED * scalingFactor + this.lastViewState[0];
-                this.viewerAPI.map.show_direction();
-             }
-          
+                this.viewerAPI.map.show_direction()
+
+
+            }
             if (e && e.keyCode == 39) { 
                 console.log('right');
                 const scalingFactor = this.camera.fov / MAX_FOV;
@@ -193,28 +194,25 @@ loadImage(0);
                 this.viewerViewState.setLatov(0 * PAN_SPEED * scalingFactor + this.lastViewState[1]);
                 this.lastViewState[0]=-30 * PAN_SPEED * scalingFactor + this.lastViewState[0]
                 this.lastViewState[1]= 0 * PAN_SPEED * scalingFactor + this.lastViewState[1];
-                this.viewerAPI.map.show_direction();
-             }
+                this.viewerAPI.map.show_direction()
+
+            }
             if (e && e.keyCode == 38) { 
+
+
                 console.log('up');
-                console.log("lets show this.viewerAPI.image.currentImageId :",this.viewerAPI.image.currentImageId);
-   
-                console.log("The image id of forward image is ",++forwardimgid);
-                console.log("lets show this.viewerAPI.image.currentImageId one more time:",this.viewerAPI.image.currentImageId);
-                this.viewerAPI.image.currentImageId=forwardimgid;
-                console.log("lets show this.viewerAPI.image.currentImageId one more time x2:",this.viewerAPI.image.currentImageId);          
-                this.display(forwardimgid);
-                
-             }
+                const forward = currentPos.addScaledVector(viewingDireciton, ARROW_UP_DOWN_DISTANCE);
+                const globalForward = this.viewerAPI.toGlobal(forward);
+                this.viewerAPI.move(globalForward[0], globalForward[1], globalForward[2]);
+
+                this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
+
+               }
 
        }
-    
-         Documentpara.onkeyup = keyboard;
+
+    Documentpara.onkeydown  = keyboard;
     }
-	
-	
-	
-	
 	
 
     camera() {
