@@ -286,49 +286,56 @@ export class ViewerPanoAPI {
         this.viewerAPI.renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
+   
     arrowKeyHandler(event) {
-        const currentPos = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
-        const viewingDirection = lonLatToLocal(this.viewerViewState.lonov, this.viewerViewState.latov);
-        
-        switch (event.key) {
-            case "ArrowLeft":
-                this.viewerViewState.setLonov(this.viewerViewState.lonov + ARROW_LEFT_RIGHT_SPEED);
-
-                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
-                break;
-            case "ArrowRight":
-                this.viewerViewState.setLonov(this.viewerViewState.lonov - ARROW_LEFT_RIGHT_SPEED);
-
-                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
-                break;
-            case "ArrowUp":
-                const forward = currentPos.addScaledVector(viewingDirection, ARROW_UP_DOWN_DISTANCE);
-                const globalForward = this.viewerAPI.toGlobal(forward);
-                this.viewerAPI.move(globalForward[0], globalForward[1], globalForward[2]);
-
-                this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
-                break;
-            case "ArrowDown":
-                // negative distance because walking backwards
+    const currentPos = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
+    const viewingDirection = lonLatToLocal(this.viewerViewState.lonov, this.viewerViewState.latov);
+    var e = event || window.event || arguments.callee.caller.arguments[0];
+            if (e && e.keyCode == 40) { 
+                console.log('down');
                 const backward = currentPos.addScaledVector(viewingDirection, - ARROW_UP_DOWN_DISTANCE);
                 const globalBackward = this.viewerAPI.toGlobal(backward);
                 this.viewerAPI.move(globalBackward[0], globalBackward[1], globalBackward[2]);
-
+    
                 this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
-                break;
-            case "+":
-                this.viewerViewState.fov = this.camera.fov - PLUS_MINUS_ZOOM_SPEED;
+                this.viewerAPI.map.show_direction();
+            }
+            if (e && e.keyCode == 38) { 
 
-                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
-                break;
-            case "-":
-                this.viewerViewState.fov = this.camera.fov + PLUS_MINUS_ZOOM_SPEED;
+                console.log('up');
 
-                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
-                break;
-        }
-        this.viewerAPI.map.show_direction();
-    }
+                const forward = currentPos.addScaledVector(viewingDirection, ARROW_UP_DOWN_DISTANCE);
+                const globalForward = this.viewerAPI.toGlobal(forward);
+                this.viewerAPI.move(globalForward[0], globalForward[1], globalForward[2]);
+    
+                this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
+                this.viewerAPI.map.show_direction();
+            }
+
+            if (e && e.keyCode == 37) { 
+            console.log('left');
+            const scalingFactor = this.camera.fov / MAX_FOV;
+            this.viewerViewState.setLonov(30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);              
+            this.lastViewState[0]=30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov;
+            this.viewerAPI.map.show_direction();
+
+            }
+
+            if (e && e.keyCode == 39) { 
+                console.log('right');
+                const scalingFactor = this.camera.fov / MAX_FOV;
+                this.viewerViewState.setLonov(-30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);
+                this.lastViewState[0]=-30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov;
+                this.viewerAPI.map.show_direction();
+                   
+            }
+
+
+}
+
+    
+    
+    
 
     // ---- event handeling functions for EventMesh / EventLayer API interaction ----
     getIntersectingMeshes(event) {
