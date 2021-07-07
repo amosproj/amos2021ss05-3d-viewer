@@ -1,6 +1,6 @@
 "use strict";
 
-import { MAX_FOV, SCALING_MAP, MAP_ZOOM } from "./ViewerConfig.js";
+import { MAX_FOV, SCALING_MAP, MAP_ZOOM, LON_SCALAR, LAN_SCALAR } from "./ViewerConfig.js";
 // Map (2D) Viewer API
 
 // Specific API for the Map View
@@ -33,6 +33,12 @@ export class ViewerMapAPI {
         this.viewerAPI = viewerAPI;
         let map = document.getElementById('map');
         map.addEventListener('dblclick', (event) => this.onDoubleClick(event));
+
+        map.addEventListener('fullscreenchange', (event) => {
+            // If map set to full screen, hide the floor setting buttons
+            hideButtons( "floorOL"); 
+          });
+        this.control_button();
     }
 
     // Method: Add an event layer to the map (2D) view.
@@ -68,14 +74,14 @@ export class ViewerMapAPI {
             }),
             controls: ol.control.defaults({
                 // Hide Map rotation button
-                rotate: false
-            }).extend([
-                // create fullScreen button
-                new ol.control.FullScreen(),
-            ]),
+                rotate: false,
+                zoom: false
+            }),
             //Disable Zoom Control on MAP
             interactions: ol.interaction.defaults({doubleClickZoom :false}),
         });
+
+        
 
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
@@ -190,6 +196,7 @@ export class ViewerMapAPI {
         this.lastVectorLayer = currentVectorLayer;
         this.lastVectorLayerRed = vectorLayerRed;
 
+        // disable init
         this.show_direction();
         this.init = false;
     }
@@ -234,6 +241,7 @@ export class ViewerMapAPI {
         });
 
         this.lastLayerDirection = vectorLayerTriangleVertex;
+       // this.addLayer(this.lastLayerDirection);
 
         // Draw Triangle Polygon
         let styleTriangle = new ol.style.Style({
@@ -264,35 +272,25 @@ export class ViewerMapAPI {
 
     getLonLanCoordinates(position, mapdata){
         // Compute the latitude and longitude  in reference to the origin in WGS84 and aff offset of the map 
-        let lon = 71500  *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
-        let lan = 113000  * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
+        let lon = LON_SCALAR * 1000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
+        let lan = LAN_SCALAR * 1000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
         return [lon, lan]; 
     }
 
-    getCoordinatesLonLan(position, mapdata){
-        // Compute the coordinate  in reference to the origin from WGS84 Longitude Latitude 
-        let x =  (position[0] -(mapdata.x / mapdata.density) )/71500   +   this.viewerFloorAPI.origin[0];
-        let y =  (position[1] -(mapdata.x / mapdata.density) )/113000  +   this.viewerFloorAPI.origin[1];
-        return [x, y]; 
-    }
-
     onDoubleClick(event) {
-    
-        // Function to trigger the position change
+
         var coord = [];
         var mousePosition = [];
-        // Update location metadata
         var mapdata = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var floor = this.viewerFloorAPI;
         var z = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].z;
         var viewerAPI = this.viewerAPI; 
-
         
         this.map.on('dblclick', function(event){
 
             coord = event.coordinate;
-            mousePosition.push( ((coord[0] - (mapdata.x / mapdata.density)) / 71500 ) + floor.origin[0] );
-            mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / 113000 ) + floor.origin[1]);
+            mousePosition.push(((coord[0] - (mapdata.x / mapdata.density)) / (LON_SCALAR * 1000) ) + floor.origin[0]);
+            mousePosition.push(((coord[1] - (mapdata.y / mapdata.density)) / (LAN_SCALAR * 1000) ) + floor.origin[1]);
 
             // move 
             viewerAPI.move(mousePosition[0],mousePosition[1],z);
@@ -301,7 +299,45 @@ export class ViewerMapAPI {
     }
 
     setMiddle(poslon, poslan){
+        console.log(this.map)
             this.map.getView().setCenter([poslon,poslan]);
+    }
+
+    control_button(){
+        var zoom_in = document.getElementById('zoom-in');
+        var zoom_out = document.getElementById('zoom-out');
+        var full_screen = document.getElementById('full-screen');
+        var map = this.map;
+
+        zoom_in.addEventListener('click', function () {
+            var view = map.getView();
+			var zoom = view.getZoom();
+			view.setZoom(zoom + 1);
+        })
+
+        zoom_out.addEventListener('click', function () {
+            var view = map.getView();
+			var zoom = view.getZoom();
+            view.setZoom(zoom - 1);
+        })
+
+        full_screen.addEventListener('click', function () {
+            var elem = document.getElementById('map');
+            elem.requestFullscreen();
+        })
     }
 }
 
+
+function hideButtons(divId) {
+
+    //let divId = "floorOL"; 
+    var element = document.getElementById(divId); 
+    
+    /* Toggle to hide HTML div */
+    if (element.style.display === "none") {
+      element.style.display = "block";
+    } else {
+      element.style.display = "none";
+    }
+  }

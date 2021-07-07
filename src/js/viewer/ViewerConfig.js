@@ -26,3 +26,9 @@ export const SCALING_MAP = 0.2;
 
 // Describes the maximum zoom of the map. 
 export const MAP_ZOOM = 4;
+
+// Scalar for Longitude from degree to km
+export const LON_SCALAR = 71.5;
+
+// Scalar for Langitude from degree to km
+export const LAN_SCALAR = 111.3;
