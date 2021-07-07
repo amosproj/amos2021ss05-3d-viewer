@@ -1,7 +1,7 @@
 "use strict";
 
 import { ViewerViewState } from "./ViewerViewState.js";
-import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED} from "./ViewerConfig.js";
+import { DEFAULT_FOV, MAX_FOV, MIN_FOV, ZOOM_SPEED, PAN_SPEED, ARROW_LEFT_RIGHT_SPEED, ARROW_UP_DOWN_DISTANCE, PLUS_MINUS_ZOOM_SPEED } from "./ViewerConfig.js";
 import { EventPosition } from "./EventPosition.js";
 
 export class ViewerPanoAPI {
@@ -20,6 +20,9 @@ export class ViewerPanoAPI {
 
         // property needed for depthAtPointer method
         this.depthCanvas = document.createElement("canvas");
+        // according to model data information depth pictures always have the same size
+        this.depthCanvas.getContext("2d").canvas.width = 1024;
+        this.depthCanvas.getContext("2d").canvas.height = 512;
 
         // handeling zooming / panning / moving / resizing
         const panoViewer = document.getElementById('pano-viewer');
@@ -34,6 +37,9 @@ export class ViewerPanoAPI {
         // Two new event listeneres are called to handle *how far* the user drags
         this.oPM = (event) => this.onPointerMove(event);
         this.oPU = () => this.onPointerUp();
+
+        // event listener for arrow keys
+        document.addEventListener('keydown', (event) => this.arrowKeyHandler(event));
         
         // handeling EventMesh / EventLayer API integration
         panoViewer.addEventListener('click', (event) => this.meshCheckClick(event));
@@ -80,11 +86,10 @@ export class ViewerPanoAPI {
             return;
         }
 
-        // initial case from here on (resolution == 0)
-
+        // --- initial case from here on (resolution == 0) ---
         this.viewerAPI.image.currentImageId = imageNum;
 
-        // --- load depth-map for panorama ---
+        // load depth-map for panorama
         const image = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
         image.crossOrigin = 'use-credentials';
         image.src = this.viewerAPI.baseURL + Math.trunc(imageNum / 100) + '/' + imageNum + 'd.png';
@@ -94,7 +99,6 @@ export class ViewerPanoAPI {
         image.addEventListener('error', function(event) {
             console.error(event);
         });
-        // -----
         
         // create sphere
         const sphere = new THREE.SphereGeometry(this.sphereRadius, 60, 40);
@@ -128,7 +132,7 @@ export class ViewerPanoAPI {
 
                 // put camera inside sphere mesh
                 this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
-                
+
                 this.display(imageNum, resolution + 1);
             }
         );
@@ -158,7 +162,10 @@ export class ViewerPanoAPI {
         if (!layer) return;
         if (this.addedLayers.has(layer)) return;
 
-        this.scene.add(layer);
+        if (layer.material != null) {
+            // eventMesh, not eventLayer passed (has visual representation)
+            this.scene.add(layer);
+        }
         this.addedLayers.add(layer);
     }
 
@@ -166,7 +173,10 @@ export class ViewerPanoAPI {
         if (!layer) return;
         if (!this.addedLayers.has(layer)) return;
 
-        this.scene.remove(layer);
+        if (layer.material != null) {
+            // eventMesh, not eventLayer passed (has visual representation)
+            this.scene.remove(layer);
+        }
         this.addedLayers.delete(layer);
     }
 
@@ -201,9 +211,6 @@ export class ViewerPanoAPI {
     onDocumentMouseWheel(event) {
         this.viewerViewState.fov = this.camera.fov + event.deltaY * ZOOM_SPEED;
 
-        this.view(this.viewerViewState.lonov, this.viewerViewState.latov, this.viewerViewState.fov);
-        this.camera.updateProjectionMatrix();
-
         this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
         this.viewerAPI.map.show_direction();
     }
@@ -218,51 +225,43 @@ export class ViewerPanoAPI {
     }
 
     onMouseMove(event){
-        // get depth data 
-        const raycaster = this.getRaycaster(event);
-        const distance = this.depthAtPointer(event);
-        const cursorLocation = raycaster.ray.origin.addScaledVector(raycaster.ray.direction, distance);
         
         // get cursor data
         const currentPos = this.viewerAPI.image.currentImage.pos;
         const newLocalPos = this.getCursorLocation(event);
         const newPos = this.viewerAPI.toGlobal(newLocalPos);
         const localPos = this.viewerAPI.toLocal([newPos[0], newPos[1], currentPos[2]]);
-        let minDistance = this.sphereRadius + 5; 
+        let minDistance = this.sphereRadius + 5;
 
         this.viewerAPI.image.calcImagesInPanoSphere(this.sphereRadius, this.viewerAPI).forEach(element => {
             const currLocalPos = this.viewerAPI.toLocal(element.pos);
             const [dx, dy] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
             // Get the distance with no height
-            const currDistance = Math.sqrt(dx * dx + dy * dy); 
+            const currDistance = Math.sqrt(dx * dx + dy * dy);
             if (currDistance < minDistance) {
                 minDistance = currDistance;
                 this.bestImg = element;
             }
         });
         
-        // limit distance to current mesh
-        const bestLocalPos = this.viewerAPI.toLocal(this.bestImg.pos);
-        const [dx, dy] = [this.camera.position.x - bestLocalPos.x, this.camera.position.y - bestLocalPos.y];
-        const currDistance = Math.sqrt(dx * dx + dy * dy);
-        const [deepx, deepy] = [this.camera.position.x - cursorLocation.x, this.camera.position.y - cursorLocation.y]
-        const currDeepDistance = Math.sqrt(deepx * deepx + deepy * deepy);
-
-        // difference between "camera to img" and "camera to raycaster"
-        const diff = Math.abs(currDistance-currDeepDistance)
+        const raycaster = this.getRaycaster(event);
+        // because depth map is not rotated by quaternion like panorama mesh, the quaternion adjustment need to happen first
+        const mappedCursorDirection = raycaster.ray.direction.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
+        const [cursorLon, cursorLat] = localToLonLat(mappedCursorDirection);
 
         // avoid duplication
         // if the nearest image of mouse position is not the same as the previous one, and the diff is smaller than 1
         // create new mesh and remove old mesh, and save latest mesh and image
-        if (this.bestImg != this.lastBestImg && diff < 1) {
-            var x = 0, y = 0, z = -2 
+        // if (this.bestImg != this.lastBestImg && (newPos[2]<10.5)) {
+        if (this.bestImg != this.lastBestImg && (cursorLat<0)) {
+            var x = 0, y = 0, z = -2;
 
             // clickable meshes are the bestImg 
             this.clickableImg = this.bestImg;
 
             // creating a circle mesh
             var geometry = new THREE.CircleBufferGeometry( 0.4, 32 );
-            const myTexture =  new THREE.TextureLoader().load('x-mark.png');
+            const myTexture = new THREE.TextureLoader().load('x-mark.png');
             const material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true, map:myTexture} );
         
             // set mesh
@@ -276,6 +275,9 @@ export class ViewerPanoAPI {
             this.addLayer(newMesh);
             this.lastMesh = newMesh;
         }
+        if (cursorLat > 0) {
+            this.removeLayer(this.lastMesh);
+        }
     };
 
     onWindowResize() {
@@ -283,6 +285,50 @@ export class ViewerPanoAPI {
         this.camera.updateProjectionMatrix();
 
         this.viewerAPI.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    arrowKeyHandler(event) {
+        const currentPos = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
+        const viewingDirection = lonLatToLocal(this.viewerViewState.lonov, this.viewerViewState.latov);
+        
+        switch (event.key) {
+            case "ArrowLeft":
+                this.viewerViewState.setLonov(this.viewerViewState.lonov + ARROW_LEFT_RIGHT_SPEED);
+
+                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
+                break;
+            case "ArrowRight":
+                this.viewerViewState.setLonov(this.viewerViewState.lonov - ARROW_LEFT_RIGHT_SPEED);
+
+                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
+                break;
+            case "ArrowUp":
+                const forward = currentPos.addScaledVector(viewingDirection, ARROW_UP_DOWN_DISTANCE);
+                const globalForward = this.viewerAPI.toGlobal(forward);
+                this.viewerAPI.move(globalForward[0], globalForward[1], globalForward[2]);
+
+                this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
+                break;
+            case "ArrowDown":
+                // negative distance because walking backwards
+                const backward = currentPos.addScaledVector(viewingDirection, - ARROW_UP_DOWN_DISTANCE);
+                const globalBackward = this.viewerAPI.toGlobal(backward);
+                this.viewerAPI.move(globalBackward[0], globalBackward[1], globalBackward[2]);
+
+                this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
+                break;
+            case "+":
+                this.viewerViewState.fov = this.camera.fov - PLUS_MINUS_ZOOM_SPEED;
+
+                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
+                break;
+            case "-":
+                this.viewerViewState.fov = this.camera.fov + PLUS_MINUS_ZOOM_SPEED;
+
+                this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
+                break;
+        }
+        this.viewerAPI.map.show_direction();
     }
 
     // ---- event handeling functions for EventMesh / EventLayer API interaction ----
@@ -327,6 +373,20 @@ export class ViewerPanoAPI {
         meshes.forEach((mesh) => {
             if (typeof mesh.vwr_oncontext == "function") {
                 const callback = mesh.vwr_oncontext(xy, location);
+
+                $.contextMenu({
+                    selector: '#pano-viewer',
+                    items: callback,
+                });
+            }
+        });
+
+        // call onContext for all eventLayers that were added (no visual representation)
+        this.addedLayers.forEach(layer => {
+            if (layer.material != null) return;
+
+            if (typeof layer.vwr_oncontext == "function") {
+                const callback = layer.vwr_oncontext(xy, location);
 
                 $.contextMenu({
                     selector: '#pano-viewer',
@@ -414,7 +474,7 @@ export class ViewerPanoAPI {
         const pixelX = Math.trunc((adjustedLonov / 360) * this.depthCanvas.width);
         const pixelY = Math.trunc((adjustedLatov + 90) / 180 * this.depthCanvas.height);
 
-        // convert pixel value to depth information 
+        // convert pixel value to depth information
         const imgData = this.depthCanvas.getContext("2d").getImageData(pixelX, pixelY, 1, 1);
         const [red, green, blue, alpha] = imgData.data;
 
@@ -436,18 +496,18 @@ export class ViewerPanoAPI {
 
     getRaycaster(event) {
         // calculate mouse position in normalized device coordinates
-	    // (-1 to +1) for both components
+        // (-1 to +1) for both components
         const mouse = new THREE.Vector2();
         const raycaster = new THREE.Raycaster();
 
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;    
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
         
         raycaster.setFromCamera(mouse, this.camera);
     
         return raycaster;
     }
-    
+
 }
 
 // returns a normalized Vector3 pointing in the direction specified by lonov latov
