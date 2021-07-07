@@ -159,7 +159,10 @@ export class ViewerPanoAPI {
         if (!layer) return;
         if (this.addedLayers.has(layer)) return;
 
-        this.scene.add(layer);
+        if (layer.material != null) {
+            // eventMesh, not eventLayer passed (has visual representation)
+            this.scene.add(layer);
+        }
         this.addedLayers.add(layer);
     }
 
@@ -167,7 +170,10 @@ export class ViewerPanoAPI {
         if (!layer) return;
         if (!this.addedLayers.has(layer)) return;
 
-        this.scene.remove(layer);
+        if (layer.material != null) {
+            // eventMesh, not eventLayer passed (has visual representation)
+            this.scene.remove(layer);
+        }
         this.addedLayers.delete(layer);
     }
 
@@ -328,6 +334,18 @@ export class ViewerPanoAPI {
         meshes.forEach((mesh) => {
             if (typeof mesh.vwr_oncontext == "function") {
                 const callback = mesh.vwr_oncontext(xy, location);
+
+                $.contextMenu({
+                    selector: '#pano-viewer',
+                    items: callback,
+                });
+            }
+        });
+
+        // call onContext for all eventLayers that were added (no visual representation)
+        this.addedLayers.filter(l => l.material == null).forEach(layer => {
+            if (typeof layer.vwr_oncontext == "function") {
+                const callback = layer.vwr_oncontext(xy, location);
 
                 $.contextMenu({
                     selector: '#pano-viewer',
