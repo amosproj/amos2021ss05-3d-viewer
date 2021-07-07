@@ -232,7 +232,6 @@ export class ViewerPanoAPI {
         const newPos = this.viewerAPI.toGlobal(newLocalPos);
         const localPos = this.viewerAPI.toLocal([newPos[0], newPos[1], currentPos[2]]);
         let minDistance = this.sphereRadius + 5;
-        console.log(newPos)
 
         this.viewerAPI.image.calcImagesInPanoSphere(this.sphereRadius, this.viewerAPI).forEach(element => {
             const currLocalPos = this.viewerAPI.toLocal(element.pos);
@@ -250,7 +249,6 @@ export class ViewerPanoAPI {
         const mappedCursorDirection = raycaster.ray.direction.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
         const [cursorLon, cursorLat] = localToLonLat(mappedCursorDirection);
 
-        console.log(cursorLat)
         // avoid duplication
         // if the nearest image of mouse position is not the same as the previous one, and the diff is smaller than 1
         // create new mesh and remove old mesh, and save latest mesh and image
@@ -277,7 +275,7 @@ export class ViewerPanoAPI {
             this.addLayer(newMesh);
             this.lastMesh = newMesh;
         }
-        if(cursorLat>0){
+        if (cursorLat > 0) {
             this.removeLayer(this.lastMesh);
         }
     };
