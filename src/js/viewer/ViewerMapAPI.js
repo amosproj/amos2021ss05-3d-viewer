@@ -307,7 +307,9 @@ export class ViewerMapAPI {
         var zoom_in = document.getElementById('zoom-in');
         var zoom_out = document.getElementById('zoom-out');
         var full_screen = document.getElementById('full-screen');
+        var close_full_screen = document.getElementById('close-full-screen');
         var map = this.map;
+        close_full_screen.style.display = "none";
 
         zoom_in.addEventListener('click', function () {
             var view = map.getView();
@@ -324,6 +326,15 @@ export class ViewerMapAPI {
         full_screen.addEventListener('click', function () {
             var elem = document.getElementById('map');
             elem.requestFullscreen();
+            full_screen.style.display = "none"; //hide.
+            close_full_screen.style.display = "";
+        })
+
+        close_full_screen.addEventListener('click', function () {
+            document.getElementById('map');
+            document.exitFullscreen();
+            close_full_screen.style.display = "none";
+            full_screen.style.display = "";;
         })
     }
 }
