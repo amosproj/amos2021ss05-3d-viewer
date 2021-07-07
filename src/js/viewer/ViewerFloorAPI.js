@@ -92,9 +92,6 @@ export class ViewerFloorAPI {
         $('button[name="buttonDown"]').hide();
         $('.control select').hide();
 
-        // Show current floor
-        $("#cfOL").text("Current Floor: " + this.currentFloor.name + ". ");
-
         // push all floor names into an array
         let totalFloorsname = [];
         this.floors.forEach(function (item) {
@@ -134,8 +131,6 @@ export class ViewerFloorAPI {
             let selectValue = dropdownFloorsOL.value;
             let index_in_floor_name = totalFloorsname.indexOf(selectValue);
             selfRef.currentFloorId = index_in_floor_name;
-        
-            $("#cfOL").text("Current Floor: " + selfRef.currentFloor.name + ". ");
 
             buttonUp.disabled = false;
             buttonDown.disabled = false;
@@ -161,8 +156,6 @@ export class ViewerFloorAPI {
         buttonUp.addEventListener('click', function () {
         
             selfRef.currentFloorId++;
-
-            $("#cfOL").text("Current Floor: " + selfRef.currentFloor.name + ". ");
 
             // change to higher floor
             if (selfRef.currentFloorId == selfRef.floors.length - 1) {
@@ -193,8 +186,7 @@ export class ViewerFloorAPI {
         buttonDown.addEventListener('click', function () {
         
             selfRef.currentFloorId--;
-            $("#cfOL").text("Current Floor: " + selfRef.currentFloor.name + ". ");
-
+     
             // change to lower floor
             if (selfRef.currentFloorId < 1 ) {
 

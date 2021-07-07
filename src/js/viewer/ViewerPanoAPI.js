@@ -225,10 +225,6 @@ export class ViewerPanoAPI {
     }
 
     onMouseMove(event){
-        // get depth data 
-        const raycaster = this.getRaycaster(event);
-        const distance = this.depthAtPointer(event);
-        const cursorLocation = raycaster.ray.origin.addScaledVector(raycaster.ray.direction, distance);
         
         // get cursor data
         const currentPos = this.viewerAPI.image.currentImage.pos;
@@ -236,6 +232,7 @@ export class ViewerPanoAPI {
         const newPos = this.viewerAPI.toGlobal(newLocalPos);
         const localPos = this.viewerAPI.toLocal([newPos[0], newPos[1], currentPos[2]]);
         let minDistance = this.sphereRadius + 5;
+        console.log(newPos)
 
         this.viewerAPI.image.calcImagesInPanoSphere(this.sphereRadius, this.viewerAPI).forEach(element => {
             const currLocalPos = this.viewerAPI.toLocal(element.pos);
@@ -248,20 +245,17 @@ export class ViewerPanoAPI {
             }
         });
         
-        // limit distance to current mesh
-        const bestLocalPos = this.viewerAPI.toLocal(this.bestImg.pos);
-        const [dx, dy] = [this.camera.position.x - bestLocalPos.x, this.camera.position.y - bestLocalPos.y];
-        const currDistance = Math.sqrt(dx * dx + dy * dy);
-        const [deepx, deepy] = [this.camera.position.x - cursorLocation.x, this.camera.position.y - cursorLocation.y];
-        const currDeepDistance = Math.sqrt(deepx * deepx + deepy * deepy);
+        const raycaster = this.getRaycaster(event);
+        // because depth map is not rotated by quaternion like panorama mesh, the quaternion adjustment need to happen first
+        const mappedCursorDirection = raycaster.ray.direction.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
+        const [cursorLon, cursorLat] = localToLonLat(mappedCursorDirection);
 
-        // difference between "camera to img" and "camera to raycaster"
-        const diff = Math.abs(currDistance-currDeepDistance);
-
+        console.log(cursorLat)
         // avoid duplication
         // if the nearest image of mouse position is not the same as the previous one, and the diff is smaller than 1
         // create new mesh and remove old mesh, and save latest mesh and image
-        if (this.bestImg != this.lastBestImg && diff < 1) {
+        // if (this.bestImg != this.lastBestImg && (newPos[2]<10.5)) {
+        if (this.bestImg != this.lastBestImg && (cursorLat<0)) {
             var x = 0, y = 0, z = -2;
 
             // clickable meshes are the bestImg 
@@ -282,6 +276,9 @@ export class ViewerPanoAPI {
             this.removeLayer(this.lastMesh);
             this.addLayer(newMesh);
             this.lastMesh = newMesh;
+        }
+        if(cursorLat>0){
+            this.removeLayer(this.lastMesh);
         }
     };
 
