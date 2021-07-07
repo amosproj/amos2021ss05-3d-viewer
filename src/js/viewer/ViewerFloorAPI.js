@@ -189,7 +189,7 @@ export class ViewerFloorAPI {
         buttonDown.addEventListener('click', function () {
         
             selfRef.currentFloorId--;
-     
+
             // change to lower floor
             if (selfRef.currentFloorId < 1 ) {
 
