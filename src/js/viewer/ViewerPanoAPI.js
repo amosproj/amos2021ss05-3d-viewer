@@ -315,7 +315,7 @@ export class ViewerPanoAPI {
             if (e && e.keyCode == 37) { 
             console.log('left');
             const scalingFactor = this.camera.fov / MAX_FOV;
-            this.viewerViewState.setLonov(30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);              
+            this.viewerViewState.setLonov(ARROW_LEFT_RIGHT_SPEED * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);              
             this.lastViewState[0]=30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov;
             this.viewerAPI.map.show_direction();
 
@@ -324,7 +324,7 @@ export class ViewerPanoAPI {
             if (e && e.keyCode == 39) { 
                 console.log('right');
                 const scalingFactor = this.camera.fov / MAX_FOV;
-                this.viewerViewState.setLonov(-30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);
+                this.viewerViewState.setLonov(-ARROW_LEFT_RIGHT_SPEED * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);
                 this.lastViewState[0]=-30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov;
                 this.viewerAPI.map.show_direction();
                    
