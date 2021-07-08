@@ -301,9 +301,6 @@ export class ViewerPanoAPI {
                 this.viewerAPI.map.show_direction();
             }
             if (e && e.keyCode == 38) { 
-
-                console.log('up');
-
                 const forward = currentPos.addScaledVector(viewingDirection, ARROW_UP_DOWN_DISTANCE);
                 const globalForward = this.viewerAPI.toGlobal(forward);
                 this.viewerAPI.move(globalForward[0], globalForward[1], globalForward[2]);
@@ -313,23 +310,20 @@ export class ViewerPanoAPI {
             }
 
             if (e && e.keyCode == 37) { 
-            console.log('left');
-            const scalingFactor = this.camera.fov / MAX_FOV;
-            this.viewerViewState.setLonov(ARROW_LEFT_RIGHT_SPEED * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);              
-            this.lastViewState[0]=30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov;
-            this.viewerAPI.map.show_direction();
+               const scalingFactor = this.camera.fov / MAX_FOV;
+               this.viewerViewState.setLonov(ARROW_LEFT_RIGHT_SPEED * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);              
+               this.viewerViewState.lonov=30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov;
+               this.viewerAPI.map.show_direction();
 
             }
 
-            if (e && e.keyCode == 39) { 
-                console.log('right');
-                const scalingFactor = this.camera.fov / MAX_FOV;
-                this.viewerViewState.setLonov(-ARROW_LEFT_RIGHT_SPEED * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);
-                this.lastViewState[0]=-30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov;
-                this.viewerAPI.map.show_direction();
+           if (e && e.keyCode == 39) { 
+               const scalingFactor = this.camera.fov / MAX_FOV;
+               this.viewerViewState.setLonov(-ARROW_LEFT_RIGHT_SPEED * PAN_SPEED * scalingFactor + this.viewerViewState.lonov);
+               this.viewerViewState.lonov=-30 * PAN_SPEED * scalingFactor + this.viewerViewState.lonov;
+               this.viewerAPI.map.show_direction();
                    
             }
-
 
 }
 
