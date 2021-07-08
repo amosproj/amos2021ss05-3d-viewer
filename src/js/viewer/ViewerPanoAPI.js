@@ -133,7 +133,6 @@ export class ViewerPanoAPI {
      
          // put camera inside sphere mesh
          this.camera.position.set(localCoord.x, localCoord.y, localCoord.z);
-         flag_imgid=imageNum;
          count++;
          loadImage(count);
        
@@ -191,7 +190,7 @@ loadImage(0);
                this.viewerAPI.move(globalForward[0], globalForward[1], globalForward[2]);
                this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true); 
          }
- }
+  }
 
       Documentpara.onkeydown  = keyboard;
 }
