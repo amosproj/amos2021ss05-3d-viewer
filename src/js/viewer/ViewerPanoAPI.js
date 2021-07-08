@@ -59,7 +59,7 @@ export class ViewerPanoAPI {
               alert(`Key pressed ${keyName}`);
             }
           }, false);
-	 ////
+	
 
         this.display(this.viewerAPI.image.currentImageId);
     }
@@ -152,15 +152,9 @@ loadImage(0);
 
 
   
-arrowMove(Documentpara) {
+ arrowMove(Documentpara) {
  
-  
-  
-//let forwardimgid=this.viewerAPI.image.currentImageId
-
-
-
-var keyboard=(event)=> {
+  var keyboard=(event)=> {
 
     const currentPos = this.viewerAPI.toLocal(this.viewerAPI.image.currentImage.pos);
     
@@ -172,81 +166,35 @@ var keyboard=(event)=> {
 
     var e = event || window.event || arguments.callee.caller.arguments[0];
             if (e && e.keyCode == 40) { 
-                console.log('down');
-
                 const backward = currentPos.addScaledVector(viewingDireciton, - ARROW_UP_DOWN_DISTANCE);
                 const globalBackward = this.viewerAPI.toGlobal(backward);
                 this.viewerAPI.move(globalBackward[0], globalBackward[1], globalBackward[2]);
-
                 this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
-              
-              /*if(forwardimgid>0){
-                console.log("lets show this.viewerAPI.image.currentImageId :",this.viewerAPI.image.currentImageId);
-   
-                console.log("The image id of forward image is ",--forwardimgid);
-                console.log("lets show this.viewerAPI.image.currentImageId one more time:",this.viewerAPI.image.currentImageId);
-                this.viewerAPI.image.currentImageId=forwardimgid;
-                console.log("lets show this.viewerAPI.image.currentImageId one more time x2:",this.viewerAPI.image.currentImageId);
-                this.display(forwardimgid);
-                this.viewerAPI.map.show_direction();
-               // this.onPointerMove(event);//?
-               */
-
-              
-
-
-
             }
             if (e && e.keyCode == 37) { 
-                console.log('left');
-               // console.log(event.clientY);
                 const scalingFactor = this.camera.fov / MAX_FOV;
                 this.viewerViewState.setLonov(this.viewerViewState.lonov + ARROW_LEFT_RIGHT_SPEED);
-
                 this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
-            
                 this.viewerAPI.map.show_direction();
-               
-                //this.oPM = (event) => this.onKeyMove(event);
-              
-               
    
-
             }
             if (e && e.keyCode == 39) { 
-                console.log('right');
                 const scalingFactor = this.camera.fov / MAX_FOV;
                 this.viewerViewState.setLonov(this.viewerViewState.lonov - ARROW_LEFT_RIGHT_SPEED);
-
                 this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
-            
                 this.viewerAPI.map.show_direction();
-      
-
-
             }
             if (e && e.keyCode == 38) { 
-
-
                console.log('up');
-                const forward = currentPos.addScaledVector(viewingDireciton, ARROW_UP_DOWN_DISTANCE);
-                const globalForward = this.viewerAPI.toGlobal(forward);
-                this.viewerAPI.move(globalForward[0], globalForward[1], globalForward[2]);
+               const forward = currentPos.addScaledVector(viewingDireciton, ARROW_UP_DOWN_DISTANCE);
+               const globalForward = this.viewerAPI.toGlobal(forward);
+               this.viewerAPI.move(globalForward[0], globalForward[1], globalForward[2]);
+               this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true); 
+         }
+ }
 
-                this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true); 
-
-                }
-
-       }
-
-Documentpara.onkeydown  = keyboard;
+      Documentpara.onkeydown  = keyboard;
 }
-
-
-
-	
-	
-	
 
 
     camera() {
