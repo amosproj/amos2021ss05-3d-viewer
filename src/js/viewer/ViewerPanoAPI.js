@@ -172,14 +172,14 @@ loadImage(0);
             }
             if (e && e.keyCode == 37) { 
                 const scalingFactor = this.camera.fov / MAX_FOV;
-                this.viewerViewState.setLonov(this.viewerViewState.lonov + ARROW_LEFT_RIGHT_SPEED);
+                this.viewerViewState.setLonov(this.viewerViewState.lonov + ARROW_LEFT_RIGHT_SPEED*scalingFactor);
                 this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
                 this.viewerAPI.map.show_direction();
    
             }
             if (e && e.keyCode == 39) { 
                 const scalingFactor = this.camera.fov / MAX_FOV;
-                this.viewerViewState.setLonov(this.viewerViewState.lonov - ARROW_LEFT_RIGHT_SPEED);
+                this.viewerViewState.setLonov(this.viewerViewState.lonov - ARROW_LEFT_RIGHT_SPEED*scalingFactor);
                 this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
                 this.viewerAPI.map.show_direction();
             }
