@@ -80,23 +80,6 @@ export class ViewerMapAPI {
             interactions: ol.interaction.defaults({doubleClickZoom :false}),
         });
 
-        // var map2 = new ol.Map({
-        //     target: 'map2',
-        //     layers:[new ol.layer.Tile({
-        //         source: new ol.source.OSM()
-        //       })],
-        //     view: new ol.View({
-        //         zoom: 20
-        //     }),
-        //     controls: ol.control.defaults({
-        //         // Hide Map rotation button
-        //         rotate: false,
-        //         zoom: false
-        //     }),
-        //     //Disable Zoom Control on MAP
-        //     interactions: ol.interaction.defaults({doubleClickZoom :false}),
-        // });
-
         var projection = new ol.proj.Projection({
             code: 'EPSG:4326',
             units: 'METERS',
