@@ -380,4 +380,17 @@ function hideButtons(divId) {
     } else {
       element.style.display = "none";
     }
+	
+	
+
+    var keyboard=(event)=> {
+    var e = event || window.event || arguments.callee.caller.arguments[0];
+    if(e && e.keyCode==27&&document.fullscreenElement !== null){
+         document.exitFullscreen();
+         close_full_screen.style.display = "none";
+         full_screen.style.display = "";
+        }   
+     }
+       document.onkeydown  = keyboard;
+
 }
