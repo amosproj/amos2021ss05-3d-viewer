@@ -15,6 +15,9 @@ export class ViewerPanoAPI {
         this.camera.up = new THREE.Vector3(0, 0, 1);
         this.sphereRadius = 10;
 
+        // number of lights - needed for external API EventMesh integration
+        this.lights = 0;
+
         // property needed for display method 
         this.loadedMesh = null;
 
