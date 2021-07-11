@@ -94,25 +94,24 @@ export class ViewerMapAPI {
             extent: extent, 
             
         })
-
+       
     
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
             let mapData = this.viewerFloorAPI.floors[i].mapData
+            let e =ol.proj.transformExtent( [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
+                pixelProjection, 'EPSG:4326')
             this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
                     opacity: 0.8,
                     url: this.baseURL + mapData.name + ".png",
                     //imageExtent: [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
                     //imageSize: [mapData.width / mapData.density, mapData.height / mapData.density],
-                    //extent: ol.proj.transformExtent( [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
-                    //  'EPSG:3857', 'EPSG:4326'),            
-                    //projection: projection,
+                    extent: e,            
+                    projection: projection,
                 }),
                 view: new ol.View ({
-                    projection: pixelProjection,
-                    zoom: 7,
-                    center: [0,0]
+                    center: ol.extent.getCenter(e)
                   }),
             }))
         }
@@ -398,3 +397,4 @@ function hideButtons(divId) {
        document.onkeydown  = keyboard;
 
 }
+
