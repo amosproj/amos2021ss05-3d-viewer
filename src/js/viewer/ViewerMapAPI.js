@@ -65,7 +65,9 @@ export class ViewerMapAPI {
         this.map = new ol.Map({
             target: 'map',
             layers:[new ol.layer.Tile({
-                source: new ol.source.OSM()
+                source: new ol.source.OSM({
+                    attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>'
+                })
               })],
             view: new ol.View({
                 zoom: 20
@@ -80,22 +82,38 @@ export class ViewerMapAPI {
             interactions: ol.interaction.defaults({doubleClickZoom :false}),
         });
 
+        var pixelProjection = new ol.proj.Projection({
+            code: 'pixel',
+            units: 'pixels',
+            extent: extent
+          });
+
         var projection = new ol.proj.Projection({
             code: 'EPSG:4326',
             units: 'METERS',
-            extent: extent
+            extent: extent, 
+            
         })
 
+    
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
             let mapData = this.viewerFloorAPI.floors[i].mapData
             this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
-                    //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
+                    opacity: 0.8,
                     url: this.baseURL + mapData.name + ".png",
-                    imageExtent: [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
-                    projection: projection
-                })
+                    //imageExtent: [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
+                    //imageSize: [mapData.width / mapData.density, mapData.height / mapData.density],
+                    //extent: ol.proj.transformExtent( [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
+                    //  'EPSG:3857', 'EPSG:4326'),            
+                    //projection: projection,
+                }),
+                view: new ol.View ({
+                    projection: pixelProjection,
+                    zoom: 7,
+                    center: [0,0]
+                  }),
             }))
         }
 
@@ -353,20 +371,6 @@ export class ViewerMapAPI {
             full_screen.style.display = "";
         })
 
-        // attemp 1
-        // document.addEventListener("keydown", event => {
-        //     if (event.code == 'Escape') {
-        //         console.log(event.code)
-        //         close_full_screen.style.display = "none";
-        //         full_screen.style.display = "";
-        //     }
-        // })
-
-        // attemp 2
-        // if (document.fullscreen == false){
-            //     close_full_screen.style.display = "none";
-            //     full_screen.style.display = "";
-            // }
     }
 }
 
