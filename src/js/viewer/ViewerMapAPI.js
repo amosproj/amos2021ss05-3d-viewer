@@ -60,7 +60,7 @@ export class ViewerMapAPI {
     initDisplayMap() {
         let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
-
+        extent = [-0.5*currentMapData.width/ currentMapData.density ,  -0.5*currentMapData.height/ currentMapData.density , 0.5*currentMapData.width/ currentMapData.density , 0.5*currentMapData.height/ currentMapData.density ];
         // create map 
         this.map = new ol.Map({
             target: 'map',
@@ -86,15 +86,17 @@ export class ViewerMapAPI {
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
             let mapData = this.viewerFloorAPI.floors[i].mapData
-            let e = new ol.proj.transformExtent([0, 0, mapData.width / mapData.density, mapData.height / mapData.density], 'EPSG:3857', 'EPSG:4326')
+            let e = new ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
             let mapOrigin =   this.viewerFloorAPI.origin
             this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
                     //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
                     url: this.baseURL + mapData.name + ".png",
+                    imageSize: [mapData.width, mapData.height],
                     //imageExtent: new ol.proj.transformExtent([0, 0, mapData.width / mapData.density, mapData.height / mapData.density], 'EPSG:3857', 'EPSG:4326')
                     imageExtent:[e[0]+mapOrigin[0], e[1]+mapOrigin[1], e[2]+mapOrigin[0],e[3]+mapOrigin[1]],
                 })
+
             }))
         }
 
@@ -183,6 +185,7 @@ export class ViewerMapAPI {
                     fill: new ol.style.Fill({ color: 'red' })
                 })
             }),
+            projection: 'EPSG:4326',
         });
 
         this.map.addLayer(vectorLayerRed);
@@ -222,7 +225,7 @@ export class ViewerMapAPI {
         var triangleFeats = [];
         for (var i = 0; i < pointsFOV.length; i++) {
             triangleFeats.push(new ol.Feature({ 
-                geometry: new ol.geom.Point(ol.proj.transform(pointsFOV[i], 'EPSG:3857', 'EPSG:4326'))}));
+                geometry: new ol.geom.Point(pointsFOV[i])}));
         }
         
         // Draw Triangle Vertex
@@ -251,9 +254,9 @@ export class ViewerMapAPI {
             })
         });
 
-        var pointsFOV_project =[ol.proj.transform([this.posLon, this.posLan], 'EPSG:3857', 'EPSG:4326'),
-        ol.proj.transform([this.posLon + RADIUS * 0.000005 * Math.cos((direction + FOV)), this.posLan + RADIUS * 0.000005* Math.sin((direction + FOV))], 'EPSG:3857', 'EPSG:4326'),  //left  vertex point 
-        ol.proj.transform([this.posLon + RADIUS * 0.000005* Math.cos((direction - FOV)), this.posLan + RADIUS * 0.000005* Math.sin((direction - FOV))], 'EPSG:3857', 'EPSG:4326'),  //right vertex point 
+        var pointsFOV_project =[[this.posLon, this.posLan],
+        [this.posLon + RADIUS * 0.000005 * Math.cos((direction + FOV)), this.posLan + RADIUS * 0.000005* Math.sin((direction + FOV))],  //left  vertex point 
+        [this.posLon + RADIUS * 0.000005* Math.cos((direction - FOV)), this.posLan + RADIUS * 0.000005* Math.sin((direction - FOV))],  //right vertex point 
         ];
 
         var polygonDirectionFeature = new ol.Feature({
