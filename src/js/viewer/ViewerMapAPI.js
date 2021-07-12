@@ -60,7 +60,7 @@ export class ViewerMapAPI {
     initDisplayMap() {
         let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
-        extent = [-0.5*currentMapData.width/ currentMapData.density ,  -0.5*currentMapData.height/ currentMapData.density , 0.5*currentMapData.width/ currentMapData.density , 0.5*currentMapData.height/ currentMapData.density ];
+        //extent = [-0.5*currentMapData.width/ currentMapData.density ,  -0.5*currentMapData.height/ currentMapData.density , 0.5*currentMapData.width/ currentMapData.density , 0.5*currentMapData.height/ currentMapData.density ];
         // create map 
         this.map = new ol.Map({
             target: 'map',
