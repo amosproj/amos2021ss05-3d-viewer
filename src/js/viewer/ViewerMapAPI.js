@@ -70,7 +70,7 @@ export class ViewerMapAPI {
                 })
               })],
             view: new ol.View({
-                zoom: 20
+                zoom: 20,
             }),
             controls: ol.control.defaults({
                 // Hide Map rotation button
@@ -94,26 +94,34 @@ export class ViewerMapAPI {
             extent: extent, 
             
         })
-       
-    
+
+
+        let mapOrigin  = new ol.proj.fromLonLat([this.viewerFloorAPI.origin[0], this.viewerFloorAPI.origin[1]]);
+        console.log("MAP ORIGIN:  ", mapOrigin   ) ;
+        console.log("CURRENT POS: ",  new ol.proj.fromLonLat(this.viewerImageAPI.currentImage.pos));
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
             let mapData = this.viewerFloorAPI.floors[i].mapData
-            let e =ol.proj.transformExtent( [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
-                pixelProjection, 'EPSG:4326')
+            console.log("MAP DIMS:  ", mapData.density , mapData.width ,  mapData.height  ) ;
+            let e = [mapOrigin[0], mapOrigin[1],mapOrigin[0]+ mapData.width /mapData.density  ,mapOrigin[1]+ mapData.height / mapData.density ];
+            console.log("MAP IMAGE EXTENCT:  ", e ) ;
+
             this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
-                    opacity: 0.8,
+                    //opacity: 0.8,
                     url: this.baseURL + mapData.name + ".png",
-                    //imageExtent: [0, 0, mapData.width / mapData.density, mapData.height / mapData.density],
-                    //imageSize: [mapData.width / mapData.density, mapData.height / mapData.density],
-                    extent: e,            
-                    projection: projection,
+                    imageExtent: e,
+                    //imageSize: [mapData.width / mapData.density, mapData.height / mapData.density],   
+                    projection: 'EPSG:3857',
                 }),
-                view: new ol.View ({
-                    center: ol.extent.getCenter(e)
-                  }),
-            }))
+                view: new ol.View({
+                    //center the map on the origin of the local room map
+                    center: new ol.extent.getCenter(e),
+                }),
+                
+                
+            }));
+            console.log("MAP CENTER: ",  new ol.extent.getCenter(e),); 
         }
 
         this.updateDisplayMap((this.viewerFloorAPI.currentFloorId));
@@ -292,7 +300,7 @@ export class ViewerMapAPI {
     }
 
     getLonLanCoordinates(position, mapdata){
-        // Compute the latitude and longitude  in reference to the origin in WGS84 and aff offset of the map 
+        // Compute the latitude and longitude in reference to the origin in WGS84 and aff offset of the map 
         let lon = LON_SCALAR * 1000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
         let lan = LAN_SCALAR * 1000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
         return [lon, lan]; 
@@ -384,17 +392,5 @@ function hideButtons(divId) {
       element.style.display = "none";
     }
 	
-	
-
-    var keyboard=(event)=> {
-    var e = event || window.event || arguments.callee.caller.arguments[0];
-    if(e && e.keyCode==27&&document.fullscreenElement !== null){
-         document.exitFullscreen();
-         close_full_screen.style.display = "none";
-         full_screen.style.display = "";
-        }   
-     }
-       document.onkeydown  = keyboard;
-
 }
 
