@@ -341,15 +341,13 @@ export class ViewerPanoAPI {
         // calculate objects intersecting the picking ray
         const intersects = raycaster.intersectObjects(this.scene.children);
 
-        // include only objects that are added meshes
+        // include only meshes that are in sphere radius 
         const meshes = [];
         for (const e in intersects) {
-            if (this.addedLayers.has(intersects[e].object)) {
-                // check if mesh is within sphere radius to camera
-                const dist = this.camera.position.distanceTo(intersects[e].object.position);
-                if (dist < this.sphereRadius) {
-                    meshes.push(intersects[e].object);
-                }
+            // check if mesh is within sphere radius to camera
+            const dist = this.camera.position.distanceTo(intersects[e].object.position);
+            if (dist < this.sphereRadius) {
+                meshes.push(intersects[e].object);
             }
         }
 
