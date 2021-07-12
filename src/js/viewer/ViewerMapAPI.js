@@ -60,7 +60,11 @@ export class ViewerMapAPI {
     initDisplayMap() {
         let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
-        extent = [-0.5*currentMapData.width/ currentMapData.density ,  -0.75*currentMapData.height/ currentMapData.density ,0.5*currentMapData.width/ currentMapData.density , 0.25*currentMapData.height/ currentMapData.density ];
+        console.log("MAP EXTENT: ", extent)
+        //extent = [-1*currentMapData.width/ currentMapData.density ,  -1*currentMapData.height/ currentMapData.density ,0*currentMapData.width/ currentMapData.density , 0*currentMapData.height/ currentMapData.density ];
+        extent = [-currentMapData.x/ currentMapData.density,- currentMapData.y/ currentMapData.density,
+            (-currentMapData.x +currentMapData.width )/ currentMapData.density, (-currentMapData.y + currentMapData.height)/ currentMapData.density]
+        console.log("MAP EXTENT: ", extent)
         // create map 
         this.map = new ol.Map({
             target: 'map',
@@ -92,9 +96,10 @@ export class ViewerMapAPI {
                 source: new ol.source.ImageStatic({
                     //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
                     url: this.baseURL + mapData.name + ".png",
-                    //imageSize: [mapData.width, mapData.height],
+                    imageSize: [mapData.width, mapData.height],
                     //imageExtent: new ol.proj.transformExtent([0, 0, mapData.width / mapData.density, mapData.height / mapData.density], 'EPSG:3857', 'EPSG:4326')
                     imageExtent:[e[0]+mapOrigin[0], e[1]+mapOrigin[1], e[2]+mapOrigin[0],e[3]+mapOrigin[1]],
+                    projection: 'EPSG:4326',
                 })
 
             }))
