@@ -343,6 +343,63 @@ export class ViewerMapAPI {
             view.setZoom(zoom - 1);
         })
 
+document.addEventListener('keydown',function(event){
+
+        var e = event || window.event || arguments.callee.caller.arguments[0];
+
+        if(e && e.keyCode==70&&document.fullscreenElement === null){
+            console.log("Going into fullscreen");
+               
+            iop=elem.requestFullscreen();
+            console.log(iop);
+            //elem.fullscreenElement=1;
+          //  console.log("checking>", e.keyCode, elem.fullscreenElement, typeof(elem.fullscreenElement));
+            ////////////////////
+            full_screen.style.display = "none"; //hide.
+            close_full_screen.style.display = "";
+           // console.log("checking>", e.keyCode, elem.fullscreenElement, typeof(elem.fullscreenElement));
+               }
+           //  document.fullscreenElement=1;
+  
+          console.log("checking>", e.keyCode, document.fullscreenElement, typeof(document.fullscreenElement))
+
+     });
+
+
+
+ document.addEventListener('keydown',function(event){
+
+
+    var e = event || window.event || arguments.callee.caller.arguments[0];
+    if(e && e.which==27){  
+       
+      /* console.log("Going into escape");     
+       document.exitFullscreen();
+      
+       console.log("checking>", e.keyCode, elem.fullscreenElement, typeof(elem.fullscreenElement));
+       ///////////////////
+       close_full_screen.style.display = "none";
+       full_screen.style.display = "";
+       console.log("checking>", e.keyCode, document.fullscreenElement, typeof(document.fullscreenElement))
+
+*/
+       console.log("---close_screen---");
+       document.getElementById('map');
+    //   if(document.fullscreenElement !== null){
+        //  document.exitFullscreen();
+    //  }
+       close_full_screen.style.display = "none";
+       full_screen.style.display = "";
+       document.fullscreenElement=null;
+       console.log("checking>", document.fullscreenElement, typeof(document.fullscreenElement));
+
+
+
+    }；
+	    
+	    
+	    
+	    
         full_screen.addEventListener('click', function () {
             var elem = document.getElementById('map');
             elem.requestFullscreen();
