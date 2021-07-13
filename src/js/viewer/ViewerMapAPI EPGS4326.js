@@ -35,18 +35,9 @@ export class ViewerMapAPI {
         map.addEventListener('dblclick', (event) => this.onDoubleClick(event));
 
         map.addEventListener('fullscreenchange', (event) => {
-            toggleButtons("floorOL");
-            
-            if (!document.fullscreenElement) { // exited fullscreen mode
-                // hide 'close-full-screen button' and show 'full-screen' button
-                let full_screen = document.getElementById('full-screen');
-                let close_full_screen = document.getElementById('close-full-screen');
-
-                close_full_screen.style.display = "none";
-                full_screen.style.display = "";
-            }
+            // If map set to full screen, hide the floor setting buttons
+            hideButtons("floorOL");
         });
-
         this.control_button();
     }
 
@@ -67,14 +58,13 @@ export class ViewerMapAPI {
     }
 
     initDisplayMap() {
-        // let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
-        // var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
-
-        // //extent = [-1*currentMapData.width/ currentMapData.density ,  -1*currentMapData.height/ currentMapData.density ,0*currentMapData.width/ currentMapData.density , 0*currentMapData.height/ currentMapData.density ];
-        // extent = [-currentMapData.x/ currentMapData.density,- currentMapData.y/ currentMapData.density,
-        //     (-currentMapData.x +currentMapData.width )/ currentMapData.density, (-currentMapData.y + currentMapData.height)/ currentMapData.density]
-
-        let mapOrigin  = new ol.proj.fromLonLat([this.viewerFloorAPI.origin[0], this.viewerFloorAPI.origin[1]]);
+        let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
+        var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
+        console.log("MAP EXTENT: ", extent)
+        //extent = [-1*currentMapData.width/ currentMapData.density ,  -1*currentMapData.height/ currentMapData.density ,0*currentMapData.width/ currentMapData.density , 0*currentMapData.height/ currentMapData.density ];
+        extent = [-currentMapData.x/ currentMapData.density,- currentMapData.y/ currentMapData.density,
+            (-currentMapData.x +currentMapData.width )/ currentMapData.density, (-currentMapData.y + currentMapData.height)/ currentMapData.density]
+        console.log("MAP EXTENT: ", extent)
 
         // create map 
         this.map = new ol.Map({
@@ -83,9 +73,10 @@ export class ViewerMapAPI {
                 source: new ol.source.OSM()
               })],
             view: new ol.View({
-                // center: mapOrigin, // Update center to current position
+                projection: 'EPSG:4326',
+                center: this.viewerFloorAPI.origin, // Update center to current position
                 zoom: 20,
-                projection:'EPSG:3857'
+                
             }),
             controls: ol.control.defaults({
                 // Hide Map rotation button
@@ -99,23 +90,17 @@ export class ViewerMapAPI {
 
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
-
-            
             let mapData = this.viewerFloorAPI.floors[i].mapData
-            let origin = new ol.proj.fromLonLat([this.viewerFloorAPI.origin[0], this.viewerFloorAPI.origin[1]]);
-            var lon0_m = origin[0]
-            var lan0_m = origin[1]
-
-            var left = lon0_m - (mapData.x/mapData.density)*1.5
-            var right = left + (mapData.width/mapData.density)*1.5
-            var bottom = lan0_m - (mapData.y/mapData.density)*1.5
-            var top = bottom + (mapData.height/mapData.density)*1.5
+            let e = new ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326')
+            let mapOrigin =   this.viewerFloorAPI.origin
             this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
+                    //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>',
                     url: this.baseURL + mapData.name + ".png",
-                    imageExtent:[left, bottom, right, top],
-                    ImageSize:[mapData.width,mapData.height],
-                    projection:'EPSG:3857'
+                    //imageSize: [mapData.width, mapData.height],
+                    //imageExtent: new ol.proj.transformExtent([0, 0, mapData.width / mapData.density, mapData.height / mapData.density], 'EPSG:3857', 'EPSG:4326')
+                    imageExtent:[e[0]+mapOrigin[0], e[1]+mapOrigin[1], e[2]+mapOrigin[0],e[3]+mapOrigin[1]],
+                    projection: 'EPSG:4326',
                 })
             }))
         }
@@ -131,8 +116,9 @@ export class ViewerMapAPI {
             allImages.forEach(image => {
                 // Get Longitude and latitude from each point
                 features.push(new ol.Feature({
-                    geometry: new ol.geom.Point( ol.proj.fromLonLat([image.pos[0], image.pos[1]]))
-                  }))
+                    
+                    geometry: new ol.geom.Point(  [image.pos[0], image.pos[1]]
+                  )}))
             });
 
             // create the vector layer for black points
@@ -148,6 +134,8 @@ export class ViewerMapAPI {
                         fill: new ol.style.Fill({ color: 'black' })
                     })
                 }),
+                projection: 'EPSG:4326'
+
             }));
         }
     }
@@ -155,18 +143,13 @@ export class ViewerMapAPI {
     updateDisplayMap(floorIndex) {
         var group = this.map.getLayerGroup();
         var layers = group.getLayers();
+
         // set layer visibility
         layers.forEach(function (layer, i) {
-            if (i!=floorIndex+1){
-                layer.setVisible(false);
-            }
-            if (i == 0){
-                layer.setVisible(true);
-            }
+            // openstreetmap = layer 0
 
-            if (i == floorIndex+1){
                 layer.setVisible(true);
-            }
+
         });
     }
 
@@ -192,7 +175,7 @@ export class ViewerMapAPI {
         this.posLan = this.viewerImageAPI.currentImage.pos[1];
 
         var redFeature = new ol.Feature({
-            geometry: new ol.geom.Point( ol.proj.fromLonLat([this.posLon, this.posLan]))
+            geometry: new ol.geom.Point([this.posLon, this.posLan]),
         });
 
         var vectorSourceRed = new ol.source.Vector({
@@ -207,6 +190,7 @@ export class ViewerMapAPI {
                     fill: new ol.style.Fill({ color: 'red' })
                 })
             }),
+            projection: 'EPSG:4326',
         });
 
         this.map.addLayer(vectorLayerRed);
@@ -225,7 +209,7 @@ export class ViewerMapAPI {
 
     show_direction() {
         // get viewing longitude direction (in degrees)
-        var lonov = THREE.Math.radToDeg(this.viewerViewState.lonov);
+        var lonov = this.viewerViewState.lonov;
 
         // temporary using 170 degree for correcting the starting zero degree of 2D map
         var direction = lonov * (Math.PI / 180) % 360;
@@ -246,7 +230,7 @@ export class ViewerMapAPI {
         var triangleFeats = [];
         for (var i = 0; i < pointsFOV.length; i++) {
             triangleFeats.push(new ol.Feature({ 
-                geometry: new ol.geom.Point(ol.proj.fromLonLat(pointsFOV[i]))}));
+                geometry: new ol.geom.Point(pointsFOV[i])}));
         }
         
         // Draw Triangle Vertex
@@ -275,9 +259,9 @@ export class ViewerMapAPI {
             })
         });
 
-        var pointsFOV_project =[ol.proj.fromLonLat([this.posLon, this.posLan]),
-            ol.proj.fromLonLat([this.posLon + RADIUS * 0.000005 * Math.cos((direction + FOV)), this.posLan + RADIUS * 0.000005* Math.sin((direction + FOV))]),  //left  vertex point 
-            ol.proj.fromLonLat([this.posLon + RADIUS * 0.000005* Math.cos((direction - FOV)), this.posLan + RADIUS * 0.000005* Math.sin((direction - FOV))]),  //right vertex point 
+        var pointsFOV_project =[[this.posLon, this.posLan],
+        [this.posLon + RADIUS * 0.000005 * Math.cos((direction + FOV)), this.posLan + RADIUS * 0.000005* Math.sin((direction + FOV))],  //left  vertex point 
+        [this.posLon + RADIUS * 0.000005* Math.cos((direction - FOV)), this.posLan + RADIUS * 0.000005* Math.sin((direction - FOV))],  //right vertex point 
         ];
 
         var polygonDirectionFeature = new ol.Feature({
@@ -296,9 +280,18 @@ export class ViewerMapAPI {
         this.addLayer(this.viewingDirectionLayer);
     }
 
+    getLonLanCoordinates(position, mapdata){
+        // Compute the latitude and longitude  in reference to the origin in WGS84 and aff offset of the map 
+        let lon = LON_SCALAR * 1000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
+        let lan = LAN_SCALAR * 1000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
+        return [lon, lan]; 
+    }
+
     onDoubleClick(event) {
 
         var coord = [];
+        // var mousePosition = [];
+        var mapdata = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var floor = this.viewerFloorAPI;
         var z = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].z;
         var cuttentId = this.viewerFloorAPI.currentFloorId;
@@ -312,7 +305,8 @@ export class ViewerMapAPI {
             var bestImg;
 
             allImages.forEach(image => {
-                var currLocalPos = ol.proj.fromLonLat([image.pos[0], image.pos[1]]);
+                
+                var currLocalPos = ol.proj.transform([image.pos[0], image.pos[1]], 'EPSG:3857', 'EPSG:4326');
                 const [dx, dy] = [coord[0] - currLocalPos[0], coord[1] - currLocalPos[1]];
                 const currDistance = Math.sqrt(dx * dx + dy * dy);
                 if (currDistance < minDistance) {
@@ -329,7 +323,7 @@ export class ViewerMapAPI {
     }
 
     setMiddle() {
-        this.map.getView().setCenter(ol.proj.fromLonLat([this.posLon, this.posLan]));
+        this.map.getView().setCenter([this.posLon, this.posLan]);
     }
 
     control_button(){
@@ -361,17 +355,29 @@ export class ViewerMapAPI {
 
         close_full_screen.addEventListener('click', function () {
             document.getElementById('map');
-          if(document.fullscreenElement !== null){
-             document.exitFullscreen();
-            }
+            document.exitFullscreen();
             close_full_screen.style.display = "none";
             full_screen.style.display = "";
         })
 
+        // attemp 1
+        // document.addEventListener("keydown", event => {
+        //     if (event.code == 'Escape') {
+        //         console.log(event.code)
+        //         close_full_screen.style.display = "none";
+        //         full_screen.style.display = "";
+        //     }
+        // })
+
+        // attemp 2
+        // if (document.fullscreen == false){
+            //     close_full_screen.style.display = "none";
+            //     full_screen.style.display = "";
+            // }
     }
 }
 
-function toggleButtons(divId) {
+function hideButtons(divId) {
     //let divId = "floorOL"; 
     var element = document.getElementById(divId); 
     
