@@ -58,21 +58,25 @@ export class ViewerMapAPI {
     }
 
     initDisplayMap() {
-        let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
-        var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
+        // let currentMapData = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
+        // var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
+
+        // //extent = [-1*currentMapData.width/ currentMapData.density ,  -1*currentMapData.height/ currentMapData.density ,0*currentMapData.width/ currentMapData.density , 0*currentMapData.height/ currentMapData.density ];
+        // extent = [-currentMapData.x/ currentMapData.density,- currentMapData.y/ currentMapData.density,
+        //     (-currentMapData.x +currentMapData.width )/ currentMapData.density, (-currentMapData.y + currentMapData.height)/ currentMapData.density]
+
+        let mapOrigin  = new ol.proj.fromLonLat([this.viewerFloorAPI.origin[0], this.viewerFloorAPI.origin[1]]);
 
         // create map 
         this.map = new ol.Map({
             target: 'map',
             layers:[new ol.layer.Tile({
-                source: new ol.source.OSM({
-                    //attributions: '© <a href="https://github.com/openlayers/openlayers/blob/main/LICENSE.md">OpenLayers</a>'
-                    //opaque: false
-                })
+                source: new ol.source.OSM()
               })],
             view: new ol.View({
+                // center: mapOrigin, // Update center to current position
                 zoom: 20,
-                projection: 'EPSG:3857', 
+                projection:'EPSG:3857'
             }),
             controls: ol.control.defaults({
                 // Hide Map rotation button
@@ -86,26 +90,28 @@ export class ViewerMapAPI {
 
         // create image layers for each floors 
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
+
+            
             let mapData = this.viewerFloorAPI.floors[i].mapData
-            let mapOrigin = new ol.proj.fromLonLat(this.viewerFloorAPI.origin)
-            let ext = [ mapOrigin[0] -currentMapData.x/ currentMapData.density,
-                        mapOrigin[1] -currentMapData.y/ currentMapData.density,
-                        mapOrigin[0] + (currentMapData.width - currentMapData.x)/ currentMapData.density ,
-                        mapOrigin[1] + (currentMapData.height - currentMapData.y)/ currentMapData.density];
-            let mapImage =new ol.layer.Image({
+            let origin = new ol.proj.fromLonLat([this.viewerFloorAPI.origin[0], this.viewerFloorAPI.origin[1]]);
+            var lon0_m = origin[0]
+            var lan0_m = origin[1]
+
+            var left = lon0_m - (mapData.x/mapData.density)*1.5
+            var right = left + (mapData.width/mapData.density)*1.5
+            var bottom = lan0_m - (mapData.y/mapData.density)*1.5
+            var top = bottom + (mapData.height/mapData.density)*1.5
+            this.map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
-                    opacity: 0.9,
                     url: this.baseURL + mapData.name + ".png",
-                    //imageSize: [currentMapData.width, currentMapData.height],
-                    imageExtent: ext,
-                    projection: 'EPSG:3857',
-                }), 
-            })
-            mapImage.setVisible(true);
-            this.map.addLayer(mapImage);
+                    imageExtent:[left, bottom, right, top],
+                    ImageSize:[mapData.width,mapData.height],
+                    projection:'EPSG:3857'
+                })
+            }))
         }
 
-        //this.updateDisplayMap((this.viewerFloorAPI.currentFloorId));
+        this.updateDisplayMap((this.viewerFloorAPI.currentFloorId));
 
         // create vector layers for each floors
         for (var i = 0; i < this.viewerFloorAPI.floors.length; i++) {
@@ -116,10 +122,8 @@ export class ViewerMapAPI {
             allImages.forEach(image => {
                 // Get Longitude and latitude from each point
                 features.push(new ol.Feature({
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([
-                        image.pos[0], image.pos[1]
-                    ]))
-                  }));
+                    geometry: new ol.geom.Point( ol.proj.fromLonLat([image.pos[0], image.pos[1]]))
+                  }))
             });
 
             // create the vector layer for black points
@@ -134,7 +138,7 @@ export class ViewerMapAPI {
                         radius: 1,
                         fill: new ol.style.Fill({ color: 'black' })
                     })
-                })
+                }),
             }));
         }
     }
@@ -142,18 +146,20 @@ export class ViewerMapAPI {
     updateDisplayMap(floorIndex) {
         var group = this.map.getLayerGroup();
         var layers = group.getLayers();
-
         // set layer visibility
         layers.forEach(function (layer, i) {
-            if (i == floorIndex) {
+            if (i!=floorIndex+1){
+                layer.setVisible(false);
+            }
+            if (i == 0){
                 layer.setVisible(true);
             }
-            else {
-                layer.setVisible(false);
+
+            if (i == floorIndex+1){
+                layer.setVisible(true);
             }
         });
     }
-
 
     // Method : Schedule a redraw of the three.js scene overlayed over the map (2D) view.
     redraw() {
@@ -177,7 +183,7 @@ export class ViewerMapAPI {
         this.posLan = this.viewerImageAPI.currentImage.pos[1];
 
         var redFeature = new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.fromLonLat([this.posLon, this.posLan])),
+            geometry: new ol.geom.Point( ol.proj.fromLonLat([this.posLon, this.posLan]))
         });
 
         var vectorSourceRed = new ol.source.Vector({
@@ -191,7 +197,7 @@ export class ViewerMapAPI {
                     radius: 3,
                     fill: new ol.style.Fill({ color: 'red' })
                 })
-            })
+            }),
         });
 
         this.map.addLayer(vectorLayerRed);
@@ -281,18 +287,9 @@ export class ViewerMapAPI {
         this.addLayer(this.viewingDirectionLayer);
     }
 
-    getLonLanCoordinates(position, mapdata){
-        // Compute the latitude and longitude in reference to the origin in WGS84 and aff offset of the map 
-        let lon = LON_SCALAR * 1000 *  (position[0] - this.viewerFloorAPI.origin[0]) + (mapdata.x / mapdata.density);
-        let lan = LAN_SCALAR * 1000 * (position[1] - this.viewerFloorAPI.origin[1]) + (mapdata.y / mapdata.density);
-        return [lon, lan]; 
-    }
-
     onDoubleClick(event) {
 
         var coord = [];
-        // var mousePosition = [];
-        var mapdata = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].mapData;
         var floor = this.viewerFloorAPI;
         var z = this.viewerFloorAPI.floors[this.viewerFloorAPI.currentFloorId].z;
         var cuttentId = this.viewerFloorAPI.currentFloorId;
@@ -375,26 +372,4 @@ function hideButtons(divId) {
     } else {
       element.style.display = "none";
     }
-
-
-   var keyboard=(event)=> {
-        var e = event || window.event || arguments.callee.caller.arguments[0];
-        var full_screen = document.getElementById('full-screen');
-        var close_full_screen = document.getElementById('close-full-screen');
-        if(e && e.keyCode==27&&document.fullscreenElement !== null){       
-           document.exitFullscreen();
-           document.fullscreenElement=null;
-           full_screen.style.display = "";
-           close_full_screen.style.display = "none";
-  
-        } else if(e && e.keyCode==70&&document.fullscreenElement === null){
-                var elem1 = document.getElementById('map');
-                elem1.requestFullscreen();
-                full_screen.style.display = "none"; //hide.
-                close_full_screen.style.display = "";
-               }
-       
-        }
-            document.onkeydown  = keyboard;
 }
-
