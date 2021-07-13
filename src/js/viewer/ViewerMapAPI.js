@@ -35,9 +35,18 @@ export class ViewerMapAPI {
         map.addEventListener('dblclick', (event) => this.onDoubleClick(event));
 
         map.addEventListener('fullscreenchange', (event) => {
-            // If map set to full screen, hide the floor setting buttons
-            hideButtons("floorOL");
+            toggleButtons("floorOL");
+            
+            if (!document.fullscreenElement) { // exited fullscreen mode
+                // hide 'close-full-screen button' and show 'full-screen' button
+                let full_screen = document.getElementById('full-screen');
+                let close_full_screen = document.getElementById('close-full-screen');
+
+                close_full_screen.style.display = "none";
+                full_screen.style.display = "";
+            }
         });
+
         this.control_button();
     }
 
@@ -331,15 +340,14 @@ export class ViewerMapAPI {
         })
 
         close_full_screen.addEventListener('click', function () {
-            document.getElementById('map');
             document.exitFullscreen();
             close_full_screen.style.display = "none";
-            full_screen.style.display = "";;
+            full_screen.style.display = "";
         })
     }
 }
 
-function hideButtons(divId) {
+function toggleButtons(divId) {
     //let divId = "floorOL"; 
     var element = document.getElementById(divId); 
     
