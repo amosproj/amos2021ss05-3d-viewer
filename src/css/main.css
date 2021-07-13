@@ -31,10 +31,6 @@ body {
     color: #fff;
 }
 
-.map {
-    background-color: white;
-}
-
 .control-OL{
     position: fixed;
     bottom: 22%;

@@ -21,21 +21,13 @@
 </head>
 <body>
     <iframe id="amos"></iframe>
-    <script type="module">
-        import { TestViewerAPI } from './src/js/viewer/TestViewerAPI.js'
-
+    <script>
         // Callback function to start viewer via viewerAsync
         window.parent = {
             callback: function(viewerWindow, viewerAsync) {
                 console.info("initial callback called:", viewerWindow, viewerAsync);
-                viewerAsync("https://bora.bup-nbg.de/amos2floors", (api) => {
-
+                viewerAsync("../assets/", (api) => {
                     console.info("loaded callback called with API:", api);
-
-                    // test the API
-                    const test = new TestViewerAPI(api);
-                    test.addListeners();
-                    //test.eventMeshTest();
                 });
             }
         };
