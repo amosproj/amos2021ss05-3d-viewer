@@ -140,7 +140,7 @@ export class ViewerAPI {
         // localCoords : THREE.Vector3 // Local coordinates used by the viewer
         const globalX = this.floor.origin[0] - ((localCoords.x / 1000) / LON_SCALAR);
         const globalY = this.floor.origin[1] - ((localCoords.y / 1000) / LAN_SCALAR);
-        const globalZ = localCoords.z - this.floor.currentFloor.z;
+        const globalZ = localCoords.z + this.floor.currentFloor.z;
 
         return [globalX, globalY, globalZ];
         // Returns: [Number] : WGS 84 coordinates [longitude, latitude, z] (z value is floorZ + panoZ, where localCoords is just the panoZ)
@@ -157,7 +157,7 @@ export class ViewerAPI {
         return new this.THREE.Vector3(
             dx * 1000,
             dy * 1000,
-            globalCoords[2] + this.floor.currentFloor.z);
+            globalCoords[2] - this.floor.currentFloor.z);
     }
 
     // TODO: swap() and big(wanted)

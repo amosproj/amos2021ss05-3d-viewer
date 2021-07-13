@@ -6,6 +6,8 @@ import { EventPosition } from "./EventPosition.js";
 
 export class ViewerPanoAPI {
 
+    floorPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+
     constructor(viewerAPI) {
         this.viewerAPI = viewerAPI;
         this.addedLayers = new Set(); // EventMesh and EventLayer objects added via addLayer();
@@ -219,27 +221,68 @@ export class ViewerPanoAPI {
     }
 
     onDoubleClick(event) {
-        // always clickable but to the limited bestImg 
-        if (this.clickableImg != this.viewerAPI.image.currentImage) {
-            this.display(this.clickableImg.id);
-            this.viewerAPI.map.redraw();
-        }
+        this.display(this.bestImg.id);
+        this.viewerAPI.map.redraw();
+
         this.viewerAPI.propagateEvent("moved", this.viewerAPI.image.currentImage.id, true);
     }
 
-    onMouseMove(event){
+    onMouseMove(event) {
+        const raycaster = this.getRaycaster(event);
+
+        // check if looking down
+        if (localToLonLat(raycaster.ray.direction)[1] > 0) return;
+
+        // line between camera-cursor (1000m long)
+        const lineEnd = raycaster.ray.origin.clone().addScaledVector(raycaster.ray.direction, 1000);
+        const line = new THREE.Line3(raycaster.ray.origin, lineEnd);
         
-        // get cursor data
-        const currentPos = this.viewerAPI.image.currentImage.pos;
-        const newLocalPos = this.getCursorLocation(event);
-        const newPos = this.viewerAPI.toGlobal(newLocalPos);
-        const localPos = this.viewerAPI.toLocal([newPos[0], newPos[1], currentPos[2]]);
+        // intersection between viewing direction and floor plane
+        const intersection = this.floorPlane.intersectLine(line);
+
+        // will be null if no intersection found
+        if (!intersection) return;
+
+        // math from https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection algebraic form (code currently broken)
+        // const planeNormal = new THREE.Vector3(0, 0, 1);             // n
+        // const planeOrigin = new THREE.Vector3(0, 0, 0);             // p0
+        // const lineDirection = raycaster.ray.direction.clone();      // l
+        // const lineOrigin = raycaster.ray.origin.clone();            // l0
+
+        // const distance = (planeOrigin.clone().sub(lineOrigin)).multiply(planeNormal)
+        //     .divide(lineDirection.clone().multiply(planeNormal));
+
+        // const intersection = lineOrigin.clone().add(lineOrigin.clone().multiplyScalar(distance));
+        
+        // console.log(distance, intersection);
+        // -- would be better to use some direct math (like attempted here) instead of heavy intersectLine function
+
+
+        // creating a circle mesh
+        const geometry = new THREE.CircleBufferGeometry(0.4, 32);
+        const xMarkTexture = new THREE.TextureLoader().load('x-mark.png');
+        const material = new THREE.MeshBasicMaterial({ opacity: 0.5, transparent: true, map: xMarkTexture });
+        const circleMesh = new THREE.Mesh(geometry, material);
+
+        if (false) {
+            // for debugging - x-mark is displayed as cursor on floor
+            circleMesh.position.set(intersection.x, intersection.y, intersection.z);
+            
+            if (this.lastMesh) {
+                this.removeLayer(this.lastMesh);
+            }
+            this.addLayer(circleMesh);
+            this.lastMesh = circleMesh;
+            
+            return;
+        } 
+        
         let minDistance = this.sphereRadius + 5;
 
         this.viewerAPI.image.calcImagesInPanoSphere(this.sphereRadius, this.viewerAPI).forEach(element => {
             const currLocalPos = this.viewerAPI.toLocal(element.pos);
-            const [dx, dy] = [localPos.x - currLocalPos.x, localPos.y - currLocalPos.y];
             // Get the distance with no height
+            const [dx, dy] = [intersection.x - currLocalPos.x, intersection.y - currLocalPos.y];
             const currDistance = Math.sqrt(dx * dx + dy * dy);
             if (currDistance < minDistance) {
                 minDistance = currDistance;
@@ -247,40 +290,19 @@ export class ViewerPanoAPI {
             }
         });
         
-        const raycaster = this.getRaycaster(event);
-        // because depth map is not rotated by quaternion like panorama mesh, the quaternion adjustment need to happen first
-        const mappedCursorDirection = raycaster.ray.direction.applyQuaternion(this.viewerAPI.image.currentImage.orientation);
-        const [cursorLon, cursorLat] = localToLonLat(mappedCursorDirection);
-
         // avoid duplication
-        // if the nearest image of mouse position is not the same as the previous one, and the diff is smaller than 1
-        // create new mesh and remove old mesh, and save latest mesh and image
-        // if (this.bestImg != this.lastBestImg && (newPos[2]<10.5)) {
-        if (this.bestImg != this.lastBestImg && (cursorLat<0)) {
-            var x = 0, y = 0, z = -2;
-
-            // clickable meshes are the bestImg 
-            this.clickableImg = this.bestImg;
-
-            // creating a circle mesh
-            var geometry = new THREE.CircleBufferGeometry( 0.4, 32 );
-            const myTexture = new THREE.TextureLoader().load('x-mark.png');
-            const material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true, map:myTexture} );
+        if (this.bestImg == this.lastBestImg) return;
         
-            // set mesh
-            const newMesh = new THREE.Mesh(geometry, material);
-            const startPos = this.viewerAPI.toLocal(this.bestImg.pos);
-            newMesh.position.set(startPos.x + x, startPos.y + y, startPos.z + z);
-            
-            // save some parameters to avoid duplication
-            this.lastBestImg = this.bestImg;
-            this.removeLayer(this.lastMesh);
-            this.addLayer(newMesh);
-            this.lastMesh = newMesh;
-        }
-        if (cursorLat > 0) {
+        const closestPos = this.viewerAPI.toLocal(this.bestImg.pos);
+        circleMesh.position.set(closestPos.x, closestPos.y, 0); // in local coords ground is always at 0, regardless of floor 
+        
+        // save some parameters to avoid duplication
+        this.lastBestImg = this.bestImg;
+        if (this.lastMesh) {
             this.removeLayer(this.lastMesh);
         }
+        this.addLayer(circleMesh);
+        this.lastMesh = circleMesh;
     };
 
     onWindowResize() {
