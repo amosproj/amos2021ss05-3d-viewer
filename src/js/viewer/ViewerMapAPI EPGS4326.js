@@ -62,9 +62,10 @@ export class ViewerMapAPI {
         var extent = [0, 0, currentMapData.width / currentMapData.density, currentMapData.height / currentMapData.density];
         console.log("MAP EXTENT: ", extent)
         //extent = [-1*currentMapData.width/ currentMapData.density ,  -1*currentMapData.height/ currentMapData.density ,0*currentMapData.width/ currentMapData.density , 0*currentMapData.height/ currentMapData.density ];
-        extent = [-currentMapData.y/ currentMapData.density,- currentMapData.x/ currentMapData.density,
-            (-currentMapData.y +currentMapData.width )/ currentMapData.density, (-currentMapData.x + currentMapData.height)/ currentMapData.density]
+        extent = [-currentMapData.x/ currentMapData.density,- currentMapData.y/ currentMapData.density,
+            (-currentMapData.x +currentMapData.width )/ currentMapData.density, (-currentMapData.y + currentMapData.height)/ currentMapData.density]
         console.log("MAP EXTENT: ", extent)
+
         // create map 
         this.map = new ol.Map({
             target: 'map',
@@ -101,7 +102,6 @@ export class ViewerMapAPI {
                     imageExtent:[e[0]+mapOrigin[0], e[1]+mapOrigin[1], e[2]+mapOrigin[0],e[3]+mapOrigin[1]],
                     projection: 'EPSG:4326',
                 })
-
             }))
         }
 
