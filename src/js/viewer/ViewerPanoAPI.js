@@ -318,12 +318,12 @@ export class ViewerPanoAPI {
         
         switch (event.key) {
             case "ArrowLeft":
-                this.viewerViewState.setLonov(this.viewerViewState.lonov + ARROW_LEFT_RIGHT_SPEED);
+                this.viewerViewState.setLonov(THREE.Math.radToDeg(this.viewerViewState.lonov) + ARROW_LEFT_RIGHT_SPEED);
 
                 this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
                 break;
             case "ArrowRight":
-                this.viewerViewState.setLonov(this.viewerViewState.lonov - ARROW_LEFT_RIGHT_SPEED);
+                this.viewerViewState.setLonov(THREE.Math.radToDeg(this.viewerViewState.lonov) - ARROW_LEFT_RIGHT_SPEED);
 
                 this.viewerAPI.propagateEvent("viewed", this.viewerViewState, true);
                 break;
