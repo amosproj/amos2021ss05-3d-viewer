@@ -197,8 +197,8 @@ export class ViewerPanoAPI {
     onPointerMove(event) {
         const scalingFactor = this.camera.fov / MAX_FOV;
     
-        this.viewerViewState.setLonov((event.clientX - this.lastMousePos[0]) * PAN_SPEED * scalingFactor + this.lastViewState[0]);
-        this.viewerViewState.setLatov((event.clientY - this.lastMousePos[1]) * PAN_SPEED * scalingFactor + this.lastViewState[1]);
+        this.viewerViewState.setLonov((event.clientX - this.lastMousePos[0]) * PAN_SPEED * scalingFactor + THREE.Math.radToDeg(this.lastViewState[0]));
+        this.viewerViewState.setLatov((event.clientY - this.lastMousePos[1]) * PAN_SPEED * scalingFactor + THREE.Math.radToDeg(this.lastViewState[1]));
 
         this.viewerAPI.map.show_direction();
     }
@@ -513,8 +513,11 @@ export class ViewerPanoAPI {
 
 // returns a normalized Vector3 pointing in the direction specified by lonov latov
 const lonLatToLocal = (lonov, latov) => {
-    const phi = THREE.MathUtils.degToRad(90 - latov);
-    const theta = THREE.MathUtils.degToRad(lonov);
+    const latDeg = THREE.Math.radToDeg(latov);
+    const lonDeg = THREE.Math.radToDeg(lonov);
+
+    const phi = THREE.MathUtils.degToRad(90 - latDeg);
+    const theta = THREE.MathUtils.degToRad(lonDeg);
 
     const x = Math.sin(phi) * Math.cos(theta);
     const y = Math.sin(phi) * Math.sin(theta);

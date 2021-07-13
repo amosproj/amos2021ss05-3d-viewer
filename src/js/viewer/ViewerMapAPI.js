@@ -203,7 +203,7 @@ export class ViewerMapAPI {
 
     show_direction() {
         // get viewing longitude direction (in degrees)
-        var lonov = this.viewerViewState.lonov;
+        var lonov = THREE.Math.radToDeg(this.viewerViewState.lonov);
 
         // temporary using 170 degree for correcting the starting zero degree of 2D map
         var direction = lonov * (Math.PI / 180) % 360;
