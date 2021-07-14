@@ -29,7 +29,7 @@ export const PLUS_MINUS_ZOOM_SPEED = 5;
 //Configurable values to change some aspects of the ViewerMapAPI
 
 // Describes the Field of View of scaling of displayed on the map. 
-export const SCALING_MAP = 0.2;
+export const SCALING_MAP = 0.1;
 
 // Describes the maximum zoom of the map. 
 export const MAP_ZOOM = 4;
