@@ -1,5 +1,5 @@
 ![JavaScript](https://img.shields.io/badge/code-JavaScript-black?style=flat&logo=javascript)
-![Online](https://img.shields.io/badge/Open-3DViewer-blue?style=flat&logo=html5&logoColor=blue)
+![Online](https://img.shields.io/badge/OpenApp-3DViewer-blue?style=flat&logo=html5&logoColor=blue)
 
 # A simply fabulous pano-based 3D-Viewer
 
