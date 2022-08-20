@@ -1,4 +1,5 @@
-# A simply fabulous pano-based 3D-Viewer (AMOS SS 2021)
+https://img.shields.io/endpoint?url=https://50-jahre-informatik.cs.fau.de&style=plastic&logo=appveyor
+# A simply fabulous pano-based 3D-Viewer
 
 <p align="center">
     <img src="Deliverables/2021-04-20-Final-Logo.png" alt="Logo" width="600" height="230">
