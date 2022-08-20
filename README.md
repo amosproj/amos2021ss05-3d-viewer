@@ -1,4 +1,6 @@
-https://img.shields.io/endpoint?url=https://50-jahre-informatik.cs.fau.de&style=plastic&logo=appveyor
+![JavaScript](https://img.shields.io/badge/code-JavaScript-black?style=flat&logo=javascript)
+![Online](https://img.shields.io/badge/Open-3DViewer-blue?style=flat&logo=html5&logoColor=blue)
+
 # A simply fabulous pano-based 3D-Viewer
 
 <p align="center">
