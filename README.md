@@ -1,9 +1,28 @@
 
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
+[contributors-shield]: https://img.shields.io/github/contributors/amosproj/amos2021ss05-3d-viewer.svg
+[contributors-url]: https://github.com/amosproj/amos2021ss05-3d-viewer/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/amosproj/amos2021ss05-3d-viewer.svg
+[forks-url]: https://github.com/amosproj/amos-ss2021-synthetic-file-system/network/members
+[stars-shield]: https://img.shields.io/github/stars/amosproj/amos2021ss05-3d-viewer.svg
+[stars-url]: https://github.com/amosproj/amos-ss2021-synthetic-file-system/stargazers
+[issues-shield]: https://img.shields.io/github/issues/amosproj/amos2021ss05-3d-viewer.svg
+[issues-url]: https://github.com/amosproj/amos2021ss05-3d-viewer/issues
+[issuesclosed-shield]: https://img.shields.io/github/issues-closed/amosproj/amos2021ss05-3d-viewer.svg
+[issuesclosed-url]: https://github.com/amosproj/amos2021ss05-3d-viewer/issues?q=is%3Aissue+is%3Aclosed
+
+
 # A simply fabulous pano-based 3D-Viewer
 
 [![Online](https://img.shields.io/badge/OpenApp-3DViewer-63c7cb?style=flat&logo=html5&logoColor=63c7cb)](https://50-jahre-informatik.cs.fau.de)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![JavaScript](https://img.shields.io/badge/-JavaScript-black?style=flat&logo=javascript)
+[![Contributors][contributors-shield]][contributors-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![Forks][forks-shield]][forks-url]
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/amosproj/amos2021ss05-3d-viewer)
 
 <p align="center">
