@@ -5,7 +5,7 @@
   </a>
 </p>
 
-This project is designed to enable the computer science department of the Friedrich-Alexander University Erlangen-Nuremberg to display its 50 years computer science department exhibition online.
+This project is designed to enable the computer science department of the Friedrich-Alexander University Erlangen-Nuremberg to display its 50 years computer science department exhibition online. This 3D Viewer web application can be easily accessed via https://50-jahre-informatik.cs.fau.de.
 
 The software to be developed shall be able to:
 
