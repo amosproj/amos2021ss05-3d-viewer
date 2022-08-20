@@ -3,7 +3,6 @@
 ![JavaScript](https://img.shields.io/badge/-JavaScript-black?style=flat&logo=javascript)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/amosproj/amos2021ss05-3d-viewer)
 
-<!-- ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg?style=for-the-badge)
 # A simply fabulous pano-based 3D-Viewer
 
 <p align="center">
