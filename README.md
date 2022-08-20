@@ -1,6 +1,9 @@
-![JavaScript](https://img.shields.io/badge/code-JavaScript-black?style=flat&logo=javascript)
-![Online](https://img.shields.io/badge/OpenApp-3DViewer-blue?style=flat&logo=html5&logoColor=blue)
+[![Online](https://img.shields.io/badge/OpenApp-3DViewer-63c7cb?style=flat&logo=html5&logoColor=63c7cb)](https://50-jahre-informatik.cs.fau.de)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![JavaScript](https://img.shields.io/badge/-JavaScript-black?style=flat&logo=javascript)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/amosproj/amos2021ss05-3d-viewer)
 
+<!-- ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg?style=for-the-badge)
 # A simply fabulous pano-based 3D-Viewer
 
 <p align="center">
